@@ -6,6 +6,9 @@
 2. SQL Editor 또는 Supabase CLI로 `supabase/migrations`의 파일을 번호순으로 적용한다.
 3. `supabase/tests/rls.sql`을 별도 테스트 프로젝트에서 실행해 교차 사용자 접근이 실패하는지 확인한다.
 4. Auth의 공개 회원가입을 끄고, Site URL과 Redirect URL에 Vercel 주소 및 `/auth/confirm` 경로를 등록한다.
+   - 로컬: `http://localhost:3000/auth/confirm`
+   - Preview: `https://*-<team>.vercel.app/auth/confirm`
+   - Production: `https://<production-domain>/auth/confirm`
 5. 운영 서비스 역할 키는 Vercel 서버 환경 변수에만 둔다.
 
 ## 2. OpenAI
