@@ -31,12 +31,25 @@ for (const file of files) {
 }
 
 const migration = fs.readFileSync("supabase/migrations/202609230001_initial_schema.sql", "utf8");
+const hardeningMigration = fs.readFileSync("supabase/migrations/202609240001_harden_helper_function_access.sql", "utf8");
 const userTables = ["profiles", "classes", "class_memberships", "learning_sessions", "drafts", "turns", "concept_states", "learning_events", "safety_events", "api_usage", "prompt_versions"];
 for (const table of userTables) {
   if (!migration.includes(`alter table public.${table} enable row level security`)) {
     console.error(`${table}: RLS 활성화 구문이 없습니다.`);
     process.exit(1);
   }
+}
+
+for (const helper of ["is_class_teacher", "is_teacher_of", "handle_new_user"]) {
+  if (!hardeningMigration.includes(`alter function public.${helper}`)) {
+    console.error(`${helper}: public 스키마에서 제거하는 보안 마이그레이션이 없습니다.`);
+    process.exit(1);
+  }
+}
+
+if (!hardeningMigration.includes("revoke all on function private.handle_new_user() from public, anon, authenticated")) {
+  console.error("handle_new_user: 클라이언트 역할의 직접 실행을 차단하지 않았습니다.");
+  process.exit(1);
 }
 
 const rlsTest = fs.readFileSync("supabase/tests/rls.sql", "utf8");

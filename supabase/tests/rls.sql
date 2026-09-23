@@ -4,6 +4,19 @@
 
 begin;
 
+do $$
+begin
+  if exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public'
+      and p.proname in ('handle_new_user', 'is_class_teacher', 'is_teacher_of')
+  ) then
+    raise exception 'security definer helper remains exposed in public schema';
+  end if;
+end $$;
+
 insert into auth.users (
   id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
   raw_app_meta_data, raw_user_meta_data, created_at, updated_at
