@@ -16,6 +16,7 @@ for (const root of roots) if (fs.existsSync(root)) walk(root);
 
 const secretPatterns = [
   { name: "OpenAI 키", pattern: /\bsk-[A-Za-z0-9_-]{20,}\b/g },
+  { name: "Supabase 비밀키", pattern: /\bsb_secret_[A-Za-z0-9_-]{20,}\b/g },
   { name: "JWT 서비스 키", pattern: /\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/g }
 ];
 
@@ -50,6 +51,19 @@ for (const helper of ["is_class_teacher", "is_teacher_of", "handle_new_user"]) {
 if (!hardeningMigration.includes("revoke all on function private.handle_new_user() from public, anon, authenticated")) {
   console.error("handle_new_user: 클라이언트 역할의 직접 실행을 차단하지 않았습니다.");
   process.exit(1);
+}
+
+const supabaseConfig = fs.readFileSync("supabase/config.toml", "utf8");
+for (const required of [
+  "enable_signup = false",
+  "enable_anonymous_sign_ins = false",
+  "minimum_password_length = 10",
+  'password_requirements = "lower_upper_letters_digits_symbols"'
+]) {
+  if (!supabaseConfig.includes(required)) {
+    console.error(`Supabase Auth 보안 설정 누락: ${required}`);
+    process.exit(1);
+  }
 }
 
 const rlsTest = fs.readFileSync("supabase/tests/rls.sql", "utf8");
