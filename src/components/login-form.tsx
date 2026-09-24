@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { buildPasswordResetRedirect } from "@/lib/auth/password-setup-redirect";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export function LoginForm() {
@@ -46,7 +47,9 @@ export function LoginForm() {
 
     setPendingAction("reset");
     setMessage("");
-    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail);
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: buildPasswordResetRedirect(window.location.origin)
+    });
     setPendingAction(null);
 
     if (error) {

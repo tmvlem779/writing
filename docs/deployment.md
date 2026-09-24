@@ -25,7 +25,7 @@
    - Production: `https://<production-domain>/auth/confirm`
 5. 운영 서비스 역할 키는 Vercel 서버 환경 변수에만 둔다.
 6. Supabase 대시보드에서 보낸 기본 초대가 Site URL로 돌아오면 앱이 implicit URL 토큰을 쿠키 기반 SSR 세션으로 전환해 `/set-password`로 이동한다. 토큰은 클라이언트 초기화 전에 브라우저 주소에서 제거한다.
-7. 초대 링크를 이미 사용했거나 놓친 사용자는 로그인 화면의 `비밀번호 설정 메일 받기`를 이용한다. 복구 링크도 같은 세션 전환을 거쳐 `/set-password`로 이동한다.
+7. 초대 링크를 이미 사용했거나 놓친 사용자는 로그인 화면의 `비밀번호 설정 메일 받기`를 이용한다. PKCE 복구 링크는 `/auth/confirm?next=/set-password`에서 코드를 쿠키 세션으로 교환한 뒤 비밀번호 설정 화면으로 이동한다.
 
 ## 2. OpenAI
 

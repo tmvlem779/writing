@@ -5,6 +5,10 @@ export type PasswordSetupSession = {
   refreshToken: string;
 };
 
+export function buildPasswordResetRedirect(origin: string) {
+  return new URL("/auth/confirm?next=/set-password", origin).toString();
+}
+
 export function parsePasswordSetupHash(hash: string): PasswordSetupSession | null {
   if (!hash.startsWith("#")) return null;
 
