@@ -31,6 +31,6 @@ pnpm build
 
 ## 배포 상태
 
-Production 배포와 Supabase 연결은 완료됐지만, 현재 Vercel SSO 보호 상태이며 OpenAI 결제 크레딧·프로젝트 한도와 초기 교사 계정이 준비되지 않았습니다. 따라서 아직 실제 수업 운영 승인 상태가 아닙니다. 최신 완료·보류 항목은 [progress.md](./progress.md)와 [배포 체크리스트](./docs/deployment.md)를 기준으로 확인합니다.
+Production 공개 배포, Supabase 연결, GitHub 자동 배포 연결은 완료됐습니다. OpenAI 결제 크레딧·프로젝트 한도와 초기 교사 계정은 아직 준비되지 않아 실제 수업 운영 승인 상태는 아닙니다. 최신 완료·보류 항목은 [progress.md](./progress.md)와 [배포 체크리스트](./docs/deployment.md)를 기준으로 확인합니다.
 
 자세한 범위와 단계는 [plan.md](./plan.md), 교육 원리는 [설계 원리.md](./설계%20원리.md), 기술 경계는 [architecture.md](./architecture.md), 배포 순서는 [docs/deployment.md](./docs/deployment.md)를 참고하세요.
