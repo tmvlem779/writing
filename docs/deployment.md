@@ -1,5 +1,17 @@
 # 배포 체크리스트
 
+## 0. 현재 운영 상태 (2026-09-24)
+
+- GitHub: `https://github.com/tmvlem779/writing`, `main` 푸시 완료
+- Supabase: 서울 리전 `writing-agent` 프로젝트에 migration 3개 적용, 원격 RLS 테스트 통과, 보안 권고 0건
+- Vercel: `https://writing-suhyeon3.vercel.app`에 Production 배포 완료
+- Vercel 환경 변수: Supabase, OpenAI, 안전 식별자, 인증·예산 설정 등록 완료
+- 운영 UI: 홈·로그인·학습·개인정보 화면 렌더링, 390px 모바일 화면, 비로그인 AI 요청 401 처리 확인
+- 보류: Vercel Production은 현재 Vercel SSO 보호 상태라 학교 사용자에게 공개되지 않음
+- 보류: Vercel–GitHub 자동 배포 연결, OpenAI 결제 크레딧·프로젝트 한도, 초기 교사·학급, 인증된 전체 E2E
+
+비밀값은 이 문서와 저장소에 기록하지 않는다. 실제 키는 Vercel의 암호화된 Production 환경 변수에만 둔다.
+
 ## 1. Supabase
 
 1. 개발용과 운영용 프로젝트를 분리한다.
@@ -44,5 +56,19 @@ GitHub 저장소를 연결한 뒤 Development, Preview, Production 환경을 분
 - 교사가 자기 학급 학생만 볼 수 있고 다른 학급 학생은 볼 수 없음
 - OpenAI 입력·출력 안전 검사와 예산 차단 확인
 - 개인정보 처리방침, 학교 승인, 미성년자 보호 검토 완료
+
+현재 배포는 기술 검증용이며 위 수동 보류 항목과 사람의 검토가 끝나기 전에는 수업 운영 승인 상태가 아니다.
+
+## 5. 남은 수동 작업
+
+1. Vercel Account Settings의 Authentication에서 GitHub Login Connection을 완료한다.
+2. Vercel 프로젝트의 Deployment Protection 공개 범위를 학교 정책에 맞게 승인한다.
+3. 저장소를 Vercel 프로젝트에 연결하고 `main` 자동 배포를 확인한다.
+4. OpenAI Billing에 크레딧을 충전하고 프로젝트 한도를 미화 6달러로 설정한다.
+5. 초기 교사 이메일과 학급명을 확정해 계정과 학급을 생성한다.
+6. 교사 초대 → 학생 비밀번호 설정 → 로그인 → 학습 → 기록 조회 → 교사 조회 흐름을 시험한다.
+7. 국어 교사와 개인정보 담당자가 대표 대화, 보관·삭제 절차, 미성년자 안내를 승인한다.
+
+OpenAI 교체 키는 2026-10-24 만료 예정이므로 그 전에 회전한다. 기존에 노출 가능성이 있었던 키는 폐기 상태를 확인했다.
 
 환경 변수나 migration을 되돌려야 할 때는 Vercel의 직전 정상 배포로 롤백하고, 데이터베이스는 파괴적 다운 migration 대신 후속 migration으로 복구한다.

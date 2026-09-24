@@ -13,6 +13,7 @@ function walk(directory) {
 }
 
 for (const root of roots) if (fs.existsSync(root)) walk(root);
+for (const file of ["next.config.ts", ".env.example"]) if (fs.existsSync(file)) files.push(file);
 
 const secretPatterns = [
   { name: "OpenAI 키", pattern: /\bsk-[A-Za-z0-9_-]{20,}\b/g },
@@ -74,4 +75,19 @@ for (const table of ["learning_sessions", "drafts", "turns", "concept_states", "
   }
 }
 
-console.log("비밀값·RLS 정적 보안 검사 통과");
+const nextConfig = fs.readFileSync("next.config.ts", "utf8");
+for (const requiredHeader of [
+  "Content-Security-Policy",
+  "Referrer-Policy",
+  "X-Content-Type-Options",
+  "X-Frame-Options",
+  "Permissions-Policy",
+  "Strict-Transport-Security"
+]) {
+  if (!nextConfig.includes(requiredHeader)) {
+    console.error(`HTTP 보안 헤더 누락: ${requiredHeader}`);
+    process.exit(1);
+  }
+}
+
+console.log("비밀값·RLS·HTTP 헤더 정적 보안 검사 통과");

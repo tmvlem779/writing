@@ -27,6 +27,10 @@ pnpm verify
 pnpm build
 ```
 
-`pnpm verify`는 lint, 타입, 단위 테스트, P1~P6 추적, 비밀값·RLS 정적 검사, eval 명세 검사를 실행합니다. 실제 운영 전에는 별도 Supabase 테스트 프로젝트에서 `supabase/tests/rls.sql`도 실행해야 합니다.
+`pnpm verify`는 lint, 타입, 단위 테스트, P1~P6 추적, 비밀값·RLS·HTTP 보안 헤더 정적 검사, eval 명세 검사를 실행합니다. 실제 운영 전에는 별도 Supabase 테스트 프로젝트에서 `supabase/tests/rls.sql`도 실행해야 합니다.
+
+## 배포 상태
+
+Production 배포와 Supabase 연결은 완료됐지만, 현재 Vercel SSO 보호 상태이며 OpenAI 결제 크레딧·프로젝트 한도와 초기 교사 계정이 준비되지 않았습니다. 따라서 아직 실제 수업 운영 승인 상태가 아닙니다. 최신 완료·보류 항목은 [progress.md](./progress.md)와 [배포 체크리스트](./docs/deployment.md)를 기준으로 확인합니다.
 
 자세한 범위와 단계는 [plan.md](./plan.md), 교육 원리는 [설계 원리.md](./설계%20원리.md), 기술 경계는 [architecture.md](./architecture.md), 배포 순서는 [docs/deployment.md](./docs/deployment.md)를 참고하세요.
