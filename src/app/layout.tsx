@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { InviteSessionRedirect } from "@/components/invite-session-redirect";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,6 +12,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ko">
       <body>
+        <InviteSessionRedirect />
         <header className="site-header">
           <Link className="brand" href="/" aria-label="문장나래 홈">
             <span className="brand-mark">문</span>
