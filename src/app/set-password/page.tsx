@@ -9,7 +9,7 @@ export default function SetPasswordPage() {
     </div>
     <div className="auth-card">
       <h2>비밀번호 설정</h2>
-      <p>8자 이상의 비밀번호를 입력하세요.</p>
+      <p>8자 이상으로 영문 소문자·대문자·숫자·특수문자를 각각 1개 이상 포함하세요.</p>
       <SetPasswordForm />
     </div>
   </section>;

@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { passwordUpdateSchema } from "@/lib/auth/password";
+import { PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/auth/password-policy";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   const input = passwordUpdateSchema.safeParse(await request.json().catch(() => null));
   if (!input.success) {
-    return NextResponse.json({ error: "비밀번호는 8자 이상 128자 이하로 입력해 주세요." }, { status: 400 });
+    return NextResponse.json({ error: PASSWORD_REQUIREMENTS_MESSAGE }, { status: 400 });
   }
 
   const supabase = await createServerSupabaseClient();
@@ -20,6 +21,12 @@ export async function POST(request: Request) {
 
   const { error } = await supabase.auth.updateUser({ password: input.data.password });
   if (error) {
+    if (error.code === "weak_password") {
+      return NextResponse.json({ error: PASSWORD_REQUIREMENTS_MESSAGE }, { status: 400 });
+    }
+    if (error.code === "same_password") {
+      return NextResponse.json({ error: "현재 비밀번호와 다른 비밀번호를 입력해 주세요." }, { status: 409 });
+    }
     return NextResponse.json({ error: "비밀번호를 설정하지 못했습니다. 잠시 후 다시 시도해 주세요." }, { status: 500 });
   }
 
