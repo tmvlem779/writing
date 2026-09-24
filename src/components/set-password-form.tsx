@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export function SetPasswordForm() {
   const router = useRouter();
@@ -17,16 +16,16 @@ export function SetPasswordForm() {
       setMessage("두 비밀번호가 서로 다릅니다.");
       return;
     }
-    const supabase = createBrowserSupabaseClient();
-    if (!supabase) {
-      setMessage("Supabase 연결 정보가 없습니다.");
-      return;
-    }
     setPending(true);
-    const { error } = await supabase.auth.updateUser({ password });
+    const response = await fetch("/api/auth/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password })
+    });
+    const body = await response.json().catch(() => null) as { error?: string } | null;
     setPending(false);
-    if (error) {
-      setMessage("비밀번호를 설정하지 못했습니다. 초대 링크를 다시 열어 주세요.");
+    if (!response.ok) {
+      setMessage(body?.error ?? "비밀번호를 설정하지 못했습니다. 잠시 후 다시 시도해 주세요.");
       return;
     }
     router.replace("/learn");
