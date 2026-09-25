@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { ConceptChapter } from "@/components/concept-chapter";
 import { PracticeChapter } from "@/components/practice-chapter";
+import { RealLifeChapter } from "@/components/real-life-chapter";
 
-type Chapter = "concept" | "practice";
+type Chapter = "concept" | "practice" | "real-life";
 
 export function WritingStudio() {
   const [chapter, setChapter] = useState<Chapter>("concept");
@@ -32,13 +33,21 @@ export function WritingStudio() {
           <strong>쓰기와 성찰</strong>
           <small>진단부터 글쓰기까지 연습해요</small>
         </button>
+        <button
+          aria-current={chapter === "real-life" ? "page" : undefined}
+          className={chapter === "real-life" ? "chapter-tab active" : "chapter-tab"}
+          onClick={() => setChapter("real-life")}
+          type="button"
+        >
+          <span>Chapter 03</span>
+          <strong>실생활 탐구</strong>
+          <small>실제적인 자료를 분석하고 고쳐 써요</small>
+        </button>
       </nav>
 
-      {chapter === "concept" ? (
-        <ConceptChapter onStartPractice={() => setChapter("practice")} />
-      ) : (
-        <PracticeChapter />
-      )}
+      {chapter === "concept" && <ConceptChapter onStartPractice={() => setChapter("practice")} />}
+      {chapter === "practice" && <PracticeChapter />}
+      {chapter === "real-life" && <RealLifeChapter />}
     </main>
   );
 }

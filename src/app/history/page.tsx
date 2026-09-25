@@ -7,7 +7,7 @@ type ConceptRow = { concept_code: string; scaffold_level: number; evidence_count
 
 const activityLabels: Record<string, string> = {
   diagnose: "시작 진단", create: "문장 만들기", expand: "문장 확장", compare: "구조 비교",
-  error: "오류 탐구", transfer: "짧은 글쓰기", reflect: "성찰"
+  error: "오류 탐구", transfer: "짧은 글쓰기", reflect: "성찰", authentic: "실생활 자료"
 };
 
 export const dynamic = "force-dynamic";

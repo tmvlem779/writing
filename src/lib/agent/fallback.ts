@@ -8,7 +8,8 @@ const activityQuestions = {
   compare: "두 문장에서 더 강조되는 정보가 무엇인지 각각 설명해 볼까요?",
   error: "어색하다고 느끼는 부분을 먼저 표시하고, 왜 그런지 말해 볼까요?",
   transfer: "같은 문장 구조를 새로운 주제나 상황에 적용해 한 문장 써 볼까요?",
-  reflect: "처음 문장과 지금 문장을 비교해 구조와 표현이 달라진 점을 말해 볼까요?"
+  reflect: "처음 문장과 지금 문장을 비교해 구조와 표현이 달라진 점을 말해 볼까요?",
+  authentic: "자료에서 찾은 문장 구조가 글의 목적과 독자에게 어떤 효과를 주는지 근거와 함께 설명해 볼까요?"
 } as const;
 
 const nextActions = {
@@ -18,7 +19,8 @@ const nextActions = {
   compare: "compare",
   error: "rewrite",
   transfer: "transfer",
-  reflect: "explain"
+  reflect: "explain",
+  authentic: "transfer"
 } as const;
 
 export function buildFallbackResponse(request: TurnRequest): AgentResponse {
@@ -42,7 +44,9 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
     scaffoldLevel: level,
     studentMessage: `${lead} 현재 도움 단계는 ‘${scaffoldLabel(level)}’입니다.`,
     question: activityQuestions[request.activity],
-    focusConcepts: ["문장 성분", "호응과 확장"],
+    focusConcepts: request.activity === "authentic"
+      ? ["문장 구조", "표현 효과", "목적과 독자"]
+      : ["문장 성분", "호응과 확장"],
     observations: ["개발용 규칙 기반 응답이며 실제 수업에서는 AI 진단 결과로 대체됩니다."],
     nextAction: nextActions[request.activity],
     masteryEvidence: [],

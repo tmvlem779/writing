@@ -7,7 +7,8 @@ export const activitySchema = z.enum([
   "compare",
   "error",
   "transfer",
-  "reflect"
+  "reflect",
+  "authentic"
 ]);
 
 export const turnRequestSchema = z.object({
