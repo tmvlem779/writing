@@ -20,7 +20,7 @@ type RealLifeChapterProps = {
 
 export function RealLifeChapter({ lessonNumber }: RealLifeChapterProps) {
   const courseLesson = getCourseLesson(lessonNumber);
-  const lessonGuide = getRealLifeLessonGuide(lessonNumber);
+  const lessonGuide = getRealLifeLessonGuide();
   const lessonMaterials = getRealLifeMaterialsForLesson(lessonNumber);
   const [materialIndex, setMaterialIndex] = useState(0);
   const [mode, setMode] = useState<RealLifePracticeMode>("structure");
@@ -36,7 +36,7 @@ export function RealLifeChapter({ lessonNumber }: RealLifeChapterProps) {
   const [demo, setDemo] = useState(false);
 
   const material = lessonMaterials[materialIndex] ?? lessonMaterials[0];
-  const task = buildRealLifeTask(material, mode, lessonNumber);
+  const task = buildRealLifeTask(material, mode);
   const selectedMode = realLifePracticeModes.find((item) => item.id === mode) ?? realLifePracticeModes[0];
 
   async function ensureSession() {
@@ -168,13 +168,16 @@ export function RealLifeChapter({ lessonNumber }: RealLifeChapterProps) {
 
         <section className="analysis-guide" aria-labelledby="analysis-guide-title">
           <div>
-            <span id="analysis-guide-title">구조 돋보기</span>
-            <h2>어떤 문장 구조가 쓰였을까요?</h2>
+            <span id="analysis-guide-title">1~4차시 종합 돋보기</span>
+            <h2>배운 개념을 모두 활용해 살펴보세요</h2>
           </div>
           <div className="concept-tags" aria-label="활용 개념">
             {lessonGuide.focusConcepts.map((concept) => <span key={concept}>{concept}</span>)}
           </div>
-          <ol>
+          <ol className="concept-review-list">
+            {lessonGuide.reviewPrompts.map((prompt) => <li key={prompt}>{prompt}</li>)}
+          </ol>
+          <ol className="analysis-question-list">
             {lessonGuide.analysisPrompts.map((prompt) => <li key={prompt}>{prompt}</li>)}
           </ol>
         </section>

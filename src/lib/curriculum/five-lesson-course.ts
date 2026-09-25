@@ -34,7 +34,7 @@ export const fiveLessonCourse: CourseLesson[] = [
       { id: "simple-complex", activity: "compare", label: "홑문장·겹문장", prompt: "‘바람이 분다.’와 ‘바람이 불어서 나뭇잎이 흔들린다.’의 구조를 비교하고 구별 근거를 설명해 보세요." },
       { id: "structure-diagnosis", activity: "reflect", label: "구조 진단", prompt: "홑문장 하나와 겹문장 하나를 직접 만든 뒤, 각 문장의 주어·서술어 관계 수를 설명해 보세요." }
     ],
-    realLifeMaterialIds: ["article", "notice"]
+    realLifeMaterialIds: []
   },
   {
     number: 2,
@@ -48,7 +48,7 @@ export const fiveLessonCourse: CourseLesson[] = [
       { id: "combine-clauses", activity: "expand", label: "문장 결합", prompt: "‘기온이 내려갔다. 길이 얼었다.’를 서로 다른 연결 관계가 드러나는 두 문장으로 결합해 보세요." },
       { id: "connection-effect", activity: "reflect", label: "효과 설명", prompt: "방금 만든 두 문장을 비교하여 독자가 사건의 관계를 어떻게 다르게 이해하는지 설명해 보세요." }
     ],
-    realLifeMaterialIds: ["notice", "dialogue"]
+    realLifeMaterialIds: []
   },
   {
     number: 3,
@@ -62,7 +62,7 @@ export const fiveLessonCourse: CourseLesson[] = [
       { id: "embed-sentences", activity: "expand", label: "문장 결합", prompt: "‘친구가 약속을 지켰다. 나는 그 사실을 안다.’를 명사절을 안은 한 문장으로 결합해 보세요." },
       { id: "transform-embedded", activity: "create", label: "문장 변형", prompt: "‘도서관에서 책을 빌렸다.’를 바탕으로 관형절을 안은 문장과 부사절을 안은 문장을 각각 만들어 보세요." }
     ],
-    realLifeMaterialIds: ["article", "presentation"]
+    realLifeMaterialIds: []
   },
   {
     number: 4,
@@ -76,7 +76,7 @@ export const fiveLessonCourse: CourseLesson[] = [
       { id: "ambiguity", activity: "error", label: "중의성 탐구", prompt: "‘나는 어제 온 친구의 동생을 만났다.’가 두 가지로 이해될 수 있는 이유를 구조의 관점에서 설명해 보세요." },
       { id: "clarify-meaning", activity: "error", label: "문장 고쳐쓰기", prompt: "앞 문장이 한 가지 뜻으로만 이해되도록 직접 고쳐 쓰고, 어떤 구조를 바꾸었는지 설명해 보세요." }
     ],
-    realLifeMaterialIds: ["interview", "social"]
+    realLifeMaterialIds: []
   },
   {
     number: 5,

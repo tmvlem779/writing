@@ -18,13 +18,21 @@ test("CURRICULUM: 다섯 차시는 제시된 핵심 내용과 핵심 질문을 �
   assert.ok(fiveLessonCourse.every((lesson) => lesson.keyQuestion.endsWith("?")));
 });
 
-test("P2·P3·P4·P5: 모든 차시는 세 챕터에서 실행 가능한 학습 활동을 가진다", () => {
+test("P2·P3·P4·P5: 모든 차시는 개념과 쓰기 활동을 가진다", () => {
   for (const lesson of fiveLessonCourse) {
     assert.ok(sentenceStructureLessons.some((concept) => concept.id === lesson.conceptLessonId));
     assert.ok(lesson.practiceActivities.length >= 4);
     assert.ok(lesson.practiceActivities.every((activity) => activity.prompt.length > 20));
-    assert.ok(getRealLifeMaterialsForLesson(lesson.number).length >= 1);
   }
+});
+
+test("P6: 실생활 탐구는 5차시에만 제공되고 여섯 자료를 모두 통합한다", () => {
+  for (const lessonNumber of [1, 2, 3, 4] as const) {
+    assert.equal(getRealLifeMaterialsForLesson(lessonNumber).length, 0);
+    assert.deepEqual(getCourseLesson(lessonNumber).realLifeMaterialIds, []);
+  }
+  assert.equal(getRealLifeMaterialsForLesson(5).length, 6);
+  assert.equal(getCourseLesson(5).realLifeMaterialIds.length, 6);
 });
 
 test("P3·P6: 5차시는 생성·자기 설명·상호 피드백·종합 평가를 포함한다", () => {

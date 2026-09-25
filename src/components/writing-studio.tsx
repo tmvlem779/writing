@@ -17,6 +17,11 @@ export function WritingStudio() {
   const [chapter, setChapter] = useState<Chapter>("concept");
   const lesson = getCourseLesson(lessonNumber);
 
+  function selectLesson(nextLesson: CourseLessonNumber) {
+    setLessonNumber(nextLesson);
+    if (nextLesson !== 5 && chapter === "real-life") setChapter("concept");
+  }
+
   return (
     <main className="learning-studio">
       <section className="course-map" aria-labelledby="course-map-title">
@@ -33,7 +38,7 @@ export function WritingStudio() {
               aria-pressed={lessonNumber === item.number}
               className={lessonNumber === item.number ? "lesson-tab active" : "lesson-tab"}
               key={item.number}
-              onClick={() => setLessonNumber(item.number)}
+              onClick={() => selectLesson(item.number)}
               type="button"
             >
               <span>{item.number}차시</span>
@@ -49,7 +54,7 @@ export function WritingStudio() {
         </div>
       </section>
 
-      <nav className="chapter-switcher" aria-label="학습 장 선택">
+      <nav className={lessonNumber === 5 ? "chapter-switcher" : "chapter-switcher two-chapters"} aria-label="학습 장 선택">
         <button
           aria-current={chapter === "concept" ? "page" : undefined}
           className={chapter === "concept" ? "chapter-tab active" : "chapter-tab"}
@@ -70,21 +75,23 @@ export function WritingStudio() {
           <strong>쓰기와 성찰</strong>
           <small>진단부터 글쓰기까지 연습해요</small>
         </button>
-        <button
-          aria-current={chapter === "real-life" ? "page" : undefined}
-          className={chapter === "real-life" ? "chapter-tab active" : "chapter-tab"}
-          onClick={() => setChapter("real-life")}
-          type="button"
-        >
-          <span>Chapter 03</span>
-          <strong>실생활 탐구</strong>
-          <small>실제적인 자료를 분석하고 고쳐 써요</small>
-        </button>
+        {lessonNumber === 5 && (
+          <button
+            aria-current={chapter === "real-life" ? "page" : undefined}
+            className={chapter === "real-life" ? "chapter-tab active" : "chapter-tab"}
+            onClick={() => setChapter("real-life")}
+            type="button"
+          >
+            <span>Chapter 03</span>
+            <strong>종합 실생활 탐구</strong>
+            <small>1~4차시 개념을 실제 자료에 적용해요</small>
+          </button>
+        )}
       </nav>
 
       {chapter === "concept" && <ConceptChapter key={`concept-${lessonNumber}`} lessonNumber={lessonNumber} onStartPractice={() => setChapter("practice")} />}
       {chapter === "practice" && <PracticeChapter key={`practice-${lessonNumber}`} lessonNumber={lessonNumber} />}
-      {chapter === "real-life" && <RealLifeChapter key={`real-life-${lessonNumber}`} lessonNumber={lessonNumber} />}
+      {chapter === "real-life" && lessonNumber === 5 && <RealLifeChapter key="real-life-5" lessonNumber={5} />}
     </main>
   );
 }

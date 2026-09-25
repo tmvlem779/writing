@@ -29,15 +29,15 @@ test("P3·P4·P6: 모든 자료는 구조, 효과, 고쳐 쓰기 과제를 제�
   }
 });
 
-test("P6: 모든 차시는 초점 개념에 맞는 실생활 자료와 세 단계 과제를 제공한다", () => {
-  assert.equal(realLifeLessonGuides.length, 5);
-  for (const lessonNumber of [1, 2, 3, 4, 5] as const) {
-    const materials = getRealLifeMaterialsForLesson(lessonNumber);
-    assert.ok(materials.length >= 1);
-    for (const material of materials) {
-      for (const mode of realLifePracticeModes) {
-        assert.ok(buildRealLifeTask(material, mode.id, lessonNumber).length > 20);
-      }
+test("P6: 5차시는 1~4차시 관점과 세 단계 실생활 과제를 통합한다", () => {
+  assert.equal(realLifeLessonGuides.length, 1);
+  assert.equal(realLifeLessonGuides[0].lessonNumber, 5);
+  assert.equal(realLifeLessonGuides[0].reviewPrompts.length, 4);
+  const materials = getRealLifeMaterialsForLesson(5);
+  assert.equal(materials.length, 6);
+  for (const material of materials) {
+    for (const mode of realLifePracticeModes) {
+      assert.ok(buildRealLifeTask(material, mode.id).length > 20);
     }
   }
 });
