@@ -1,18 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
+import { getCourseLesson, type CourseLessonNumber } from "@/lib/curriculum/five-lesson-course";
 import {
   buildRealLifeTask,
-  realLifeMaterials,
+  getRealLifeLessonGuide,
+  getRealLifeMaterialsForLesson,
   realLifePracticeModes,
   type RealLifePracticeMode
 } from "@/lib/curriculum/real-life-materials";
 
 type Message = { role: "student" | "assistant"; content: string };
 
-export function RealLifeChapter() {
+type RealLifeChapterProps = {
+  lessonNumber: CourseLessonNumber;
+};
+
+export function RealLifeChapter({ lessonNumber }: RealLifeChapterProps) {
+  const courseLesson = getCourseLesson(lessonNumber);
+  const lessonGuide = getRealLifeLessonGuide(lessonNumber);
+  const lessonMaterials = getRealLifeMaterialsForLesson(lessonNumber);
   const [materialIndex, setMaterialIndex] = useState(0);
   const [mode, setMode] = useState<RealLifePracticeMode>("structure");
   const [draft, setDraft] = useState("");
@@ -26,8 +35,8 @@ export function RealLifeChapter() {
   const [error, setError] = useState("");
   const [demo, setDemo] = useState(false);
 
-  const material = realLifeMaterials[materialIndex];
-  const task = useMemo(() => buildRealLifeTask(material, mode), [material, mode]);
+  const material = lessonMaterials[materialIndex] ?? lessonMaterials[0];
+  const task = buildRealLifeTask(material, mode, lessonNumber);
   const selectedMode = realLifePracticeModes.find((item) => item.id === mode) ?? realLifePracticeModes[0];
 
   async function ensureSession() {
@@ -51,6 +60,8 @@ export function RealLifeChapter() {
     try {
       const id = await ensureSession();
       const studentMessage = [
+        `[수업 차시] ${lessonNumber}차시 · ${courseLesson.title}`,
+        `[핵심 질문] ${courseLesson.keyQuestion}`,
         `[자료 유형] ${material.label}`,
         `[자료 제목] ${material.title}`,
         `[자료 본문]\n${material.content}`,
@@ -112,12 +123,12 @@ export function RealLifeChapter() {
 
   return (
     <div className="authentic-shell">
-      <aside className="material-sidebar" aria-label="3장 실생활 자료">
+      <aside className="material-sidebar" aria-label={`${lessonNumber}차시 3장 실생활 자료`}>
         <div className="sidebar-heading">
-          <span>Chapter 03</span>
-          <strong>실생활 글 탐구</strong>
+          <span>Chapter 03 · {lessonNumber}차시</span>
+          <strong>{courseLesson.title}</strong>
         </div>
-        {realLifeMaterials.map((item, index) => (
+        {lessonMaterials.map((item, index) => (
           <button
             aria-current={material.id === item.id ? "step" : undefined}
             className={material.id === item.id ? "material-button active" : "material-button"}
@@ -135,12 +146,17 @@ export function RealLifeChapter() {
       <section className="material-workspace" aria-labelledby="material-title">
         <header className="material-header">
           <div>
-            <span className="eyebrow">{material.label} · 실제 형식으로 탐구하기</span>
+            <span className="eyebrow">{lessonNumber}차시 · {material.label} 탐구</span>
             <h1 id="material-title">{material.title}</h1>
             <p>{material.situation}</p>
           </div>
           {demo && <span className="demo-badge">개발용 데모</span>}
         </header>
+
+        <section className="lesson-question-card compact" aria-label={`${lessonNumber}차시 핵심 질문`}>
+          <span>핵심 질문</span>
+          <strong>{courseLesson.keyQuestion}</strong>
+        </section>
 
         <article className={`real-material-card material-${material.id}`}>
           <div className="material-meta">
@@ -156,10 +172,10 @@ export function RealLifeChapter() {
             <h2>어떤 문장 구조가 쓰였을까요?</h2>
           </div>
           <div className="concept-tags" aria-label="활용 개념">
-            {material.focusConcepts.map((concept) => <span key={concept}>{concept}</span>)}
+            {lessonGuide.focusConcepts.map((concept) => <span key={concept}>{concept}</span>)}
           </div>
           <ol>
-            {material.analysisPrompts.map((prompt) => <li key={prompt}>{prompt}</li>)}
+            {lessonGuide.analysisPrompts.map((prompt) => <li key={prompt}>{prompt}</li>)}
           </ol>
         </section>
 
@@ -220,10 +236,10 @@ export function RealLifeChapter() {
       </section>
 
       <aside className="transfer-panel" aria-label="3장 학습 진행">
-        <span className="panel-kicker">전이 학습</span>
+        <span className="panel-kicker">{lessonNumber}차시 전이 학습</span>
         <h2>배운 개념을<br />실제 글로 옮겨요</h2>
         <dl>
-          <div><dt>살펴본 자료</dt><dd>{attemptedMaterials.size}/{realLifeMaterials.length}</dd></div>
+          <div><dt>살펴본 자료</dt><dd>{attemptedMaterials.size}/{lessonMaterials.length}</dd></div>
           <div><dt>현재 도움</dt><dd>{scaffoldLevel + 1}/5</dd></div>
           <div><dt>현재 단계</dt><dd>{selectedMode.label}</dd></div>
         </dl>

@@ -1,23 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Activity, AgentResponse } from "@/lib/agent/schema";
+import type { AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
-
-const activities: Array<{ value: Activity; label: string; prompt: string }> = [
-  { value: "diagnose", label: "시작 진단", prompt: "주어와 서술어가 잘 호응하는 문장을 한 문장 써 보세요." },
-  { value: "create", label: "문장 만들기", prompt: "‘학생’과 ‘도서관’을 활용해 기본 문장을 만들어 보세요." },
-  { value: "expand", label: "문장 확장", prompt: "기본 문장에 수식어나 절을 더해 뜻을 구체화해 보세요." },
-  { value: "compare", label: "구조 비교", prompt: "같은 내용을 이어진문장과 안은문장으로 표현해 보세요." },
-  { value: "error", label: "오류 탐구", prompt: "어색한 문장을 고치기 전에 문제가 있는 부분과 이유를 설명해 보세요." },
-  { value: "transfer", label: "짧은 글쓰기", prompt: "배운 문장 구조를 활용해 학교생활에 관한 짧은 글을 써 보세요." },
-  { value: "reflect", label: "성찰", prompt: "처음 문장과 지금 문장에서 달라진 점을 설명해 보세요." }
-];
+import { getCourseLesson, type CourseLessonNumber } from "@/lib/curriculum/five-lesson-course";
 
 type Message = { role: "student" | "assistant"; content: string };
 
-export function PracticeChapter() {
-  const [activity, setActivity] = useState<Activity>("diagnose");
+type PracticeChapterProps = {
+  lessonNumber: CourseLessonNumber;
+};
+
+export function PracticeChapter({ lessonNumber }: PracticeChapterProps) {
+  const lesson = getCourseLesson(lessonNumber);
+  const activities = lesson.practiceActivities;
+  const [activityId, setActivityId] = useState(activities[0].id);
   const [draft, setDraft] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [response, setResponse] = useState<AgentResponse | null>(null);
@@ -28,14 +25,14 @@ export function PracticeChapter() {
   const [error, setError] = useState("");
   const [demo, setDemo] = useState(false);
 
-  const selected = useMemo(() => activities.find((item) => item.value === activity) ?? activities[0], [activity]);
+  const selected = useMemo(() => activities.find((item) => item.id === activityId) ?? activities[0], [activities, activityId]);
 
   async function ensureSession() {
     if (sessionId) return sessionId;
     const result = await fetch("/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ activity })
+      body: JSON.stringify({ activity: selected.activity })
     });
     const body = await result.json();
     if (!result.ok) throw new Error(body.error ?? "세션을 시작할 수 없습니다.");
@@ -50,13 +47,19 @@ export function PracticeChapter() {
     setError("");
     try {
       const id = await ensureSession();
+      const studentMessage = [
+        `[수업 차시] ${lessonNumber}차시 · ${lesson.title}`,
+        `[핵심 질문] ${lesson.keyQuestion}`,
+        `[현재 과제] ${selected.prompt}`,
+        `[학생 답]\n${draft}`
+      ].join("\n\n");
       const result = await fetch("/api/agent/turn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId: id,
-          activity,
-          message: draft,
+          activity: selected.activity,
+          message: studentMessage,
           scaffoldLevel,
           attemptCount,
           history: history.slice(-6)
@@ -81,9 +84,11 @@ export function PracticeChapter() {
     }
   }
 
-  function changeActivity(next: Activity) {
-    setActivity(next);
+  function changeActivity(nextId: string) {
+    setActivityId(nextId);
     setResponse(null);
+    setSessionId(null);
+    setHistory([]);
     setAttemptCount(0);
     setScaffoldLevel(0);
     setDraft("");
@@ -91,16 +96,17 @@ export function PracticeChapter() {
 
   return (
     <div className="studio-shell">
-      <aside className="activity-sidebar" aria-label="2장 학습 활동">
+      <aside className="activity-sidebar" aria-label={`${lessonNumber}차시 2장 학습 활동`}>
         <div className="sidebar-heading">
-          <span>Chapter 02</span>
-          <strong>문장 쓰기와 성찰</strong>
+          <span>Chapter 02 · {lessonNumber}차시</span>
+          <strong>{lesson.title}</strong>
         </div>
         {activities.map((item, index) => (
           <button
-            className={activity === item.value ? "activity-button active" : "activity-button"}
-            key={item.value}
-            onClick={() => changeActivity(item.value)}
+            aria-current={activityId === item.id ? "step" : undefined}
+            className={activityId === item.id ? "activity-button active" : "activity-button"}
+            key={item.id}
+            onClick={() => changeActivity(item.id)}
             type="button"
           >
             <span>{String(index + 1).padStart(2, "0")}</span>
@@ -119,11 +125,16 @@ export function PracticeChapter() {
       <section className="workspace" aria-labelledby="workspace-title">
         <header className="workspace-header">
           <div>
-            <span className="eyebrow">{selected.label}</span>
+            <span className="eyebrow">{lessonNumber}차시 · {selected.label}</span>
             <h1 id="workspace-title">생각을 먼저 적어 보세요</h1>
           </div>
           {demo && <span className="demo-badge">개발용 데모</span>}
         </header>
+
+        <section className="lesson-question-card compact" aria-label={`${lessonNumber}차시 핵심 질문`}>
+          <span>핵심 질문</span>
+          <strong>{lesson.keyQuestion}</strong>
+        </section>
 
         <div className="task-card">
           <span>이번 과제</span>
@@ -165,7 +176,7 @@ export function PracticeChapter() {
       </section>
 
       <aside className="evidence-panel" aria-label="학습 기록">
-        <span className="panel-kicker">학습 기록</span>
+        <span className="panel-kicker">{lessonNumber}차시 학습 기록</span>
         <h2>내가 해낸 과정</h2>
         <dl>
           <div><dt>시도 횟수</dt><dd>{attemptCount}</dd></div>

@@ -5,7 +5,9 @@ import { activitySchema } from "../src/lib/agent/schema.ts";
 import { buildFallbackResponse } from "../src/lib/agent/fallback.ts";
 import {
   buildRealLifeTask,
+  getRealLifeMaterialsForLesson,
   realLifeMaterials,
+  realLifeLessonGuides,
   realLifePracticeModes
 } from "../src/lib/curriculum/real-life-materials.ts";
 
@@ -24,6 +26,19 @@ test("P3·P4·P6: 모든 자료는 구조, 효과, 고쳐 쓰기 과제를 제�
     assert.ok(buildRealLifeTask(material, "structure").length > 10);
     assert.ok(buildRealLifeTask(material, "effect").length > 10);
     assert.ok(buildRealLifeTask(material, "rewrite").length > 10);
+  }
+});
+
+test("P6: 모든 차시는 초점 개념에 맞는 실생활 자료와 세 단계 과제를 제공한다", () => {
+  assert.equal(realLifeLessonGuides.length, 5);
+  for (const lessonNumber of [1, 2, 3, 4, 5] as const) {
+    const materials = getRealLifeMaterialsForLesson(lessonNumber);
+    assert.ok(materials.length >= 1);
+    for (const material of materials) {
+      for (const mode of realLifePracticeModes) {
+        assert.ok(buildRealLifeTask(material, mode.id, lessonNumber).length > 20);
+      }
+    }
   }
 });
 

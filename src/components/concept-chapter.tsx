@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { getCourseLesson, type CourseLessonNumber } from "@/lib/curriculum/five-lesson-course";
 import {
   evaluateConceptCheck,
   sentenceStructureLessons,
@@ -8,59 +9,49 @@ import {
 } from "@/lib/curriculum/sentence-structure";
 
 type ConceptChapterProps = {
+  lessonNumber: CourseLessonNumber;
   onStartPractice: () => void;
 };
 
-export function ConceptChapter({ onStartPractice }: ConceptChapterProps) {
-  const [lessonIndex, setLessonIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const lesson = sentenceStructureLessons[lessonIndex];
-  const selectedAnswer = answers[lesson.id];
+export function ConceptChapter({ lessonNumber, onStartPractice }: ConceptChapterProps) {
+  const courseLesson = getCourseLesson(lessonNumber);
+  const lesson = sentenceStructureLessons.find((item) => item.id === courseLesson.conceptLessonId) ?? sentenceStructureLessons[0];
+  const [selectedAnswer, setSelectedAnswer] = useState("");
   const result = useMemo(
     () => selectedAnswer ? evaluateConceptCheck(lesson.id, selectedAnswer) : null,
     [lesson.id, selectedAnswer]
   );
-  const completedCount = Object.keys(answers).length;
-
-  function selectLesson(index: number) {
-    setLessonIndex(index);
-  }
-
-  function selectAnswer(optionId: string) {
-    setAnswers((current) => ({ ...current, [lesson.id]: optionId }));
-  }
 
   return (
     <div className="concept-shell">
-      <aside className="concept-sidebar" aria-label="1장 개념 차례">
+      <aside className="concept-sidebar" aria-label={`${lessonNumber}차시 1장 학습 순서`}>
         <div className="sidebar-heading">
-          <span>Chapter 01</span>
-          <strong>문장의 구조 개념</strong>
+          <span>Chapter 01 · {lessonNumber}차시</span>
+          <strong>개념 학습</strong>
         </div>
-        {sentenceStructureLessons.map((item, index) => (
-          <button
-            aria-current={lesson.id === item.id ? "step" : undefined}
-            className={lesson.id === item.id ? "concept-step active" : "concept-step"}
-            key={item.id}
-            onClick={() => selectLesson(index)}
-            type="button"
-          >
-            <span>{String(item.step).padStart(2, "0")}</span>
-            <span>{item.title}</span>
-            {answers[item.id] && <i aria-label="확인 완료">✓</i>}
-          </button>
+        {["관찰하기", "개념 정리", "확인·설명"].map((step, index) => (
+          <div className="concept-step active" key={step}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <span>{step}</span>
+            {selectedAnswer && index === 2 && <i aria-label="확인 완료">✓</i>}
+          </div>
         ))}
       </aside>
 
       <section className="concept-workspace" aria-labelledby="concept-title">
         <header className="concept-header">
           <div>
-            <span className="eyebrow">개념 {lesson.step} · 관찰하고 설명하기</span>
+            <span className="eyebrow">{lessonNumber}차시 · 관찰하고 설명하기</span>
             <h1 id="concept-title">{lesson.title}</h1>
             <p>{lesson.summary}</p>
           </div>
-          <span className="concept-count">{lesson.step} / {sentenceStructureLessons.length}</span>
+          <span className="concept-count">{lessonNumber} / 5차시</span>
         </header>
+
+        <section className="lesson-question-card" aria-label={`${lessonNumber}차시 핵심 질문`}>
+          <span>핵심 질문</span>
+          <strong>{courseLesson.keyQuestion}</strong>
+        </section>
 
         <section className="inquiry-card" aria-labelledby="inquiry-heading">
           <span id="inquiry-heading">먼저 살펴보기</span>
@@ -93,7 +84,7 @@ export function ConceptChapter({ onStartPractice }: ConceptChapterProps) {
                 aria-pressed={selectedAnswer === option.id}
                 className={selectedAnswer === option.id ? "check-option selected" : "check-option"}
                 key={option.id}
-                onClick={() => selectAnswer(option.id)}
+                onClick={() => setSelectedAnswer(option.id)}
                 type="button"
               >
                 {option.label}
@@ -109,42 +100,21 @@ export function ConceptChapter({ onStartPractice }: ConceptChapterProps) {
           )}
         </fieldset>
 
-        <div className="concept-actions">
-          <button
-            className="secondary-button"
-            disabled={lessonIndex === 0}
-            onClick={() => setLessonIndex((index) => Math.max(0, index - 1))}
-            type="button"
-          >
-            이전 개념
+        <div className="concept-actions concept-actions-end">
+          <button className="primary-button" onClick={onStartPractice} type="button">
+            이 차시의 2장 연습으로
           </button>
-          {lessonIndex < sentenceStructureLessons.length - 1 ? (
-            <button
-              className="primary-button"
-              onClick={() => setLessonIndex((index) => Math.min(sentenceStructureLessons.length - 1, index + 1))}
-              type="button"
-            >
-              다음 개념
-            </button>
-          ) : (
-            <button className="primary-button" onClick={onStartPractice} type="button">
-              2장 활동 시작
-            </button>
-          )}
         </div>
       </section>
 
-      <aside className="concept-progress" aria-label="개념 학습 진행">
-        <span className="panel-kicker">개념 지도</span>
-        <h2>{completedCount} / {sentenceStructureLessons.length} 확인</h2>
-        <div className="progress-ring" aria-label={`개념 확인 ${completedCount}/${sentenceStructureLessons.length}`}>
-          <strong>{Math.round((completedCount / sentenceStructureLessons.length) * 100)}%</strong>
-        </div>
+      <aside className="concept-progress" aria-label={`${lessonNumber}차시 주요 활동`}>
+        <span className="panel-kicker">{lessonNumber}차시 학습 지도</span>
+        <h2>{courseLesson.title}</h2>
         <ol>
-          {sentenceStructureLessons.map((item) => (
-            <li className={answers[item.id] ? "done" : ""} key={item.id}>
-              <span>{answers[item.id] ? "완료" : `0${item.step}`}</span>
-              {item.title}
+          {courseLesson.activities.map((activity, index) => (
+            <li key={activity}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              {activity}
             </li>
           ))}
         </ol>

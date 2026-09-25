@@ -15,6 +15,14 @@ export type RealLifeMaterial = {
 
 export type RealLifePracticeMode = "structure" | "effect" | "rewrite";
 
+export type RealLifeLessonGuide = {
+  lessonNumber: 1 | 2 | 3 | 4 | 5;
+  materialIds: RealLifeMaterialKind[];
+  focusConcepts: string[];
+  analysisPrompts: [string, string];
+  rewritePrompt: string;
+};
+
 export const realLifePracticeModes: Array<{
   id: RealLifePracticeMode;
   label: string;
@@ -118,8 +126,72 @@ export const realLifeMaterials: RealLifeMaterial[] = [
   }
 ];
 
-export function buildRealLifeTask(material: RealLifeMaterial, mode: RealLifePracticeMode) {
-  if (mode === "structure") return material.analysisPrompts[0];
-  if (mode === "effect") return material.analysisPrompts[1];
-  return material.rewritePrompt;
+export const realLifeLessonGuides: RealLifeLessonGuide[] = [
+  {
+    lessonNumber: 1,
+    materialIds: ["article", "notice"],
+    focusConcepts: ["주어·서술어 관계", "홑문장", "겹문장"],
+    analysisPrompts: [
+      "자료의 각 문장에서 주어·서술어 관계가 몇 번 나타나는지 세고 홑문장과 겹문장을 구별해 보세요.",
+      "자료가 홑문장만으로 이루어졌을 때와 겹문장을 함께 사용했을 때 정보 전달 방식이 어떻게 달라질까요?"
+    ],
+    rewritePrompt: "겹문장 하나를 두 개의 홑문장으로 바꾼 뒤, 원래 문장과 정보 전달 효과를 비교해 보세요."
+  },
+  {
+    lessonNumber: 2,
+    materialIds: ["notice", "dialogue"],
+    focusConcepts: ["대등한 연결", "종속적인 연결", "연결 어미"],
+    analysisPrompts: [
+      "자료에서 두 절이 이어진 문장을 찾고 대등한 연결인지 종속적인 연결인지 근거와 함께 설명해 보세요.",
+      "연결 어미가 나열·대조·원인·조건 등의 관계를 독자에게 어떻게 드러내는지 설명해 보세요."
+    ],
+    rewritePrompt: "자료 속 이어진문장 하나의 연결 어미를 바꾸어 새 문장을 만들고, 의미 관계가 어떻게 달라졌는지 설명해 보세요."
+  },
+  {
+    lessonNumber: 3,
+    materialIds: ["article", "presentation"],
+    focusConcepts: ["명사절", "관형절", "부사절"],
+    analysisPrompts: [
+      "자료에서 명사절·관형절·부사절 가운데 하나를 찾아 경계를 표시하고 문장 안에서 맡은 역할을 설명해 보세요.",
+      "찾은 안긴절이 핵심 정보와 배경 정보를 나누는 데 어떤 효과를 내는지 설명해 보세요."
+    ],
+    rewritePrompt: "자료의 홑문장 두 개를 명사절·관형절·부사절 중 하나를 활용한 안은문장으로 결합하고 선택 이유를 적어 보세요."
+  },
+  {
+    lessonNumber: 4,
+    materialIds: ["interview", "social"],
+    focusConcepts: ["서술절", "인용절", "의미 차이와 중의성"],
+    analysisPrompts: [
+      "자료에서 말이나 생각을 담은 부분 또는 서술 기능을 하는 절을 찾고 그 경계와 역할을 설명해 보세요.",
+      "인용 방식이나 꾸밈 관계를 다르게 이해하면 의미가 달라질 수 있는 부분이 있는지 독자의 관점에서 살펴보세요."
+    ],
+    rewritePrompt: "자료의 문장 하나를 인용 주체나 꾸밈 관계가 한 가지로만 이해되도록 고쳐 쓰고, 바꾼 부분을 설명해 보세요."
+  },
+  {
+    lessonNumber: 5,
+    materialIds: ["article", "notice", "dialogue", "presentation", "interview", "social"],
+    focusConcepts: ["문장 구조 선택", "목적과 독자", "표현 효과"],
+    analysisPrompts: [
+      "자료에서 홑문장·이어진문장·안은문장을 찾아 구조를 분석하고, 자료의 목적에 가장 기여하는 문장을 하나 고르세요.",
+      "고른 문장이 자료의 독자에게 의도한 의미를 효과적으로 전달하는지 구조와 표현 효과를 근거로 평가해 보세요."
+    ],
+    rewritePrompt: "같은 내용을 다른 형식의 실생활 글로 바꾸어 3~5문장을 쓰고, 사용한 문장 구조 두 가지와 선택 이유를 설명해 보세요."
+  }
+];
+
+export function getRealLifeLessonGuide(lessonNumber: 1 | 2 | 3 | 4 | 5) {
+  return realLifeLessonGuides.find((guide) => guide.lessonNumber === lessonNumber) ?? realLifeLessonGuides[4];
+}
+
+export function getRealLifeMaterialsForLesson(lessonNumber: 1 | 2 | 3 | 4 | 5) {
+  const guide = getRealLifeLessonGuide(lessonNumber);
+  return guide.materialIds.map((id) => realLifeMaterials.find((material) => material.id === id)).filter((material): material is RealLifeMaterial => Boolean(material));
+}
+
+export function buildRealLifeTask(material: RealLifeMaterial, mode: RealLifePracticeMode, lessonNumber: 1 | 2 | 3 | 4 | 5 = 5) {
+  const guide = getRealLifeLessonGuide(lessonNumber);
+  const contextualize = (prompt: string) => prompt.replace("자료", `${material.label} 자료`);
+  if (mode === "structure") return contextualize(guide.analysisPrompts[0]);
+  if (mode === "effect") return contextualize(guide.analysisPrompts[1]);
+  return contextualize(guide.rewritePrompt);
 }
