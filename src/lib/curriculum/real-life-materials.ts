@@ -263,10 +263,15 @@ export function getRealLifeLessonGuide(trackId: CourseTrackId = "structure") {
 }
 
 export function getRealLifeMaterialsForLesson(lessonNumber: 1 | 2 | 3 | 4 | 5, trackId: CourseTrackId = "structure") {
-  if (lessonNumber !== 5) return [];
+  if (lessonNumber !== 5 || trackId === "grammar") return [];
   const guide = getRealLifeLessonGuide(trackId);
-  const materials = trackId === "grammar" ? grammarRealLifeMaterials : realLifeMaterials;
-  return guide.materialIds.map((id) => materials.find((material) => material.id === id)).filter((material): material is RealLifeMaterial => Boolean(material));
+  return guide.materialIds.map((id) => realLifeMaterials.find((material) => material.id === id)).filter((material): material is RealLifeMaterial => Boolean(material));
+}
+
+export function getGrammarWingMaterials() {
+  return grammarRealLifeLessonGuide.materialIds
+    .map((id) => grammarRealLifeMaterials.find((material) => material.id === id))
+    .filter((material): material is RealLifeMaterial => Boolean(material));
 }
 
 export function buildRealLifeTask(material: RealLifeMaterial, mode: RealLifePracticeMode, trackId: CourseTrackId = "structure") {

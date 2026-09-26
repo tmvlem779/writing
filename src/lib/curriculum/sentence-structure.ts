@@ -8,6 +8,21 @@ export type ConceptCheckOption = {
   label: string;
 };
 
+export type ConceptCheck = {
+  prompt: string;
+  options: ConceptCheckOption[];
+  answer: string;
+  feedback: string;
+  reflection: string;
+  retryHint?: string;
+};
+
+export type ConceptSection = {
+  title: string;
+  description?: string;
+  points: string[];
+};
+
 export type ConceptLesson = {
   id: string;
   step: number;
@@ -16,13 +31,9 @@ export type ConceptLesson = {
   inquiryQuestion: string;
   examples: ConceptExample[];
   keyPoints: string[];
-  check: {
-    prompt: string;
-    options: ConceptCheckOption[];
-    answer: string;
-    feedback: string;
-    reflection: string;
-  };
+  conceptSections?: ConceptSection[];
+  check: ConceptCheck;
+  extraChecks?: ConceptCheck[];
 };
 
 export const sentenceStructureSource = {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { getCourseLesson, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 import {
   evaluateGrammarConceptCheck,
@@ -24,15 +24,9 @@ export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: Conce
   const lessons = trackId === "grammar" ? grammarElementLessons : sentenceStructureLessons;
   const source = trackId === "grammar" ? grammarElementsSource : sentenceStructureSource;
   const lesson = lessons.find((item) => item.id === courseLesson.conceptLessonId) ?? lessons[0];
-  const [selectedAnswer, setSelectedAnswer] = useState("");
-  const result = useMemo(
-    () => selectedAnswer
-      ? trackId === "grammar"
-        ? evaluateGrammarConceptCheck(lesson.id, selectedAnswer)
-        : evaluateConceptCheck(lesson.id, selectedAnswer)
-      : null,
-    [lesson.id, selectedAnswer, trackId]
-  );
+  const checks = [lesson.check, ...(lesson.extraChecks ?? [])];
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
+  const completedChecks = Object.keys(selectedAnswers).length;
 
   return (
     <div className="concept-shell">
@@ -45,7 +39,7 @@ export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: Conce
           <div className="concept-step active" key={step}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <span>{step}</span>
-            {selectedAnswer && index === 2 && <i aria-label="확인 완료">✓</i>}
+            {completedChecks === checks.length && index === 2 && <i aria-label="확인 완료">✓</i>}
           </div>
         ))}
       </aside>
@@ -80,37 +74,65 @@ export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: Conce
 
         <section className="concept-summary-card" aria-labelledby="summary-heading">
           <span id="summary-heading">개념 정리</span>
-          <ul>
-            {lesson.keyPoints.map((point) => <li key={point}>{point}</li>)}
-          </ul>
+          {lesson.conceptSections ? (
+            <div className="concept-section-grid">
+              {lesson.conceptSections.map((section, index) => (
+                <article className="concept-detail-section" key={section.title}>
+                  <div><span>{String(index + 1).padStart(2, "0")}</span><h3>{section.title}</h3></div>
+                  {section.description && <p>{section.description}</p>}
+                  <ul>{section.points.map((point) => <li key={point}>{point}</li>)}</ul>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <ul>
+              {lesson.keyPoints.map((point) => <li key={point}>{point}</li>)}
+            </ul>
+          )}
         </section>
 
-        <fieldset className="concept-check">
-          <legend>
-            <span>스스로 확인하기</span>
-            {lesson.check.prompt}
-          </legend>
-          <div className="check-options">
-            {lesson.check.options.map((option) => (
-              <button
-                aria-pressed={selectedAnswer === option.id}
-                className={selectedAnswer === option.id ? "check-option selected" : "check-option"}
-                key={option.id}
-                onClick={() => setSelectedAnswer(option.id)}
-                type="button"
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-          {result && (
-            <div className={result.correct ? "check-feedback correct" : "check-feedback retry"} aria-live="polite">
-              <strong>{result.correct ? "맞았어요. 근거까지 확인해 볼까요?" : "한 번 더 관계를 살펴보세요."}</strong>
-              <p>{result.correct ? result.feedback : lesson.inquiryQuestion}</p>
-              <small>{result.reflection}</small>
-            </div>
-          )}
-        </fieldset>
+        <section className="concept-check-set" aria-labelledby="check-set-heading">
+          <header>
+            <span id="check-set-heading">스스로 확인하기</span>
+            <strong>{completedChecks} / {checks.length}문항 응답</strong>
+          </header>
+          {checks.map((check, checkIndex) => {
+            const selectedAnswer = selectedAnswers[check.prompt] ?? "";
+            const result = selectedAnswer
+              ? trackId === "grammar"
+                ? evaluateGrammarConceptCheck(lesson.id, selectedAnswer)
+                : evaluateConceptCheck(lesson.id, selectedAnswer)
+              : null;
+            return (
+              <fieldset className="concept-check" key={check.prompt}>
+                <legend>
+                  <span>문항 {checkIndex + 1}</span>
+                  {check.prompt}
+                </legend>
+                <div className="check-options">
+                  {check.options.map((option) => (
+                    <button
+                      aria-pressed={selectedAnswer === option.id}
+                      className={selectedAnswer === option.id ? "check-option selected" : "check-option"}
+                      key={option.id}
+                      onClick={() => setSelectedAnswers((current) => ({ ...current, [check.prompt]: option.id }))}
+                      type="button"
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                {result && (
+                  <div className={result.correct ? "check-feedback correct" : "check-feedback retry"} aria-live="polite">
+                    <strong>{result.correct ? "맞았어요. 근거까지 확인해 볼까요?" : "정답을 바로 보기보다 단서를 다시 살펴보세요."}</strong>
+                    <p>{result.correct ? result.feedback : check.retryHint ?? lesson.inquiryQuestion}</p>
+                    <small>{result.reflection}</small>
+                  </div>
+                )}
+              </fieldset>
+            );
+          })}
+        </section>
 
         <div className="concept-actions concept-actions-end">
           <button className="primary-button" onClick={onStartPractice} type="button">

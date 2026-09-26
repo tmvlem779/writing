@@ -3,9 +3,10 @@
 import { useState } from "react";
 import type { AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
-import { getCourseLesson, getCourseTrack, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
+import { getCourseLesson, getCourseTrack, grammarWingActivity, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 import {
   buildRealLifeTask,
+  getGrammarWingMaterials,
   getRealLifeLessonGuide,
   getRealLifeMaterialsForLesson,
   realLifePracticeModes,
@@ -17,13 +18,14 @@ type Message = { role: "student" | "assistant"; content: string };
 type RealLifeChapterProps = {
   lessonNumber: CourseLessonNumber;
   trackId: CourseTrackId;
+  standalone?: boolean;
 };
 
-export function RealLifeChapter({ lessonNumber, trackId }: RealLifeChapterProps) {
+export function RealLifeChapter({ lessonNumber, trackId, standalone = false }: RealLifeChapterProps) {
   const courseLesson = getCourseLesson(lessonNumber, trackId);
   const track = getCourseTrack(trackId);
   const lessonGuide = getRealLifeLessonGuide(trackId);
-  const lessonMaterials = getRealLifeMaterialsForLesson(lessonNumber, trackId);
+  const lessonMaterials = standalone ? getGrammarWingMaterials() : getRealLifeMaterialsForLesson(lessonNumber, trackId);
   const [materialIndex, setMaterialIndex] = useState(0);
   const [mode, setMode] = useState<RealLifePracticeMode>("structure");
   const [draft, setDraft] = useState("");
@@ -63,8 +65,8 @@ export function RealLifeChapter({ lessonNumber, trackId }: RealLifeChapterProps)
       const id = await ensureSession();
       const studentMessage = [
         `[수업안] ${track.optionLabel} · ${track.title}`,
-        `[수업 차시] ${lessonNumber}차시 · ${courseLesson.title}`,
-        `[핵심 질문] ${courseLesson.keyQuestion}`,
+        standalone ? `[수업 위치] ${grammarWingActivity.title}` : `[수업 차시] ${lessonNumber}차시 · ${courseLesson.title}`,
+        `[핵심 질문] ${standalone ? grammarWingActivity.keyQuestion : courseLesson.keyQuestion}`,
         `[자료 유형] ${material.label}`,
         `[자료 제목] ${material.title}`,
         `[자료 본문]\n${material.content}`,
@@ -126,10 +128,10 @@ export function RealLifeChapter({ lessonNumber, trackId }: RealLifeChapterProps)
 
   return (
     <div className="authentic-shell">
-      <aside className="material-sidebar" aria-label={`${lessonNumber}차시 3장 실생활 자료`}>
+      <aside className="material-sidebar" aria-label={standalone ? "날개 실생활 자료" : `${lessonNumber}차시 3장 실생활 자료`}>
         <div className="sidebar-heading">
-          <span>Chapter 03 · {lessonNumber}차시</span>
-          <strong>{courseLesson.title}</strong>
+          <span>{standalone ? "날개 · 별도 활동" : `Chapter 03 · ${lessonNumber}차시`}</span>
+          <strong>{standalone ? "구조+문법 요소 실생활 탐구" : courseLesson.title}</strong>
         </div>
         {lessonMaterials.map((item, index) => (
           <button
@@ -149,16 +151,16 @@ export function RealLifeChapter({ lessonNumber, trackId }: RealLifeChapterProps)
       <section className="material-workspace" aria-labelledby="material-title">
         <header className="material-header">
           <div>
-            <span className="eyebrow">{lessonNumber}차시 · {material.label} 탐구</span>
+            <span className="eyebrow">{standalone ? "날개" : `${lessonNumber}차시`} · {material.label} 탐구</span>
             <h1 id="material-title">{material.title}</h1>
             <p>{material.situation}</p>
           </div>
           {demo && <span className="demo-badge">개발용 데모</span>}
         </header>
 
-        <section className="lesson-question-card compact" aria-label={`${lessonNumber}차시 핵심 질문`}>
+        <section className="lesson-question-card compact" aria-label={standalone ? "날개 핵심 질문" : `${lessonNumber}차시 핵심 질문`}>
           <span>핵심 질문</span>
-          <strong>{courseLesson.keyQuestion}</strong>
+          <strong>{standalone ? grammarWingActivity.keyQuestion : courseLesson.keyQuestion}</strong>
         </section>
 
         <article className={`real-material-card material-${material.id}`}>
@@ -241,8 +243,8 @@ export function RealLifeChapter({ lessonNumber, trackId }: RealLifeChapterProps)
         </section>
       </section>
 
-      <aside className="transfer-panel" aria-label="3장 학습 진행">
-        <span className="panel-kicker">{lessonNumber}차시 전이 학습</span>
+      <aside className="transfer-panel" aria-label={standalone ? "날개 학습 진행" : "3장 학습 진행"}>
+        <span className="panel-kicker">{standalone ? "날개 전이 학습" : `${lessonNumber}차시 전이 학습`}</span>
         <h2>배운 개념을<br />실제 글로 옮겨요</h2>
         <dl>
           <div><dt>살펴본 자료</dt><dd>{attemptedMaterials.size}/{lessonMaterials.length}</dd></div>

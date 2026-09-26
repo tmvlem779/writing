@@ -104,6 +104,13 @@ export const fiveLessonCourse: CourseLesson[] = [
   }
 ];
 
+export const grammarWingActivity = {
+  title: "날개 · 실생활 탐구",
+  keyQuestion: "구조와 문법 요소를 실제 언어 자료에 어떻게 적용할까?",
+  activities: ["자료 맥락 파악", "구조·문법 요소 찾기", "표현 효과 평가", "상황에 맞게 고쳐 쓰기"],
+  realLifeMaterialIds: ["article", "notice", "dialogue", "presentation", "interview", "social"] as RealLifeMaterialKind[]
+} as const;
+
 export const grammarFiveLessonCourse: CourseLesson[] = [
   {
     number: 1,
@@ -175,7 +182,7 @@ export const grammarFiveLessonCourse: CourseLesson[] = [
       { id: "grammar-self-explain", activity: "reflect", label: "선택 이유 설명", prompt: "사용한 문장 구조 하나와 문법 요소 두 가지가 의미·정보 초점·화자 태도에 미친 효과를 근거와 함께 설명해 보세요." },
       { id: "grammar-peer-review", activity: "error", label: "상호 피드백·평가", prompt: "친구에게 보여 줄 문장과 ‘상황에 어울리는가, 의도가 분명한가, 선택 이유가 타당한가’ 중 받고 싶은 기준을 정하세요. 의견을 받은 뒤 수정 여부와 이유를 직접 결정하세요." }
     ],
-    realLifeMaterialIds: ["article", "notice", "dialogue", "presentation", "interview", "social"]
+    realLifeMaterialIds: []
   }
 ];
 
