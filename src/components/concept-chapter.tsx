@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { getCourseLesson, type CourseLessonNumber } from "@/lib/curriculum/five-lesson-course";
+import { getCourseLesson, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
+import {
+  evaluateGrammarConceptCheck,
+  grammarElementLessons,
+  grammarElementsSource
+} from "@/lib/curriculum/grammar-elements";
 import {
   evaluateConceptCheck,
   sentenceStructureLessons,
@@ -10,16 +15,23 @@ import {
 
 type ConceptChapterProps = {
   lessonNumber: CourseLessonNumber;
+  trackId: CourseTrackId;
   onStartPractice: () => void;
 };
 
-export function ConceptChapter({ lessonNumber, onStartPractice }: ConceptChapterProps) {
-  const courseLesson = getCourseLesson(lessonNumber);
-  const lesson = sentenceStructureLessons.find((item) => item.id === courseLesson.conceptLessonId) ?? sentenceStructureLessons[0];
+export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: ConceptChapterProps) {
+  const courseLesson = getCourseLesson(lessonNumber, trackId);
+  const lessons = trackId === "grammar" ? grammarElementLessons : sentenceStructureLessons;
+  const source = trackId === "grammar" ? grammarElementsSource : sentenceStructureSource;
+  const lesson = lessons.find((item) => item.id === courseLesson.conceptLessonId) ?? lessons[0];
   const [selectedAnswer, setSelectedAnswer] = useState("");
   const result = useMemo(
-    () => selectedAnswer ? evaluateConceptCheck(lesson.id, selectedAnswer) : null,
-    [lesson.id, selectedAnswer]
+    () => selectedAnswer
+      ? trackId === "grammar"
+        ? evaluateGrammarConceptCheck(lesson.id, selectedAnswer)
+        : evaluateConceptCheck(lesson.id, selectedAnswer)
+      : null,
+    [lesson.id, selectedAnswer, trackId]
   );
 
   return (
@@ -119,7 +131,7 @@ export function ConceptChapter({ lessonNumber, onStartPractice }: ConceptChapter
           ))}
         </ol>
         <p className="source-note">
-          {sentenceStructureSource.curriculum}의 「{sentenceStructureSource.section}」({sentenceStructureSource.pages})을 바탕으로 재구성했습니다.
+          {source.curriculum}의 「{source.section}」({source.pages})을 바탕으로 재구성했습니다.
         </p>
       </aside>
     </div>

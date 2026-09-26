@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
-import { getCourseLesson, type CourseLessonNumber } from "@/lib/curriculum/five-lesson-course";
+import { getCourseLesson, getCourseTrack, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 import {
   buildRealLifeTask,
   getRealLifeLessonGuide,
@@ -16,12 +16,14 @@ type Message = { role: "student" | "assistant"; content: string };
 
 type RealLifeChapterProps = {
   lessonNumber: CourseLessonNumber;
+  trackId: CourseTrackId;
 };
 
-export function RealLifeChapter({ lessonNumber }: RealLifeChapterProps) {
-  const courseLesson = getCourseLesson(lessonNumber);
-  const lessonGuide = getRealLifeLessonGuide();
-  const lessonMaterials = getRealLifeMaterialsForLesson(lessonNumber);
+export function RealLifeChapter({ lessonNumber, trackId }: RealLifeChapterProps) {
+  const courseLesson = getCourseLesson(lessonNumber, trackId);
+  const track = getCourseTrack(trackId);
+  const lessonGuide = getRealLifeLessonGuide(trackId);
+  const lessonMaterials = getRealLifeMaterialsForLesson(lessonNumber, trackId);
   const [materialIndex, setMaterialIndex] = useState(0);
   const [mode, setMode] = useState<RealLifePracticeMode>("structure");
   const [draft, setDraft] = useState("");
@@ -36,7 +38,7 @@ export function RealLifeChapter({ lessonNumber }: RealLifeChapterProps) {
   const [demo, setDemo] = useState(false);
 
   const material = lessonMaterials[materialIndex] ?? lessonMaterials[0];
-  const task = buildRealLifeTask(material, mode);
+  const task = buildRealLifeTask(material, mode, trackId);
   const selectedMode = realLifePracticeModes.find((item) => item.id === mode) ?? realLifePracticeModes[0];
 
   async function ensureSession() {
@@ -60,6 +62,7 @@ export function RealLifeChapter({ lessonNumber }: RealLifeChapterProps) {
     try {
       const id = await ensureSession();
       const studentMessage = [
+        `[수업안] ${track.optionLabel} · ${track.title}`,
         `[수업 차시] ${lessonNumber}차시 · ${courseLesson.title}`,
         `[핵심 질문] ${courseLesson.keyQuestion}`,
         `[자료 유형] ${material.label}`,

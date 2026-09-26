@@ -570,3 +570,24 @@ DATA_RETENTION_DAYS=0
 - [Supabase Next.js Quickstart](https://supabase.com/docs/guides/getting-started/quickstarts/nextjs): Next.js, Cookie 기반 Auth, TypeScript, RLS 구성
 - [Supabase Server-Side Auth](https://supabase.com/docs/guides/auth/server-side): SSR 환경의 세션 관리
 - [Vercel Environment Variables](https://vercel.com/docs/environment-variables): Development, Preview, Production 환경 변수 분리
+
+## 18. 비교 수업안 확장 작업
+
+### 목표
+
+- 기존 5차시 `A안 · 문장 구조 중심`을 그대로 유지한다.
+- 교과서 86~111쪽을 반영한 `B안 · 구조+문법 요소` 5차시를 별도 데이터로 추가한다.
+- 학생이 같은 화면에서 두 수업안을 전환해 나중에 수업 결과를 비교할 수 있게 한다.
+
+### 완료 조건
+
+- A안의 차시·개념·과제·실생활 자료가 변경 없이 동작한다.
+- B안은 요청된 다섯 차시와 각 차시별 1장 개념·2장 쓰기 활동을 제공한다.
+- B안 4차시는 시간·높임·피동/사동·부정 표현을 형태와 의미 효과로 연결한다.
+- B안 5차시는 여섯 실생활 자료에서 구조와 문법 요소를 종합 적용한다.
+- AI 요청에 수업안·차시·핵심 질문·과제가 포함되고 프롬프트 버전이 갱신된다.
+- 관련 교육과정 테스트, 개인정보 검사, `pnpm verify`, Production 빌드가 통과한다.
+
+### 롤백
+
+- 새 B안 선택 UI와 `grammar*` 교육과정 데이터만 제거하면 기존 A안은 기본값으로 계속 동작한다.

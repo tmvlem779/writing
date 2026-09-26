@@ -9,7 +9,7 @@ export type ConceptCheckOption = {
 };
 
 export type ConceptLesson = {
-  id: "sentence-and-clause" | "connected-sentences" | "embedded-basic" | "embedded-advanced-effect" | "synthesis-generation";
+  id: string;
   step: number;
   title: string;
   summary: string;
@@ -173,7 +173,7 @@ export const sentenceStructureLessons: ConceptLesson[] = [
   }
 ];
 
-export function evaluateConceptCheck(lessonId: ConceptLesson["id"], optionId: string) {
+export function evaluateConceptCheck(lessonId: string, optionId: string) {
   const lesson = sentenceStructureLessons.find((item) => item.id === lessonId);
   if (!lesson) return null;
   return {

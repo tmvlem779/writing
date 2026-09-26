@@ -3,16 +3,18 @@
 import { useMemo, useState } from "react";
 import type { AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
-import { getCourseLesson, type CourseLessonNumber } from "@/lib/curriculum/five-lesson-course";
+import { getCourseLesson, getCourseTrack, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 
 type Message = { role: "student" | "assistant"; content: string };
 
 type PracticeChapterProps = {
   lessonNumber: CourseLessonNumber;
+  trackId: CourseTrackId;
 };
 
-export function PracticeChapter({ lessonNumber }: PracticeChapterProps) {
-  const lesson = getCourseLesson(lessonNumber);
+export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps) {
+  const lesson = getCourseLesson(lessonNumber, trackId);
+  const track = getCourseTrack(trackId);
   const activities = lesson.practiceActivities;
   const [activityId, setActivityId] = useState(activities[0].id);
   const [draft, setDraft] = useState("");
@@ -48,6 +50,7 @@ export function PracticeChapter({ lessonNumber }: PracticeChapterProps) {
     try {
       const id = await ensureSession();
       const studentMessage = [
+        `[수업안] ${track.optionLabel} · ${track.title}`,
         `[수업 차시] ${lessonNumber}차시 · ${lesson.title}`,
         `[핵심 질문] ${lesson.keyQuestion}`,
         `[현재 과제] ${selected.prompt}`,
