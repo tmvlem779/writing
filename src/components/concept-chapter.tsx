@@ -1,6 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import {
+  advanceConceptCheck,
+  canAdvanceConceptCheck,
+  isConceptCheckComplete
+} from "@/lib/curriculum/concept-check-flow";
 import { getCourseLesson, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 import {
   evaluateGrammarConceptCheck,
@@ -26,7 +31,31 @@ export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: Conce
   const lesson = lessons.find((item) => item.id === courseLesson.conceptLessonId) ?? lessons[0];
   const checks = [lesson.check, ...(lesson.extraChecks ?? [])];
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
-  const completedChecks = Object.keys(selectedAnswers).length;
+  const [passedCheckIndexes, setPassedCheckIndexes] = useState<number[]>([]);
+  const [currentCheckIndex, setCurrentCheckIndex] = useState(0);
+  const currentCheck = checks[currentCheckIndex];
+  const selectedAnswer = selectedAnswers[currentCheck.prompt] ?? "";
+  const result = selectedAnswer
+    ? trackId === "grammar"
+      ? evaluateGrammarConceptCheck(lesson.id, selectedAnswer)
+      : evaluateConceptCheck(lesson.id, selectedAnswer)
+    : null;
+  const completedChecks = passedCheckIndexes.length;
+  const allChecksPassed = isConceptCheckComplete(checks.length, passedCheckIndexes);
+  const canOpenNextCheck = canAdvanceConceptCheck(currentCheckIndex, checks.length, passedCheckIndexes);
+
+  function selectCheckAnswer(optionId: string) {
+    setSelectedAnswers((current) => ({ ...current, [currentCheck.prompt]: optionId }));
+    if (optionId === currentCheck.answer) {
+      setPassedCheckIndexes((current) => current.includes(currentCheckIndex)
+        ? current
+        : [...current, currentCheckIndex]);
+    }
+  }
+
+  function openNextCheck() {
+    setCurrentCheckIndex((current) => advanceConceptCheck(current, checks.length, passedCheckIndexes));
+  }
 
   return (
     <div className="concept-shell">
@@ -39,7 +68,7 @@ export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: Conce
           <div className="concept-step active" key={step}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <span>{step}</span>
-            {completedChecks === checks.length && index === 2 && <i aria-label="확인 완료">✓</i>}
+            {allChecksPassed && index === 2 && <i aria-label="확인 완료">✓</i>}
           </div>
         ))}
       </aside>
@@ -94,44 +123,50 @@ export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: Conce
         <section className="concept-check-set" aria-labelledby="check-set-heading">
           <header>
             <span id="check-set-heading">스스로 확인하기</span>
-            <strong>{completedChecks} / {checks.length}문항 응답</strong>
+            <strong aria-live="polite">{completedChecks} / {checks.length}문항 통과</strong>
           </header>
-          {checks.map((check, checkIndex) => {
-            const selectedAnswer = selectedAnswers[check.prompt] ?? "";
-            const result = selectedAnswer
-              ? trackId === "grammar"
-                ? evaluateGrammarConceptCheck(lesson.id, selectedAnswer)
-                : evaluateConceptCheck(lesson.id, selectedAnswer)
-              : null;
-            return (
-              <fieldset className="concept-check" key={check.prompt}>
-                <legend>
-                  <span>문항 {checkIndex + 1}</span>
-                  {check.prompt}
-                </legend>
-                <div className="check-options">
-                  {check.options.map((option) => (
-                    <button
-                      aria-pressed={selectedAnswer === option.id}
-                      className={selectedAnswer === option.id ? "check-option selected" : "check-option"}
-                      key={option.id}
-                      onClick={() => setSelectedAnswers((current) => ({ ...current, [check.prompt]: option.id }))}
-                      type="button"
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-                {result && (
-                  <div className={result.correct ? "check-feedback correct" : "check-feedback retry"} aria-live="polite">
-                    <strong>{result.correct ? "맞았어요. 근거까지 확인해 볼까요?" : "정답을 바로 보기보다 단서를 다시 살펴보세요."}</strong>
-                    <p>{result.correct ? result.feedback : check.retryHint ?? lesson.inquiryQuestion}</p>
-                    <small>{result.reflection}</small>
-                  </div>
-                )}
-              </fieldset>
-            );
-          })}
+          <p className="check-sequence-guide">
+            문항 {currentCheckIndex + 1} / {checks.length} · {currentCheckIndex < checks.length - 1
+              ? "현재 문항을 맞히면 다음 문항이 열려요."
+              : "마지막 문항이에요."}
+          </p>
+          <fieldset className="concept-check" key={currentCheck.prompt}>
+            <legend>
+              <span>문항 {currentCheckIndex + 1}</span>
+              {currentCheck.prompt}
+            </legend>
+            <div className="check-options">
+              {currentCheck.options.map((option) => (
+                <button
+                  aria-pressed={selectedAnswer === option.id}
+                  className={selectedAnswer === option.id ? "check-option selected" : "check-option"}
+                  disabled={Boolean(result?.correct)}
+                  key={option.id}
+                  onClick={() => selectCheckAnswer(option.id)}
+                  type="button"
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            {result && (
+              <div className={result.correct ? "check-feedback correct" : "check-feedback retry"} aria-live="polite">
+                <strong>{result.correct ? "맞았어요. 근거까지 확인해 볼까요?" : "정답을 바로 보기보다 단서를 다시 살펴보세요."}</strong>
+                <p>{result.correct ? result.feedback : currentCheck.retryHint ?? lesson.inquiryQuestion}</p>
+                <small>{result.reflection}</small>
+              </div>
+            )}
+            {canOpenNextCheck && (
+              <div className="check-next-row">
+                <button className="secondary-button" onClick={openNextCheck} type="button">
+                  다음 문항으로
+                </button>
+              </div>
+            )}
+            {allChecksPassed && (
+              <p className="check-complete-message" role="status">모든 확인 문제를 통과했어요.</p>
+            )}
+          </fieldset>
         </section>
 
         <div className="concept-actions concept-actions-end">
