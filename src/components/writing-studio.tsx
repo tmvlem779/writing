@@ -19,10 +19,13 @@ export function WritingStudio() {
   const [trackId, setTrackId] = useState<CourseTrackId>("structure");
   const [lessonNumber, setLessonNumber] = useState<CourseLessonNumber>(1);
   const [chapter, setChapter] = useState<Chapter>("concept");
+  const [completedConcepts, setCompletedConcepts] = useState<Set<string>>(new Set());
   const track = getCourseTrack(trackId);
   const courseLessons = getCourseLessons(trackId);
   const lesson = getCourseLesson(lessonNumber, trackId);
   const hasRealLifeChapter = lesson.realLifeMaterialIds.length > 0;
+  const conceptCompletionKey = `${trackId}:${lessonNumber}`;
+  const isConceptComplete = completedConcepts.has(conceptCompletionKey);
 
   function selectTrack(nextTrack: CourseTrackId) {
     setTrackId(nextTrack);
@@ -33,7 +36,13 @@ export function WritingStudio() {
   function selectLesson(nextLesson: CourseLessonNumber) {
     setLessonNumber(nextLesson);
     const nextLessonHasRealLifeChapter = getCourseLesson(nextLesson, trackId).realLifeMaterialIds.length > 0;
+    const nextConceptIsComplete = completedConcepts.has(`${trackId}:${nextLesson}`);
+    if (chapter === "practice" && !nextConceptIsComplete) setChapter("concept");
     if (chapter === "real-life" && !nextLessonHasRealLifeChapter) setChapter("concept");
+  }
+
+  function completeConcept() {
+    setCompletedConcepts((current) => new Set(current).add(conceptCompletionKey));
   }
 
   return (
@@ -99,13 +108,14 @@ export function WritingStudio() {
         </button>
         <button
           aria-current={chapter === "practice" ? "page" : undefined}
-          className={chapter === "practice" ? "chapter-tab active" : "chapter-tab"}
+          className={chapter === "practice" ? "chapter-tab active" : isConceptComplete ? "chapter-tab" : "chapter-tab locked"}
+          disabled={!isConceptComplete}
           onClick={() => setChapter("practice")}
           type="button"
         >
           <span>Chapter 02</span>
           <strong>쓰기와 성찰</strong>
-          <small>진단부터 글쓰기까지 연습해요</small>
+          <small>{isConceptComplete ? "진단부터 글쓰기까지 연습해요" : "Chapter 01 확인 문제를 모두 통과하면 열려요"}</small>
         </button>
         {hasRealLifeChapter && (
           <button
@@ -121,7 +131,16 @@ export function WritingStudio() {
         )}
       </nav>
 
-      {chapter === "concept" && <ConceptChapter key={`concept-${trackId}-${lessonNumber}`} lessonNumber={lessonNumber} trackId={trackId} onStartPractice={() => setChapter("practice")} />}
+      {chapter === "concept" && (
+        <ConceptChapter
+          completed={isConceptComplete}
+          key={`concept-${trackId}-${lessonNumber}`}
+          lessonNumber={lessonNumber}
+          onComplete={completeConcept}
+          onStartPractice={() => setChapter("practice")}
+          trackId={trackId}
+        />
+      )}
       {chapter === "practice" && <PracticeChapter key={`practice-${trackId}-${lessonNumber}`} lessonNumber={lessonNumber} trackId={trackId} />}
       {chapter === "real-life" && hasRealLifeChapter && (
         <RealLifeChapter key={`real-life-${trackId}-${lessonNumber}`} lessonNumber={lessonNumber} trackId={trackId} />

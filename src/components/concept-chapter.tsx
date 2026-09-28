@@ -19,12 +19,14 @@ import {
 } from "@/lib/curriculum/sentence-structure";
 
 type ConceptChapterProps = {
+  completed: boolean;
   lessonNumber: CourseLessonNumber;
   trackId: CourseTrackId;
+  onComplete: () => void;
   onStartPractice: () => void;
 };
 
-export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: ConceptChapterProps) {
+export function ConceptChapter({ completed, lessonNumber, trackId, onComplete, onStartPractice }: ConceptChapterProps) {
   const courseLesson = getCourseLesson(lessonNumber, trackId);
   const courseLessonCount = getCourseLessons(trackId).length;
   const lessons = trackId === "grammar" ? grammarElementLessons : sentenceStructureLessons;
@@ -32,8 +34,10 @@ export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: Conce
   const lesson = lessons.find((item) => item.id === courseLesson.conceptLessonId) ?? lessons[0];
   const checks = [lesson.check, ...(lesson.extraChecks ?? [])];
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
-  const [passedCheckIndexes, setPassedCheckIndexes] = useState<number[]>([]);
-  const [currentCheckIndex, setCurrentCheckIndex] = useState(0);
+  const [passedCheckIndexes, setPassedCheckIndexes] = useState<number[]>(
+    () => completed ? checks.map((_, index) => index) : []
+  );
+  const [currentCheckIndex, setCurrentCheckIndex] = useState(() => completed ? checks.length - 1 : 0);
   const currentCheck = checks[currentCheckIndex];
   const selectedAnswer = selectedAnswers[currentCheck.prompt] ?? "";
   const result = selectedAnswer
@@ -47,10 +51,10 @@ export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: Conce
 
   function selectCheckAnswer(optionId: string) {
     setSelectedAnswers((current) => ({ ...current, [currentCheck.prompt]: optionId }));
-    if (optionId === currentCheck.answer) {
-      setPassedCheckIndexes((current) => current.includes(currentCheckIndex)
-        ? current
-        : [...current, currentCheckIndex]);
+    if (optionId === currentCheck.answer && !passedCheckIndexes.includes(currentCheckIndex)) {
+      const nextPassedCheckIndexes = [...passedCheckIndexes, currentCheckIndex];
+      setPassedCheckIndexes(nextPassedCheckIndexes);
+      if (isConceptCheckComplete(checks.length, nextPassedCheckIndexes)) onComplete();
     }
   }
 
@@ -171,7 +175,10 @@ export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: Conce
         </section>
 
         <div className="concept-actions concept-actions-end">
-          <button className="primary-button" onClick={onStartPractice} type="button">
+          {!allChecksPassed && (
+            <p className="chapter-lock-message" role="status">스스로 확인하기의 모든 문항을 통과하면 Chapter 02가 열려요.</p>
+          )}
+          <button className="primary-button" disabled={!allChecksPassed} onClick={onStartPractice} type="button">
             이 차시의 2장 연습으로
           </button>
         </div>

@@ -55,6 +55,7 @@
 - 6차시 구성을 우선하는 `writing-tutor-v6` 프롬프트 및 migration 추가
 - `pnpm verify` 49개 테스트, 10개 교육·안전 평가와 `pnpm build` 통과
 - B안 4·5·6차시와 6차시 Chapter 03의 여섯 자료를 Production 빌드 화면에서 점검 완료
+- Chapter 1의 확인 문항을 모두 통과하기 전에는 상단 Chapter 02 탭과 하단 이동 버튼을 잠그도록 변경
 
 ## 다음 작업
 
