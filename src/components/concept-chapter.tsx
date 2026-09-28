@@ -6,7 +6,7 @@ import {
   canAdvanceConceptCheck,
   isConceptCheckComplete
 } from "@/lib/curriculum/concept-check-flow";
-import { getCourseLesson, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
+import { getCourseLesson, getCourseLessons, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 import {
   evaluateGrammarConceptCheck,
   grammarElementLessons,
@@ -26,6 +26,7 @@ type ConceptChapterProps = {
 
 export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: ConceptChapterProps) {
   const courseLesson = getCourseLesson(lessonNumber, trackId);
+  const courseLessonCount = getCourseLessons(trackId).length;
   const lessons = trackId === "grammar" ? grammarElementLessons : sentenceStructureLessons;
   const source = trackId === "grammar" ? grammarElementsSource : sentenceStructureSource;
   const lesson = lessons.find((item) => item.id === courseLesson.conceptLessonId) ?? lessons[0];
@@ -80,7 +81,7 @@ export function ConceptChapter({ lessonNumber, trackId, onStartPractice }: Conce
             <h1 id="concept-title">{lesson.title}</h1>
             <p>{lesson.summary}</p>
           </div>
-          <span className="concept-count">{lessonNumber} / 5차시</span>
+          <span className="concept-count">{lessonNumber} / {courseLessonCount}차시</span>
         </header>
 
         <section className="lesson-question-card" aria-label={`${lessonNumber}차시 핵심 질문`}>

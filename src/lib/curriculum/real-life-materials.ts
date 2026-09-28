@@ -1,4 +1,4 @@
-import type { CourseTrackId } from "@/lib/curriculum/five-lesson-course";
+import type { CourseLessonNumber, CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 
 export type RealLifeMaterialKind = "article" | "notice" | "dialogue" | "presentation" | "interview" | "social";
 
@@ -18,7 +18,7 @@ export type RealLifeMaterial = {
 export type RealLifePracticeMode = "structure" | "effect" | "rewrite";
 
 export type RealLifeLessonGuide = {
-  lessonNumber: 5;
+  lessonNumber: CourseLessonNumber;
   materialIds: RealLifeMaterialKind[];
   focusConcepts: string[];
   reviewPrompts: string[];
@@ -242,14 +242,15 @@ export const realLifeLessonGuides: RealLifeLessonGuide[] = [
 ];
 
 export const grammarRealLifeLessonGuide: RealLifeLessonGuide = {
-  lessonNumber: 5,
+  lessonNumber: 6,
   materialIds: ["article", "notice", "dialogue", "presentation", "interview", "social"],
-  focusConcepts: ["문장 구조", "시간 표현", "높임 표현", "피동·사동", "부정 표현", "담화 맥락"],
+  focusConcepts: ["문장 구조", "종결 표현", "높임 표현", "시간 표현", "피동·사동", "부정 표현", "인용 표현", "담화 맥락"],
   reviewPrompts: [
     "1차시: 문장 성분과 주어·서술어 관계를 찾아 기본 구조를 설명해 보세요.",
     "2차시: 연결 어미가 나타내는 나열·대조·원인·조건 등의 관계를 찾아보세요.",
     "3차시: 명사절·관형절·부사절의 경계와 문장 안 역할을 찾아보세요.",
-    "4차시: 시간·높임·피동/사동·부정 표현이 의미와 초점을 어떻게 바꾸는지 살펴보세요."
+    "4차시: 종결·높임·시간 표현이 화자의 태도, 인물 관계, 사건의 시점을 어떻게 드러내는지 살펴보세요.",
+    "5차시: 피동·사동·부정·인용 표현이 행위의 주체, 정보 초점, 관점에 어떤 변화를 주는지 살펴보세요."
   ],
   analysisPrompts: [
     "자료에서 문장 구조와 문법 요소를 각각 찾아 형태와 역할을 분석하고, 화자·독자·목적을 정리하세요.",
@@ -262,15 +263,12 @@ export function getRealLifeLessonGuide(trackId: CourseTrackId = "structure") {
   return trackId === "grammar" ? grammarRealLifeLessonGuide : realLifeLessonGuides[0];
 }
 
-export function getRealLifeMaterialsForLesson(lessonNumber: 1 | 2 | 3 | 4 | 5, trackId: CourseTrackId = "structure") {
-  if (lessonNumber !== 5 || trackId === "grammar") return [];
+export function getRealLifeMaterialsForLesson(lessonNumber: CourseLessonNumber, trackId: CourseTrackId = "structure") {
   const guide = getRealLifeLessonGuide(trackId);
-  return guide.materialIds.map((id) => realLifeMaterials.find((material) => material.id === id)).filter((material): material is RealLifeMaterial => Boolean(material));
-}
-
-export function getGrammarWingMaterials() {
-  return grammarRealLifeLessonGuide.materialIds
-    .map((id) => grammarRealLifeMaterials.find((material) => material.id === id))
+  if (lessonNumber !== guide.lessonNumber) return [];
+  const materials = trackId === "grammar" ? grammarRealLifeMaterials : realLifeMaterials;
+  return guide.materialIds
+    .map((id) => materials.find((material) => material.id === id))
     .filter((material): material is RealLifeMaterial => Boolean(material));
 }
 

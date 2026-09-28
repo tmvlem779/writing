@@ -2,7 +2,7 @@ import type { Activity } from "@/lib/agent/schema";
 import type { ConceptLesson } from "@/lib/curriculum/sentence-structure";
 import type { RealLifeMaterialKind } from "@/lib/curriculum/real-life-materials";
 
-export type CourseLessonNumber = 1 | 2 | 3 | 4 | 5;
+export type CourseLessonNumber = 1 | 2 | 3 | 4 | 5 | 6;
 export type CourseTrackId = "structure" | "grammar";
 
 export type CourseTrack = {
@@ -104,14 +104,7 @@ export const fiveLessonCourse: CourseLesson[] = [
   }
 ];
 
-export const grammarWingActivity = {
-  title: "날개 · 실생활 탐구",
-  keyQuestion: "구조와 문법 요소를 실제 언어 자료에 어떻게 적용할까?",
-  activities: ["자료 맥락 파악", "구조·문법 요소 찾기", "표현 효과 평가", "상황에 맞게 고쳐 쓰기"],
-  realLifeMaterialIds: ["article", "notice", "dialogue", "presentation", "interview", "social"] as RealLifeMaterialKind[]
-} as const;
-
-export const grammarFiveLessonCourse: CourseLesson[] = [
+export const grammarSixLessonCourse: CourseLesson[] = [
   {
     number: 1,
     title: "문장의 기본 구조와 문장 생성",
@@ -156,24 +149,39 @@ export const grammarFiveLessonCourse: CourseLesson[] = [
   },
   {
     number: 4,
-    title: "문법 요소와 의미 변화",
-    keyQuestion: "같은 기본 문장은 문법 요소에 따라 의미와 태도가 어떻게 달라질까?",
-    activities: ["시간 표현 변형", "높임 표현 선택", "피동·사동 비교", "부정 의미 구별", "표현 효과 설명"],
-    conceptLessonId: "grammar-meaning-change",
+    title: "종결·높임·시간 표현",
+    keyQuestion: "종결·높임·시간 표현은 상황과 의미를 어떻게 드러낼까?",
+    activities: ["종결 표현 기능 분석", "높임 대상과 방법 구별", "시제·상 변형", "상황별 표현 선택", "표현 효과 설명"],
+    conceptLessonId: "grammar-ending-honor-time",
     practiceActivities: [
+      { id: "grammar-ending", activity: "compare", label: "종결 표현", prompt: "‘창문을 닫아 줄래?’가 질문·요청 가운데 어떤 기능을 하는지 상황을 정해 설명하고, 같은 내용을 평서문과 명령문 형식으로 바꾸어 보세요." },
       { id: "grammar-time", activity: "compare", label: "시간 표현", prompt: "‘학생이 운동장을 달린다.’를 과거·미래·진행상·완료상으로 바꾸고, 각 표현이 사건을 바라보는 방식을 비교해 보세요." },
       { id: "grammar-honorific", activity: "create", label: "높임 표현", prompt: "‘선생님이 교실에 있다.’를 주체를 높이는 문장으로 바꾸고, 조사·선어말 어미·특수 어휘 중 무엇을 바꾸었는지 설명해 보세요." },
-      { id: "grammar-voice-causative", activity: "compare", label: "피동·사동", prompt: "‘학생이 창문을 열었다.’를 피동문으로, ‘아이가 책을 읽는다.’를 사동문으로 바꾸고 각 문장에서 새로 강조되는 대상을 설명해 보세요." },
-      { id: "grammar-negation", activity: "error", label: "부정 표현", prompt: "‘나는 발표하지 않았다.’와 ‘나는 발표하지 못했다.’의 차이를 의지와 능력·상황의 관점에서 설명하고, 각각 어울리는 상황을 만들어 보세요." },
-      { id: "grammar-effect-explain", activity: "reflect", label: "의미 변화 설명", prompt: "앞 활동에서 바꾼 문장 하나를 고르고, 기본 문장과 비교해 형태·의미·화자의 태도가 어떻게 달라졌는지 설명해 보세요." }
+      { id: "grammar-ending-context", activity: "transfer", label: "상황별 선택", prompt: "친구에게 말하는 상황과 학교 공식 발표 상황을 정하고, 같은 내용을 종결·높임·시간 표현을 달리하여 각각 써 보세요." },
+      { id: "grammar-ending-effect", activity: "reflect", label: "표현 효과 설명", prompt: "앞에서 바꾼 문장 하나를 골라 종결 어미, 높임 방식, 시간 표현이 화자 태도와 독자 이해에 미친 효과를 설명해 보세요." }
     ],
     realLifeMaterialIds: []
   },
   {
     number: 5,
+    title: "피동·사동·부정·인용 표현",
+    keyQuestion: "피동·사동·부정·인용 표현은 정보의 초점과 관점을 어떻게 바꿀까?",
+    activities: ["능동·피동 비교", "주동·사동 비교", "부정 의미·범위 분석", "직접·간접 인용 변환", "표현 적절성 평가"],
+    conceptLessonId: "grammar-voice-negation-quotation",
+    practiceActivities: [
+      { id: "grammar-passive", activity: "compare", label: "피동 표현", prompt: "‘학생이 창문을 열었다.’를 피동문으로 바꾸고, 문장 성분과 정보의 초점이 어떻게 달라졌는지 설명해 보세요." },
+      { id: "grammar-causative", activity: "compare", label: "사동 표현", prompt: "‘아이가 책을 읽는다.’를 사동문으로 바꾸고, 새로 도입된 주체와 원래 주어의 역할 변화를 설명해 보세요." },
+      { id: "grammar-negation", activity: "error", label: "부정 표현", prompt: "‘나는 발표하지 않았다.’와 ‘나는 발표하지 못했다.’의 차이를 의지와 능력·상황의 관점에서 설명하고, 각각 어울리는 상황을 만들어 보세요." },
+      { id: "grammar-quotation", activity: "transfer", label: "인용 표현", prompt: "친구의 말 ‘나는 내일 발표할 거야.’를 직접 인용과 간접 인용으로 각각 쓰고, 대명사·시간·종결 표현의 변화를 표시해 보세요." },
+      { id: "grammar-voice-effect", activity: "reflect", label: "표현 적절성 평가", prompt: "피동·사동·부정·인용 표현 중 하나를 사용한 실제 문장을 만들고, 그 표현이 상황과 목적에 적절한지 근거를 들어 평가해 보세요." }
+    ],
+    realLifeMaterialIds: []
+  },
+  {
+    number: 6,
     title: "구조와 문법 요소의 종합적 활용",
     keyQuestion: "상황에 맞는 구조와 문법 요소로 의도한 의미를 표현할 수 있을까?",
-    activities: ["담화 맥락 분석", "조건 문장 생성", "다른 상황으로 변형", "선택 이유 설명", "상호 피드백·종합 평가"],
+    activities: ["담화 맥락 분석", "조건 문장 생성", "상황별 변형", "선택 이유 설명", "상호 피드백", "실생활 자료 종합 탐구"],
     conceptLessonId: "grammar-synthesis",
     practiceActivities: [
       { id: "grammar-context", activity: "diagnose", label: "맥락 분석", prompt: "‘창문을 닫아 주세요.’가 사용될 수 있는 화자·청자·목적을 정하고, 같은 요청을 친구와 교장 선생님께 할 때 무엇을 달리해야 하는지 적어 보세요." },
@@ -182,7 +190,7 @@ export const grammarFiveLessonCourse: CourseLesson[] = [
       { id: "grammar-self-explain", activity: "reflect", label: "선택 이유 설명", prompt: "사용한 문장 구조 하나와 문법 요소 두 가지가 의미·정보 초점·화자 태도에 미친 효과를 근거와 함께 설명해 보세요." },
       { id: "grammar-peer-review", activity: "error", label: "상호 피드백·평가", prompt: "친구에게 보여 줄 문장과 ‘상황에 어울리는가, 의도가 분명한가, 선택 이유가 타당한가’ 중 받고 싶은 기준을 정하세요. 의견을 받은 뒤 수정 여부와 이유를 직접 결정하세요." }
     ],
-    realLifeMaterialIds: []
+    realLifeMaterialIds: ["article", "notice", "dialogue", "presentation", "interview", "social"]
   }
 ];
 
@@ -198,13 +206,13 @@ export const courseTracks: CourseTrack[] = [
     id: "grammar",
     optionLabel: "B안",
     title: "구조+문법 요소",
-    description: "문장 구조에 시간·높임·피동·사동·부정 표현을 더해 상황에 맞게 써요.",
+    description: "문장 구조에 종결·높임·시간·피동·사동·부정·인용 표현을 더해 상황에 맞게 써요.",
     badge: "새 확장 수업안"
   }
 ];
 
 export function getCourseLessons(trackId: CourseTrackId = "structure") {
-  return trackId === "grammar" ? grammarFiveLessonCourse : fiveLessonCourse;
+  return trackId === "grammar" ? grammarSixLessonCourse : fiveLessonCourse;
 }
 
 export function getCourseTrack(trackId: CourseTrackId) {

@@ -5,8 +5,7 @@ import {
   courseTracks,
   fiveLessonCourse,
   getCourseLesson,
-  grammarWingActivity,
-  grammarFiveLessonCourse
+  grammarSixLessonCourse
 } from "../src/lib/curriculum/five-lesson-course.ts";
 import {
   evaluateGrammarConceptCheck,
@@ -15,7 +14,6 @@ import {
 } from "../src/lib/curriculum/grammar-elements.ts";
 import {
   buildRealLifeTask,
-  getGrammarWingMaterials,
   getRealLifeLessonGuide,
   getRealLifeMaterialsForLesson,
   grammarRealLifeMaterials,
@@ -26,35 +24,41 @@ test("CURRICULUM: 기존 구조 중심안과 새 구조+문법 요소안을 별�
   assert.equal(courseTracks.length, 2);
   assert.deepEqual(courseTracks.map((track) => track.id), ["structure", "grammar"]);
   assert.equal(fiveLessonCourse.length, 5);
-  assert.equal(grammarFiveLessonCourse.length, 5);
-  assert.notStrictEqual(fiveLessonCourse, grammarFiveLessonCourse);
+  assert.equal(grammarSixLessonCourse.length, 6);
+  assert.notStrictEqual(fiveLessonCourse, grammarSixLessonCourse);
   assert.equal(getCourseLesson(1, "structure").title, "문장의 짜임과 홑문장·겹문장");
   assert.equal(getCourseLesson(1, "grammar").title, "문장의 기본 구조와 문장 생성");
 });
 
-test("CURRICULUM: 새 수업안은 요청한 다섯 차시를 순서대로 제공한다", () => {
-  assert.deepEqual(grammarFiveLessonCourse.map((lesson) => lesson.title), [
+test("CURRICULUM: 새 수업안은 요청한 여섯 차시를 순서대로 제공한다", () => {
+  assert.deepEqual(grammarSixLessonCourse.map((lesson) => lesson.title), [
     "문장의 기본 구조와 문장 생성",
     "이어진문장과 의미 관계",
     "안은문장과 문장 확대",
-    "문법 요소와 의미 변화",
+    "종결·높임·시간 표현",
+    "피동·사동·부정·인용 표현",
     "구조와 문법 요소의 종합적 활용"
   ]);
-  assert.ok(grammarFiveLessonCourse.every((lesson) => lesson.keyQuestion.endsWith("?")));
-  assert.ok(grammarFiveLessonCourse.every((lesson) => lesson.practiceActivities.length >= 4));
+  assert.ok(grammarSixLessonCourse.every((lesson) => lesson.keyQuestion.endsWith("?")));
+  assert.ok(grammarSixLessonCourse.every((lesson) => lesson.practiceActivities.length >= 4));
 });
 
 test("P3·P4: 교과서 범위와 문법 요소를 개념 학습에 반영한다", () => {
   assert.equal(grammarElementsSource.section, "문장의 구조와 문법 요소");
   assert.equal(grammarElementsSource.pages, "86~111쪽");
-  assert.equal(grammarElementLessons.length, 5);
-  for (const lesson of grammarFiveLessonCourse) {
+  assert.equal(grammarElementLessons.length, 6);
+  for (const lesson of grammarSixLessonCourse) {
     assert.ok(grammarElementLessons.some((concept) => concept.id === lesson.conceptLessonId));
   }
-  const grammarLesson = grammarElementLessons.find((lesson) => lesson.id === "grammar-meaning-change");
-  const content = [grammarLesson?.summary, ...(grammarLesson?.conceptSections?.flatMap((section) => [section.title, ...section.points]) ?? [])].join(" ");
-  for (const element of ["종결", "시간", "높임", "피동", "사동", "부정"]) {
-    assert.match(content, new RegExp(element));
+  const fourth = grammarElementLessons.find((lesson) => lesson.id === "grammar-ending-honor-time");
+  const fifth = grammarElementLessons.find((lesson) => lesson.id === "grammar-voice-negation-quotation");
+  const fourthContent = [fourth?.summary, ...(fourth?.conceptSections?.flatMap((section) => [section.title, ...section.points]) ?? [])].join(" ");
+  const fifthContent = [fifth?.summary, ...(fifth?.conceptSections?.flatMap((section) => [section.title, ...section.points]) ?? [])].join(" ");
+  for (const element of ["종결", "높임", "시간"]) {
+    assert.match(fourthContent, new RegExp(element));
+  }
+  for (const element of ["피동", "사동", "부정", "인용"]) {
+    assert.match(fifthContent, new RegExp(element));
   }
 });
 
@@ -71,32 +75,37 @@ test("P3: B안 모든 차시는 세분화된 개념과 세 문항 이상의 자�
 });
 
 test("P3: 문법 요소 개념 확인도 오답에서 정답을 먼저 공개하지 않는다", () => {
-  const incorrect = evaluateGrammarConceptCheck("grammar-meaning-change", "choice");
-  const correct = evaluateGrammarConceptCheck("grammar-meaning-change", "ability");
+  const incorrect = evaluateGrammarConceptCheck("grammar-voice-negation-quotation", "voice-choice");
+  const correct = evaluateGrammarConceptCheck("grammar-voice-negation-quotation", "voice-ability");
   assert.equal(incorrect?.correct, false);
   assert.equal(correct?.correct, true);
   assert.equal(incorrect?.reflection, correct?.reflection);
 });
 
-test("P4·P6: 4차시는 의미 변화, 5차시는 생성·변형·설명을 요구한다", () => {
+test("P4·P6: 4·5차시는 문법 요소를 나누고 6차시는 생성·변형·설명을 요구한다", () => {
   const fourth = getCourseLesson(4, "grammar");
-  const labels = fourth.practiceActivities.map((activity) => activity.label).join(" ");
-  for (const element of ["시간", "높임", "피동·사동", "부정", "의미 변화"]) {
-    assert.match(labels, new RegExp(element));
+  const fourthLabels = fourth.practiceActivities.map((activity) => activity.label).join(" ");
+  for (const element of ["종결", "높임", "시간"]) {
+    assert.match(fourthLabels, new RegExp(element));
   }
-  const finalPrompts = getCourseLesson(5, "grammar").practiceActivities.map((activity) => activity.prompt).join(" ");
+  const fifthLabels = getCourseLesson(5, "grammar").practiceActivities.map((activity) => activity.label).join(" ");
+  for (const element of ["피동", "사동", "부정", "인용"]) {
+    assert.match(fifthLabels, new RegExp(element));
+  }
+  const finalPrompts = getCourseLesson(6, "grammar").practiceActivities.map((activity) => activity.prompt).join(" ");
   assert.match(finalPrompts, /친구 대화용/);
   assert.match(finalPrompts, /학교 공식 안내용/);
   assert.match(finalPrompts, /선택 이유/);
 });
 
-test("P6·PRIVACY: 실생활 탐구는 5차시에서 빠지고 별도 날개 활동으로 제공된다", () => {
+test("P6·PRIVACY: 실생활 탐구는 기존 종합 활동과 함께 6차시에 통합된다", () => {
   assert.deepEqual(getCourseLesson(5, "grammar").realLifeMaterialIds, []);
-  assert.equal(grammarWingActivity.realLifeMaterialIds.length, 6);
+  assert.equal(getCourseLesson(6, "grammar").realLifeMaterialIds.length, 6);
   assert.equal(getRealLifeMaterialsForLesson(4, "grammar").length, 0);
   assert.equal(getRealLifeMaterialsForLesson(5, "grammar").length, 0);
-  assert.equal(getGrammarWingMaterials().length, 6);
-  assert.equal(getRealLifeLessonGuide("grammar").reviewPrompts.length, 4);
+  assert.equal(getRealLifeMaterialsForLesson(6, "grammar").length, 6);
+  assert.equal(getRealLifeLessonGuide("grammar").lessonNumber, 6);
+  assert.equal(getRealLifeLessonGuide("grammar").reviewPrompts.length, 5);
   assert.deepEqual(grammarRealLifeMaterials.map((material) => material.id), ["article", "notice", "dialogue", "presentation", "interview", "social"]);
   for (const material of grammarRealLifeMaterials) {
     assert.doesNotMatch(material.content, /@|\b01[016789]-?\d{3,4}-?\d{4}\b/);
@@ -116,4 +125,10 @@ test("DATA: 별도 날개 활동과 상세 개념을 반영한 프롬프트 v5 �
   const migration = fs.readFileSync("supabase/migrations/202609260002_add_grammar_wing_prompt.sql", "utf8");
   assert.match(migration, /writing-tutor-v5/);
   assert.match(migration, /grammar-wing-expanded-concepts/);
+});
+
+test("DATA: 여섯 차시 통합 구성을 반영한 프롬프트 v6 마이그레이션이 존재한다", () => {
+  const migration = fs.readFileSync("supabase/migrations/202609280001_add_six_lesson_grammar_prompt.sql", "utf8");
+  assert.match(migration, /writing-tutor-v6/);
+  assert.match(migration, /six-lesson-grammar-course/);
 });

@@ -83,12 +83,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .course-map > header p { display: grid; gap: 3px; margin: 0; color: rgba(255,255,255,.82); font-size: 14px; }
 .course-map > header p strong { color: #f3b98e; font-size: 11px; letter-spacing: .05em; }
 .lesson-switcher { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 20px; }
-.lesson-switcher.with-wing { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.lesson-switcher.six-lessons { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .lesson-tab { min-width: 0; min-height: 74px; padding: 12px 14px; display: grid; align-content: start; gap: 4px; border: 1px solid rgba(255,255,255,.18); border-radius: 12px; background: rgba(255,255,255,.06); color: rgba(255,255,255,.72); cursor: pointer; text-align: left; }
 .lesson-tab span { color: var(--lime); font: 700 11px/1.4 serif; }
 .lesson-tab strong { overflow: hidden; color: inherit; font-size: 12px; line-height: 1.45; text-overflow: ellipsis; }
 .lesson-tab small { color: inherit; font-size: 9px; line-height: 1.35; opacity: .72; }
-.lesson-tab.wing-tab { border-style: dashed; background: rgba(243,185,142,.1); }
 .lesson-tab.active { border-color: var(--lime); background: var(--surface); color: var(--green-dark); box-shadow: 0 10px 24px rgba(0,0,0,.16); }
 .lesson-tab.active span { color: var(--orange); }
 .lesson-activity-summary { display: flex; align-items: flex-start; gap: 12px; margin-top: 15px; }

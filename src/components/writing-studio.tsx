@@ -6,7 +6,6 @@ import { PracticeChapter } from "@/components/practice-chapter";
 import { RealLifeChapter } from "@/components/real-life-chapter";
 import {
   courseTracks,
-  grammarWingActivity,
   getCourseLesson,
   getCourseLessons,
   getCourseTrack,
@@ -23,8 +22,7 @@ export function WritingStudio() {
   const track = getCourseTrack(trackId);
   const courseLessons = getCourseLessons(trackId);
   const lesson = getCourseLesson(lessonNumber, trackId);
-  const isWing = trackId === "grammar" && chapter === "real-life";
-  const visibleActivities = isWing ? grammarWingActivity.activities : lesson.activities;
+  const hasRealLifeChapter = lesson.realLifeMaterialIds.length > 0;
 
   function selectTrack(nextTrack: CourseTrackId) {
     setTrackId(nextTrack);
@@ -34,12 +32,8 @@ export function WritingStudio() {
 
   function selectLesson(nextLesson: CourseLessonNumber) {
     setLessonNumber(nextLesson);
-    if (chapter === "real-life") setChapter("concept");
-  }
-
-  function selectWing() {
-    setLessonNumber(5);
-    setChapter("real-life");
+    const nextLessonHasRealLifeChapter = getCourseLesson(nextLesson, trackId).realLifeMaterialIds.length > 0;
+    if (chapter === "real-life" && !nextLessonHasRealLifeChapter) setChapter("concept");
   }
 
   return (
@@ -62,19 +56,19 @@ export function WritingStudio() {
         </div>
         <header>
           <div>
-            <span>{isWing ? "B안 · 별도 날개 활동" : `${track.optionLabel} · ${track.title} · 총 5차시`}</span>
-            <h1 id="course-map-title">{isWing ? grammarWingActivity.title : `${track.title} 수업안`}</h1>
+            <span>{track.optionLabel} · {track.title} · 총 {courseLessons.length}차시</span>
+            <h1 id="course-map-title">{track.title} 수업안</h1>
           </div>
           <p>
-            <strong>{isWing ? "날개 핵심 질문" : `${lessonNumber}차시 핵심 질문`}</strong>
-            {isWing ? grammarWingActivity.keyQuestion : lesson.keyQuestion}
+            <strong>{lessonNumber}차시 핵심 질문</strong>
+            {lesson.keyQuestion}
           </p>
         </header>
-        <div className={trackId === "grammar" ? "lesson-switcher with-wing" : "lesson-switcher"} role="group" aria-label="수업 차시와 날개 활동 선택">
+        <div className={trackId === "grammar" ? "lesson-switcher six-lessons" : "lesson-switcher"} role="group" aria-label="수업 차시 선택">
           {courseLessons.map((item) => (
             <button
-              aria-pressed={!isWing && lessonNumber === item.number}
-              className={!isWing && lessonNumber === item.number ? "lesson-tab active" : "lesson-tab"}
+              aria-pressed={lessonNumber === item.number}
+              className={lessonNumber === item.number ? "lesson-tab active" : "lesson-tab"}
               key={item.number}
               onClick={() => selectLesson(item.number)}
               type="button"
@@ -83,28 +77,16 @@ export function WritingStudio() {
               <strong>{item.title}</strong>
             </button>
           ))}
-          {trackId === "grammar" && (
-            <button
-              aria-pressed={isWing}
-              className={isWing ? "lesson-tab wing-tab active" : "lesson-tab wing-tab"}
-              onClick={selectWing}
-              type="button"
-            >
-              <span>날개</span>
-              <strong>실생활 탐구</strong>
-              <small>5차시와 분리된 전이 활동</small>
-            </button>
-          )}
         </div>
-        <div className="lesson-activity-summary" aria-label={isWing ? "날개 주요 활동" : `${lessonNumber}차시 주요 활동`}>
+        <div className="lesson-activity-summary" aria-label={`${lessonNumber}차시 주요 활동`}>
           <span>주요 활동</span>
           <ol>
-            {visibleActivities.map((activity) => <li key={activity}>{activity}</li>)}
+            {lesson.activities.map((activity) => <li key={activity}>{activity}</li>)}
           </ol>
         </div>
       </section>
 
-      {!isWing && <nav className={lessonNumber === 5 && trackId === "structure" ? "chapter-switcher" : "chapter-switcher two-chapters"} aria-label="학습 장 선택">
+      <nav className={hasRealLifeChapter ? "chapter-switcher" : "chapter-switcher two-chapters"} aria-label="학습 장 선택">
         <button
           aria-current={chapter === "concept" ? "page" : undefined}
           className={chapter === "concept" ? "chapter-tab active" : "chapter-tab"}
@@ -125,7 +107,7 @@ export function WritingStudio() {
           <strong>쓰기와 성찰</strong>
           <small>진단부터 글쓰기까지 연습해요</small>
         </button>
-        {lessonNumber === 5 && trackId === "structure" && (
+        {hasRealLifeChapter && (
           <button
             aria-current={chapter === "real-life" ? "page" : undefined}
             className={chapter === "real-life" ? "chapter-tab active" : "chapter-tab"}
@@ -134,15 +116,15 @@ export function WritingStudio() {
           >
             <span>Chapter 03</span>
             <strong>종합 실생활 탐구</strong>
-            <small>1~4차시 개념을 실제 자료에 적용해요</small>
+            <small>1~{lessonNumber - 1}차시 개념을 실제 자료에 적용해요</small>
           </button>
         )}
-      </nav>}
+      </nav>
 
       {chapter === "concept" && <ConceptChapter key={`concept-${trackId}-${lessonNumber}`} lessonNumber={lessonNumber} trackId={trackId} onStartPractice={() => setChapter("practice")} />}
       {chapter === "practice" && <PracticeChapter key={`practice-${trackId}-${lessonNumber}`} lessonNumber={lessonNumber} trackId={trackId} />}
-      {chapter === "real-life" && lessonNumber === 5 && (
-        <RealLifeChapter key={`real-life-${trackId}-5`} lessonNumber={5} trackId={trackId} standalone={trackId === "grammar"} />
+      {chapter === "real-life" && hasRealLifeChapter && (
+        <RealLifeChapter key={`real-life-${trackId}-${lessonNumber}`} lessonNumber={lessonNumber} trackId={trackId} />
       )}
     </main>
   );
