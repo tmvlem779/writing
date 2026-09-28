@@ -12,6 +12,7 @@ import {
   grammarElementLessons,
   grammarElementsSource
 } from "@/lib/curriculum/grammar-elements";
+import { GrammarSummaryNotebook } from "@/components/grammar-summary-notebook";
 import {
   evaluateConceptCheck,
   sentenceStructureLessons,
@@ -124,6 +125,8 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onComplete, o
             </ul>
           )}
         </section>
+
+        {trackId === "grammar" && lessonNumber === 6 && <GrammarSummaryNotebook />}
 
         <section className="concept-check-set" aria-labelledby="check-set-heading">
           <header>

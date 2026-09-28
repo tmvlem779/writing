@@ -5,7 +5,6 @@ import { ConceptChapter } from "@/components/concept-chapter";
 import { PracticeChapter } from "@/components/practice-chapter";
 import { RealLifeChapter } from "@/components/real-life-chapter";
 import {
-  courseTracks,
   getCourseLesson,
   getCourseLessons,
   getCourseTrack,
@@ -16,7 +15,7 @@ import {
 type Chapter = "concept" | "practice" | "real-life";
 
 export function WritingStudio() {
-  const [trackId, setTrackId] = useState<CourseTrackId>("structure");
+  const trackId: CourseTrackId = "grammar";
   const [lessonNumber, setLessonNumber] = useState<CourseLessonNumber>(1);
   const [chapter, setChapter] = useState<Chapter>("concept");
   const [completedConcepts, setCompletedConcepts] = useState<Set<string>>(new Set());
@@ -26,12 +25,6 @@ export function WritingStudio() {
   const hasRealLifeChapter = lesson.realLifeMaterialIds.length > 0;
   const conceptCompletionKey = `${trackId}:${lessonNumber}`;
   const isConceptComplete = completedConcepts.has(conceptCompletionKey);
-
-  function selectTrack(nextTrack: CourseTrackId) {
-    setTrackId(nextTrack);
-    setLessonNumber(1);
-    setChapter("concept");
-  }
 
   function selectLesson(nextLesson: CourseLessonNumber) {
     setLessonNumber(nextLesson);
@@ -48,21 +41,6 @@ export function WritingStudio() {
   return (
     <main className="learning-studio">
       <section className="course-map" aria-labelledby="course-map-title">
-        <div className="course-track-switcher" role="group" aria-label="비교할 수업안 선택">
-          {courseTracks.map((item) => (
-            <button
-              aria-pressed={trackId === item.id}
-              className={trackId === item.id ? "course-track-option active" : "course-track-option"}
-              key={item.id}
-              onClick={() => selectTrack(item.id)}
-              type="button"
-            >
-              <span>{item.optionLabel} · {item.badge}</span>
-              <strong>{item.title}</strong>
-              <small>{item.description}</small>
-            </button>
-          ))}
-        </div>
         <header>
           <div>
             <span>{track.optionLabel} · {track.title} · 총 {courseLessons.length}차시</span>
@@ -73,7 +51,7 @@ export function WritingStudio() {
             {lesson.keyQuestion}
           </p>
         </header>
-        <div className={trackId === "grammar" ? "lesson-switcher six-lessons" : "lesson-switcher"} role="group" aria-label="수업 차시 선택">
+        <div className="lesson-switcher six-lessons" role="group" aria-label="수업 차시 선택">
           {courseLessons.map((item) => (
             <button
               aria-pressed={lessonNumber === item.number}
@@ -104,7 +82,7 @@ export function WritingStudio() {
         >
           <span>Chapter 01</span>
           <strong>개념 학습</strong>
-          <small>{trackId === "grammar" ? "구조와 문법 요소를 관찰해요" : "문장 구조를 관찰하고 이해해요"}</small>
+          <small>구조와 문법 요소를 관찰해요</small>
         </button>
         <button
           aria-current={chapter === "practice" ? "page" : undefined}

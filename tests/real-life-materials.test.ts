@@ -43,11 +43,11 @@ test("P6: 5차시는 1~4차시 관점과 세 단계 실생활 과제를 통합�
   }
 });
 
-test("P6: B안 6차시는 1~5차시와 여섯 실생활 자료를 통합한다", () => {
+test("P6: 현재 여섯 차시 수업의 실생활 자료 원본은 나중의 재사용을 위해 보존한다", () => {
   assert.equal(getRealLifeMaterialsForLesson(5, "grammar").length, 0);
   const materials = getRealLifeMaterialsForLesson(6, "grammar");
   assert.equal(materials.length, 6);
-  assert.deepEqual(materials.map((material) => material.id), grammarRealLifeMaterials.map((material) => material.id));
+  assert.equal(grammarRealLifeMaterials.length, 6);
 });
 
 test("P6: 실생활 자료 활동은 서버 입력 스키마와 비계 응답에 연결된다", () => {

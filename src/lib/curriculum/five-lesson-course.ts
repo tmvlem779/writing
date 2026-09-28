@@ -181,7 +181,7 @@ export const grammarSixLessonCourse: CourseLesson[] = [
     number: 6,
     title: "구조와 문법 요소의 종합적 활용",
     keyQuestion: "상황에 맞는 구조와 문법 요소로 의도한 의미를 표현할 수 있을까?",
-    activities: ["담화 맥락 분석", "조건 문장 생성", "상황별 변형", "선택 이유 설명", "상호 피드백", "실생활 자료 종합 탐구"],
+    activities: ["핵심 개념 정리 노트", "담화 맥락 분석", "조건 문장 생성", "상황별 변형", "선택 이유 설명", "상호 피드백"],
     conceptLessonId: "grammar-synthesis",
     practiceActivities: [
       { id: "grammar-context", activity: "diagnose", label: "맥락 분석", prompt: "‘창문을 닫아 주세요.’가 사용될 수 있는 화자·청자·목적을 정하고, 같은 요청을 친구와 교장 선생님께 할 때 무엇을 달리해야 하는지 적어 보세요." },
@@ -190,28 +190,21 @@ export const grammarSixLessonCourse: CourseLesson[] = [
       { id: "grammar-self-explain", activity: "reflect", label: "선택 이유 설명", prompt: "사용한 문장 구조 하나와 문법 요소 두 가지가 의미·정보 초점·화자 태도에 미친 효과를 근거와 함께 설명해 보세요." },
       { id: "grammar-peer-review", activity: "error", label: "상호 피드백·평가", prompt: "친구에게 보여 줄 문장과 ‘상황에 어울리는가, 의도가 분명한가, 선택 이유가 타당한가’ 중 받고 싶은 기준을 정하세요. 의견을 받은 뒤 수정 여부와 이유를 직접 결정하세요." }
     ],
-    realLifeMaterialIds: ["article", "notice", "dialogue", "presentation", "interview", "social"]
+    realLifeMaterialIds: []
   }
 ];
 
 export const courseTracks: CourseTrack[] = [
   {
-    id: "structure",
-    optionLabel: "A안",
-    title: "문장 구조 중심",
-    description: "홑문장·이어진문장·안은문장의 구조와 표현 효과를 깊게 탐구해요.",
-    badge: "기존 수업안"
-  },
-  {
     id: "grammar",
-    optionLabel: "B안",
+    optionLabel: "6차시 수업",
     title: "구조+문법 요소",
     description: "문장 구조에 종결·높임·시간·피동·사동·부정·인용 표현을 더해 상황에 맞게 써요.",
     badge: "새 확장 수업안"
   }
 ];
 
-export function getCourseLessons(trackId: CourseTrackId = "structure") {
+export function getCourseLessons(trackId: CourseTrackId = "grammar") {
   return trackId === "grammar" ? grammarSixLessonCourse : fiveLessonCourse;
 }
 
@@ -219,7 +212,7 @@ export function getCourseTrack(trackId: CourseTrackId) {
   return courseTracks.find((track) => track.id === trackId) ?? courseTracks[0];
 }
 
-export function getCourseLesson(number: CourseLessonNumber, trackId: CourseTrackId = "structure") {
+export function getCourseLesson(number: CourseLessonNumber, trackId: CourseTrackId = "grammar") {
   const lessons = getCourseLessons(trackId);
   return lessons.find((lesson) => lesson.number === number) ?? lessons[0];
 }

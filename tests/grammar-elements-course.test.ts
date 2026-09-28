@@ -3,7 +3,6 @@ import fs from "node:fs";
 import test from "node:test";
 import {
   courseTracks,
-  fiveLessonCourse,
   getCourseLesson,
   grammarSixLessonCourse
 } from "../src/lib/curriculum/five-lesson-course.ts";
@@ -20,13 +19,11 @@ import {
   realLifePracticeModes
 } from "../src/lib/curriculum/real-life-materials.ts";
 
-test("CURRICULUM: 기존 구조 중심안과 새 구조+문법 요소안을 별도로 보존한다", () => {
-  assert.equal(courseTracks.length, 2);
-  assert.deepEqual(courseTracks.map((track) => track.id), ["structure", "grammar"]);
-  assert.equal(fiveLessonCourse.length, 5);
+test("CURRICULUM: 학생 화면에는 구조+문법 요소 여섯 차시만 제공한다", () => {
+  assert.equal(courseTracks.length, 1);
+  assert.deepEqual(courseTracks.map((track) => track.id), ["grammar"]);
   assert.equal(grammarSixLessonCourse.length, 6);
-  assert.notStrictEqual(fiveLessonCourse, grammarSixLessonCourse);
-  assert.equal(getCourseLesson(1, "structure").title, "문장의 짜임과 홑문장·겹문장");
+  assert.equal(getCourseLesson(1).title, "문장의 기본 구조와 문장 생성");
   assert.equal(getCourseLesson(1, "grammar").title, "문장의 기본 구조와 문장 생성");
 });
 
@@ -62,7 +59,7 @@ test("P3·P4: 교과서 범위와 문법 요소를 개념 학습에 반영한다
   }
 });
 
-test("P3: B안 모든 차시는 세분화된 개념과 세 문항 이상의 자기 확인을 제공한다", () => {
+test("P3: 모든 차시는 세분화된 개념과 세 문항 이상의 자기 확인을 제공한다", () => {
   for (const lesson of grammarElementLessons) {
     assert.ok((lesson.conceptSections?.length ?? 0) >= 3);
     assert.ok(lesson.conceptSections?.every((section) => section.points.length >= 3));
@@ -98,9 +95,9 @@ test("P4·P6: 4·5차시는 문법 요소를 나누고 6차시는 생성·변형
   assert.match(finalPrompts, /선택 이유/);
 });
 
-test("P6·PRIVACY: 실생활 탐구는 기존 종합 활동과 함께 6차시에 통합된다", () => {
+test("P6·PRIVACY: 6차시 챕터 3은 숨기되 실생활 자료는 나중의 재사용을 위해 보존한다", () => {
   assert.deepEqual(getCourseLesson(5, "grammar").realLifeMaterialIds, []);
-  assert.equal(getCourseLesson(6, "grammar").realLifeMaterialIds.length, 6);
+  assert.deepEqual(getCourseLesson(6, "grammar").realLifeMaterialIds, []);
   assert.equal(getRealLifeMaterialsForLesson(4, "grammar").length, 0);
   assert.equal(getRealLifeMaterialsForLesson(5, "grammar").length, 0);
   assert.equal(getRealLifeMaterialsForLesson(6, "grammar").length, 6);
@@ -131,4 +128,10 @@ test("DATA: 여섯 차시 통합 구성을 반영한 프롬프트 v6 마이그�
   const migration = fs.readFileSync("supabase/migrations/202609280001_add_six_lesson_grammar_prompt.sql", "utf8");
   assert.match(migration, /writing-tutor-v6/);
   assert.match(migration, /six-lesson-grammar-course/);
+});
+
+test("DATA: 단일 수업안과 정리 노트를 반영한 프롬프트 v7 마이그레이션이 존재한다", () => {
+  const migration = fs.readFileSync("supabase/migrations/202609280002_add_single_course_summary_prompt.sql", "utf8");
+  assert.match(migration, /writing-tutor-v7/);
+  assert.match(migration, /single-course-summary-notebook/);
 });
