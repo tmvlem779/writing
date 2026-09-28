@@ -23,3 +23,11 @@ export function isConceptCheckComplete(totalChecks: number, passedIndexes: numbe
   return totalChecks > 0
     && Array.from({ length: totalChecks }, (_, index) => index).every((index) => passedIndexes.includes(index));
 }
+
+export function canCompleteConceptChapter(
+  allChecksPassed: boolean,
+  summaryRequired: boolean,
+  summaryComplete: boolean
+) {
+  return allChecksPassed && (!summaryRequired || summaryComplete);
+}

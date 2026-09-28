@@ -34,8 +34,13 @@ export function WritingStudio() {
     if (chapter === "real-life" && !nextLessonHasRealLifeChapter) setChapter("concept");
   }
 
-  function completeConcept() {
-    setCompletedConcepts((current) => new Set(current).add(conceptCompletionKey));
+  function updateConceptCompletion(complete: boolean) {
+    setCompletedConcepts((current) => {
+      const next = new Set(current);
+      if (complete) next.add(conceptCompletionKey);
+      else next.delete(conceptCompletionKey);
+      return next;
+    });
   }
 
   return (
@@ -114,7 +119,7 @@ export function WritingStudio() {
           completed={isConceptComplete}
           key={`concept-${trackId}-${lessonNumber}`}
           lessonNumber={lessonNumber}
-          onComplete={completeConcept}
+          onCompletionChange={updateConceptCompletion}
           onStartPractice={() => setChapter("practice")}
           trackId={trackId}
         />

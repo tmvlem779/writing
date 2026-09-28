@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   advanceConceptCheck,
+  canCompleteConceptChapter,
   canAdvanceConceptCheck,
   isConceptCheckComplete
 } from "@/lib/curriculum/concept-check-flow";
@@ -23,22 +24,24 @@ type ConceptChapterProps = {
   completed: boolean;
   lessonNumber: CourseLessonNumber;
   trackId: CourseTrackId;
-  onComplete: () => void;
+  onCompletionChange: (complete: boolean) => void;
   onStartPractice: () => void;
 };
 
-export function ConceptChapter({ completed, lessonNumber, trackId, onComplete, onStartPractice }: ConceptChapterProps) {
+export function ConceptChapter({ completed, lessonNumber, trackId, onCompletionChange, onStartPractice }: ConceptChapterProps) {
   const courseLesson = getCourseLesson(lessonNumber, trackId);
   const courseLessonCount = getCourseLessons(trackId).length;
   const lessons = trackId === "grammar" ? grammarElementLessons : sentenceStructureLessons;
   const source = trackId === "grammar" ? grammarElementsSource : sentenceStructureSource;
   const lesson = lessons.find((item) => item.id === courseLesson.conceptLessonId) ?? lessons[0];
   const checks = [lesson.check, ...(lesson.extraChecks ?? [])];
+  const summaryRequired = trackId === "grammar" && lessonNumber === 6;
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [passedCheckIndexes, setPassedCheckIndexes] = useState<number[]>(
     () => completed ? checks.map((_, index) => index) : []
   );
   const [currentCheckIndex, setCurrentCheckIndex] = useState(() => completed ? checks.length - 1 : 0);
+  const [summaryNotebookComplete, setSummaryNotebookComplete] = useState(() => completed);
   const currentCheck = checks[currentCheckIndex];
   const selectedAnswer = selectedAnswers[currentCheck.prompt] ?? "";
   const result = selectedAnswer
@@ -48,6 +51,7 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onComplete, o
     : null;
   const completedChecks = passedCheckIndexes.length;
   const allChecksPassed = isConceptCheckComplete(checks.length, passedCheckIndexes);
+  const chapterComplete = canCompleteConceptChapter(allChecksPassed, summaryRequired, summaryNotebookComplete);
   const canOpenNextCheck = canAdvanceConceptCheck(currentCheckIndex, checks.length, passedCheckIndexes);
 
   function selectCheckAnswer(optionId: string) {
@@ -55,8 +59,16 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onComplete, o
     if (optionId === currentCheck.answer && !passedCheckIndexes.includes(currentCheckIndex)) {
       const nextPassedCheckIndexes = [...passedCheckIndexes, currentCheckIndex];
       setPassedCheckIndexes(nextPassedCheckIndexes);
-      if (isConceptCheckComplete(checks.length, nextPassedCheckIndexes)) onComplete();
+      const nextChecksComplete = isConceptCheckComplete(checks.length, nextPassedCheckIndexes);
+      if (canCompleteConceptChapter(nextChecksComplete, summaryRequired, summaryNotebookComplete)) {
+        onCompletionChange(true);
+      }
     }
+  }
+
+  function updateSummaryNotebookCompletion(complete: boolean) {
+    setSummaryNotebookComplete(complete);
+    onCompletionChange(canCompleteConceptChapter(allChecksPassed, summaryRequired, complete));
   }
 
   function openNextCheck() {
@@ -74,7 +86,7 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onComplete, o
           <div className="concept-step active" key={step}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <span>{step}</span>
-            {allChecksPassed && index === 2 && <i aria-label="확인 완료">✓</i>}
+            {chapterComplete && index === 2 && <i aria-label="확인 완료">✓</i>}
           </div>
         ))}
       </aside>
@@ -126,7 +138,7 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onComplete, o
           )}
         </section>
 
-        {trackId === "grammar" && lessonNumber === 6 && <GrammarSummaryNotebook />}
+        {summaryRequired && <GrammarSummaryNotebook onCompletionChange={updateSummaryNotebookCompletion} />}
 
         <section className="concept-check-set" aria-labelledby="check-set-heading">
           <header>
@@ -178,10 +190,14 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onComplete, o
         </section>
 
         <div className="concept-actions concept-actions-end">
-          {!allChecksPassed && (
-            <p className="chapter-lock-message" role="status">스스로 확인하기의 모든 문항을 통과하면 Chapter 02가 열려요.</p>
+          {!chapterComplete && (
+            <p className="chapter-lock-message" role="status">
+              {summaryRequired
+                ? "정리 노트의 모든 빈칸을 맞히고 스스로 확인하기의 모든 문항을 통과하면 Chapter 02가 열려요."
+                : "스스로 확인하기의 모든 문항을 통과하면 Chapter 02가 열려요."}
+            </p>
           )}
-          <button className="primary-button" disabled={!allChecksPassed} onClick={onStartPractice} type="button">
+          <button className="primary-button" disabled={!chapterComplete} onClick={onStartPractice} type="button">
             이 차시의 2장 연습으로
           </button>
         </div>

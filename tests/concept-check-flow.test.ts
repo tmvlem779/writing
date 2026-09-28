@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   advanceConceptCheck,
+  canCompleteConceptChapter,
   canAdvanceConceptCheck,
   isConceptCheckComplete
 } from "../src/lib/curriculum/concept-check-flow.ts";
@@ -9,6 +10,13 @@ import {
 test("P1·P3: 현재 문항을 통과하기 전에는 다음 문항으로 갈 수 없다", () => {
   assert.equal(canAdvanceConceptCheck(0, 3, []), false);
   assert.equal(advanceConceptCheck(0, 3, []), 0);
+});
+
+test("P1·P3: 6차시는 정리 노트와 확인 문제를 모두 통과해야 Chapter 02가 열린다", () => {
+  assert.equal(canCompleteConceptChapter(true, true, false), false);
+  assert.equal(canCompleteConceptChapter(false, true, true), false);
+  assert.equal(canCompleteConceptChapter(true, true, true), true);
+  assert.equal(canCompleteConceptChapter(true, false, false), true);
 });
 
 test("P1·P3: 현재 문항의 정답을 맞힌 뒤에만 바로 다음 문항이 열린다", () => {

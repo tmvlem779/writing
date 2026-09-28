@@ -7,7 +7,11 @@ import {
   isGrammarSummaryAnswerCorrect
 } from "@/lib/curriculum/grammar-summary-notebook";
 
-export function GrammarSummaryNotebook() {
+type GrammarSummaryNotebookProps = {
+  onCompletionChange: (complete: boolean) => void;
+};
+
+export function GrammarSummaryNotebook({ onCompletionChange }: GrammarSummaryNotebookProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submittedIds, setSubmittedIds] = useState<Set<string>>(new Set());
   const blanks = grammarSummarySections.flatMap((section) => section.blanks);
@@ -19,6 +23,7 @@ export function GrammarSummaryNotebook() {
 
   function updateAnswer(id: string, value: string) {
     setAnswers((current) => ({ ...current, [id]: value }));
+    onCompletionChange(false);
     setSubmittedIds((current) => {
       if (!current.has(id)) return current;
       const next = new Set(current);
@@ -28,11 +33,12 @@ export function GrammarSummaryNotebook() {
   }
 
   function checkAnswers() {
-    setSubmittedIds(new Set(
-      blanks
-        .filter((blank) => answers[blank.id]?.trim())
-        .map((blank) => blank.id)
-    ));
+    const filledBlanks = blanks.filter((blank) => answers[blank.id]?.trim());
+    setSubmittedIds(new Set(filledBlanks.map((blank) => blank.id)));
+    onCompletionChange(
+      filledBlanks.length === blanks.length
+      && filledBlanks.every((blank) => isGrammarSummaryAnswerCorrect(blank, answers[blank.id] ?? ""))
+    );
   }
 
   return (
@@ -88,7 +94,9 @@ export function GrammarSummaryNotebook() {
       <div className="summary-notebook-actions">
         <p aria-live="polite">
           {submittedCount > 0
-            ? `${submittedCount}개를 제출해 ${correctCount}개를 알맞게 정리했어요. 틀린 칸에만 표시된 힌트를 보고 다시 써 보세요.`
+            ? correctCount === blanks.length
+              ? "모든 빈칸을 알맞게 정리했어요. 이제 스스로 확인하기까지 모두 통과해 보세요."
+              : `${submittedCount}개를 제출해 ${correctCount}개를 알맞게 정리했어요. 틀린 칸에만 표시된 힌트를 보고 다시 써 보세요.`
             : "정답을 먼저 보여 주지 않아요. 기억나는 표현을 써 본 뒤 확인해 보세요."}
         </p>
         <button className="secondary-button" disabled={filledCount === 0} onClick={checkAnswers} type="button">
