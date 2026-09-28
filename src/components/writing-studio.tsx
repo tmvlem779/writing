@@ -44,7 +44,7 @@ export function WritingStudio() {
   }
 
   return (
-    <main className="learning-studio">
+    <div className="learning-studio">
       <section className="course-map" aria-labelledby="course-map-title">
         <header>
           <div>
@@ -128,6 +128,6 @@ export function WritingStudio() {
       {chapter === "real-life" && hasRealLifeChapter && (
         <RealLifeChapter key={`real-life-${trackId}-${lessonNumber}`} lessonNumber={lessonNumber} trackId={trackId} />
       )}
-    </main>
+    </div>
   );
 }

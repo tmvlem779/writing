@@ -34,10 +34,23 @@ for (const file of files) {
 
 const migration = fs.readFileSync("supabase/migrations/202609230001_initial_schema.sql", "utf8");
 const hardeningMigration = fs.readFileSync("supabase/migrations/202609240001_harden_helper_function_access.sql", "utf8");
+const wrongAnswersMigration = fs.readFileSync("supabase/migrations/202609280003_add_wrong_answers.sql", "utf8");
 const userTables = ["profiles", "classes", "class_memberships", "learning_sessions", "drafts", "turns", "concept_states", "learning_events", "safety_events", "api_usage", "prompt_versions"];
 for (const table of userTables) {
   if (!migration.includes(`alter table public.${table} enable row level security`)) {
     console.error(`${table}: RLS 활성화 구문이 없습니다.`);
+    process.exit(1);
+  }
+}
+
+for (const required of [
+  "alter table public.wrong_answers enable row level security",
+  'create policy "wrong_answers_read_owner_or_teacher"',
+  'create policy "wrong_answers_insert_owner"',
+  'create policy "wrong_answers_update_owner"'
+]) {
+  if (!wrongAnswersMigration.includes(required)) {
+    console.error(`wrong_answers 보안 정책 누락: ${required}`);
     process.exit(1);
   }
 }
@@ -68,7 +81,7 @@ for (const required of [
 }
 
 const rlsTest = fs.readFileSync("supabase/tests/rls.sql", "utf8");
-for (const table of ["learning_sessions", "drafts", "turns", "concept_states", "learning_events"]) {
+for (const table of ["learning_sessions", "drafts", "turns", "concept_states", "learning_events", "wrong_answers"]) {
   if (!rlsTest.includes(`from public.${table}`)) {
     console.error(`${table}: 교차 사용자 RLS 음성 테스트가 없습니다.`);
     process.exit(1);

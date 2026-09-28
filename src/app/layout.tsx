@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" data-scroll-behavior="smooth">
       <body>
         <PasswordSetupSessionRedirect />
         <header className="site-header">

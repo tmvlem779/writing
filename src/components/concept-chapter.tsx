@@ -19,6 +19,7 @@ import {
   sentenceStructureLessons,
   sentenceStructureSource
 } from "@/lib/curriculum/sentence-structure";
+import { recordWrongAnswer, resolveWrongAnswer } from "@/lib/learning/wrong-answer-client";
 
 type ConceptChapterProps = {
   completed: boolean;
@@ -56,13 +57,26 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onCompletionC
 
   function selectCheckAnswer(optionId: string) {
     setSelectedAnswers((current) => ({ ...current, [currentCheck.prompt]: optionId }));
+    const problemId = `${trackId}-${lessonNumber}-${lesson.id}-check-${currentCheckIndex + 1}`;
+    const selectedOption = currentCheck.options.find((option) => option.id === optionId);
     if (optionId === currentCheck.answer && !passedCheckIndexes.includes(currentCheckIndex)) {
+      void resolveWrongAnswer("challenge", problemId);
       const nextPassedCheckIndexes = [...passedCheckIndexes, currentCheckIndex];
       setPassedCheckIndexes(nextPassedCheckIndexes);
       const nextChecksComplete = isConceptCheckComplete(checks.length, nextPassedCheckIndexes);
       if (canCompleteConceptChapter(nextChecksComplete, summaryRequired, summaryNotebookComplete)) {
         onCompletionChange(true);
       }
+    } else if (optionId !== currentCheck.answer) {
+      void recordWrongAnswer({
+        source: "challenge",
+        sourceLabel: "오늘의 챌린지",
+        problemId,
+        problemTitle: `${lessonNumber}차시 · ${lesson.title} · 문항 ${currentCheckIndex + 1}`,
+        question: currentCheck.prompt,
+        submittedAnswer: selectedOption?.label ?? optionId,
+        feedbackHint: currentCheck.retryHint ?? lesson.inquiryQuestion
+      });
     }
   }
 
