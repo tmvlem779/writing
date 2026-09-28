@@ -24,7 +24,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.03em; font-size: 20px; }
 .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: var(--green); color: white; font-family: serif; }
 .site-header nav { display: flex; align-items: center; gap: 28px; font-size: 14px; font-weight: 650; }
-.nav-button { padding: 9px 17px; border: 1px solid var(--green); border-radius: 999px; color: var(--green); }
 .site-footer { padding: 34px clamp(20px, 5vw, 72px); display: flex; justify-content: space-between; gap: 24px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
 .site-footer p { margin: 0; }
 
@@ -33,7 +32,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .hero-content { width: min(980px, 100%); position: relative; z-index: 1; }
 .eyebrow, .section-kicker, .panel-kicker { color: var(--orange); font-weight: 800; font-size: 13px; letter-spacing: .09em; text-transform: uppercase; }
 .hero h1 { max-width: 940px; font-size: clamp(46px, 6vw, 78px); line-height: 1.13; letter-spacing: -.055em; margin: 0 0 30px; font-weight: 820; text-wrap: balance; }
-.hero h1 span { display: block; margin-top: 8px; color: var(--green); }
+.hero h1 span { display: block; margin-bottom: 8px; color: var(--green); }
 .hero-copy { max-width: 760px; margin: 0; color: var(--muted); font-size: clamp(17px, 1.7vw, 20px); line-height: 1.85; }
 .hero-copy span { display: block; }
 .hero-actions { display: flex; gap: 12px; margin-top: 38px; }
@@ -163,7 +162,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 1000px) {
   .lesson-switcher { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .studio-shell, .concept-shell, .authentic-shell { grid-template-columns: 190px 1fr; }.evidence-panel, .concept-progress, .transfer-panel { display: none; }
-  .site-header nav a:not(.nav-button) { display: none; }
+  .site-header nav { display: none; }
 }
 @media (max-width: 720px) {
   .site-header { height: 64px; }.hero { min-height: calc(100vh - 64px); padding: 72px 24px; }.hero h1 { font-size: clamp(40px, 12vw, 54px); }.hero-copy { font-size: 16px; }.hero-actions { flex-wrap: wrap; }

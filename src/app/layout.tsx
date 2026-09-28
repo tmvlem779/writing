@@ -23,7 +23,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Link href={{ pathname: "/history" }}>나의 기록</Link>
             <Link href="/teacher">교사 화면</Link>
             <Link href="/privacy">개인정보 안내</Link>
-            <Link className="nav-button" href="/login">로그인</Link>
           </nav>
         </header>
         <main>{children}</main>
