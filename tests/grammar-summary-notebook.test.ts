@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  getGrammarSummaryFeedback,
   grammarSummarySections,
   isGrammarSummaryAnswerCorrect
 } from "../src/lib/curriculum/grammar-summary-notebook.ts";
@@ -32,4 +33,20 @@ test("P1·P3: 오답용 힌트는 빈칸 답 대신 관찰 단서를 제공한�
     assert.ok(blank.hint.endsWith("요."));
     assert.notEqual(blank.hint.trim(), blank.answers[0]);
   }
+});
+
+test("P1·P3: 각 칸은 제출 전 힌트를 숨기고 제출한 오답에만 개별 힌트를 제공한다", () => {
+  const firstBlank = grammarSummarySections[0].blanks[0];
+  const secondBlank = grammarSummarySections[0].blanks[1];
+
+  assert.equal(getGrammarSummaryFeedback(firstBlank, "연결 조사", false), null);
+  assert.deepEqual(getGrammarSummaryFeedback(firstBlank, "연결 조사", true), {
+    kind: "retry",
+    message: firstBlank.hint
+  });
+  assert.equal(getGrammarSummaryFeedback(secondBlank, "", true), null);
+  assert.deepEqual(getGrammarSummaryFeedback(firstBlank, "연결 어미", true), {
+    kind: "correct",
+    message: "맞게 정리했어요."
+  });
 });

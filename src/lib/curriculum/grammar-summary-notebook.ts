@@ -59,3 +59,20 @@ export function isGrammarSummaryAnswerCorrect(blank: GrammarSummaryBlank, value:
   const normalized = normalizeSummaryAnswer(value);
   return normalized.length > 0 && blank.answers.some((answer) => normalizeSummaryAnswer(answer) === normalized);
 }
+
+export type GrammarSummaryFeedback = {
+  kind: "correct" | "retry";
+  message: string;
+};
+
+export function getGrammarSummaryFeedback(
+  blank: GrammarSummaryBlank,
+  value: string,
+  submitted: boolean
+): GrammarSummaryFeedback | null {
+  if (!submitted || !value.trim()) return null;
+  if (isGrammarSummaryAnswerCorrect(blank, value)) {
+    return { kind: "correct", message: "맞게 정리했어요." };
+  }
+  return { kind: "retry", message: blank.hint };
+}

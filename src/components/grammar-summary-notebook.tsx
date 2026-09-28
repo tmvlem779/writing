@@ -2,20 +2,37 @@
 
 import { useState } from "react";
 import {
+  getGrammarSummaryFeedback,
   grammarSummarySections,
   isGrammarSummaryAnswerCorrect
 } from "@/lib/curriculum/grammar-summary-notebook";
 
 export function GrammarSummaryNotebook() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [checked, setChecked] = useState(false);
+  const [submittedIds, setSubmittedIds] = useState<Set<string>>(new Set());
   const blanks = grammarSummarySections.flatMap((section) => section.blanks);
   const filledCount = blanks.filter((blank) => answers[blank.id]?.trim()).length;
-  const correctCount = blanks.filter((blank) => isGrammarSummaryAnswerCorrect(blank, answers[blank.id] ?? "")).length;
+  const submittedCount = submittedIds.size;
+  const correctCount = blanks.filter((blank) => (
+    submittedIds.has(blank.id) && isGrammarSummaryAnswerCorrect(blank, answers[blank.id] ?? "")
+  )).length;
 
   function updateAnswer(id: string, value: string) {
     setAnswers((current) => ({ ...current, [id]: value }));
-    setChecked(false);
+    setSubmittedIds((current) => {
+      if (!current.has(id)) return current;
+      const next = new Set(current);
+      next.delete(id);
+      return next;
+    });
+  }
+
+  function checkAnswers() {
+    setSubmittedIds(new Set(
+      blanks
+        .filter((blank) => answers[blank.id]?.trim())
+        .map((blank) => blank.id)
+    ));
   }
 
   return (
@@ -40,15 +57,16 @@ export function GrammarSummaryNotebook() {
             <div className="summary-blank-table">
               {section.blanks.map((blank, index) => {
                 const value = answers[blank.id] ?? "";
-                const correct = isGrammarSummaryAnswerCorrect(blank, value);
-                const feedback = checked ? correct ? "맞게 정리했어요." : "관련 개념을 다시 살펴보세요." : blank.hint;
+                const feedback = getGrammarSummaryFeedback(blank, value, submittedIds.has(blank.id));
+                const feedbackId = `summary-feedback-${blank.id}`;
                 return (
-                  <label className={checked ? correct ? "summary-blank-row correct" : "summary-blank-row retry" : "summary-blank-row"} key={blank.id}>
+                  <label className={feedback ? `summary-blank-row ${feedback.kind}` : "summary-blank-row"} key={blank.id}>
                     <span className="summary-blank-number">{String(index + 1).padStart(2, "0")}</span>
                     <strong>{blank.topic}</strong>
                     <span className="summary-blank-sentence">
                       {blank.before}
                       <input
+                        aria-describedby={feedback ? feedbackId : undefined}
                         aria-label={`${section.title} ${blank.topic} 빈칸 ${index + 1}`}
                         autoComplete="off"
                         onChange={(event) => updateAnswer(blank.id, event.target.value)}
@@ -58,7 +76,7 @@ export function GrammarSummaryNotebook() {
                       />
                       {blank.after}
                     </span>
-                    <small>{feedback}</small>
+                    {feedback && <small id={feedbackId}>{feedback.message}</small>}
                   </label>
                 );
               })}
@@ -69,11 +87,11 @@ export function GrammarSummaryNotebook() {
 
       <div className="summary-notebook-actions">
         <p aria-live="polite">
-          {checked
-            ? `${blanks.length}개 중 ${correctCount}개를 알맞게 정리했어요. 답이 다른 칸은 힌트를 보고 다시 써 보세요.`
+          {submittedCount > 0
+            ? `${submittedCount}개를 제출해 ${correctCount}개를 알맞게 정리했어요. 틀린 칸에만 표시된 힌트를 보고 다시 써 보세요.`
             : "정답을 먼저 보여 주지 않아요. 기억나는 표현을 써 본 뒤 확인해 보세요."}
         </p>
-        <button className="secondary-button" disabled={filledCount === 0} onClick={() => setChecked(true)} type="button">
+        <button className="secondary-button" disabled={filledCount === 0} onClick={checkAnswers} type="button">
           내 정리 확인하기
         </button>
       </div>
