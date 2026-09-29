@@ -9,6 +9,8 @@ const nav = read("src/components/student-learning-nav.tsx");
 const diagnosisPage = read("src/app/learn/diagnosis/page.tsx");
 const challengePage = read("src/app/learn/challenge/page.tsx");
 const selfStudyPage = read("src/app/learn/self-study/page.tsx");
+const selfStudyWorkspace = read("src/components/self-study-workspace.tsx");
+const realLifeChapter = read("src/components/real-life-chapter.tsx");
 const wrongNotesPage = read("src/app/learn/wrong-notes/page.tsx");
 const diagnosisApi = read("src/app/api/diagnosis/route.ts");
 const migration = read("supabase/migrations/202609280003_add_wrong_answers.sql");
@@ -46,11 +48,20 @@ test("P1·P3: 진단 오답은 정답을 즉시 공개하지 않고 관찰 단�
   }
 });
 
-test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 보관된 6차시 3장 자료를 사용한다", () => {
+test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 문학·실생활 자료를 분리한다", () => {
   assert.match(challengePage, /WritingStudio/);
-  assert.match(selfStudyPage, /RealLifeChapter lessonNumber=\{6\} trackId="grammar"/);
-  assert.match(selfStudyPage, /showOverview=\{false\}/);
+  assert.match(selfStudyPage, /SelfStudyWorkspace/);
+  assert.match(selfStudyWorkspace, /문학 작품/);
+  assert.match(selfStudyWorkspace, /실생활 자료/);
+  assert.match(selfStudyWorkspace, /materialGroup=\{activeGroup\}/);
+  assert.match(selfStudyWorkspace, /showOverview=\{false\}/);
   assert.match(selfStudyPage, /문학 작품/);
+});
+
+test("P3·P4: 문학 학습은 학생의 구조 판단을 먼저 받은 뒤 그 답으로 질문한다", () => {
+  assert.match(realLifeChapter, /내 판단 먼저 보내기/);
+  assert.match(realLifeChapter, /학생이 쓴 구체적인 문장과 구조 판단을 반영/);
+  assert.match(realLifeChapter, /내가 고른 문장에서 이어진 질문/);
 });
 
 test("학생 홈은 둥근 브랜드 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {

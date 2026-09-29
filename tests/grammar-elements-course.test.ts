@@ -100,10 +100,21 @@ test("P6·PRIVACY: 6차시 챕터 3은 숨기되 실생활 자료는 나중의 �
   assert.deepEqual(getCourseLesson(6, "grammar").realLifeMaterialIds, []);
   assert.equal(getRealLifeMaterialsForLesson(4, "grammar").length, 0);
   assert.equal(getRealLifeMaterialsForLesson(5, "grammar").length, 0);
-  assert.equal(getRealLifeMaterialsForLesson(6, "grammar").length, 7);
+  assert.equal(getRealLifeMaterialsForLesson(6, "grammar").length, 10);
   assert.equal(getRealLifeLessonGuide("grammar").lessonNumber, 6);
   assert.equal(getRealLifeLessonGuide("grammar").reviewPrompts.length, 5);
-  assert.deepEqual(grammarRealLifeMaterials.map((material) => material.id), ["article", "notice", "dialogue", "presentation", "interview", "social", "literature"]);
+  assert.deepEqual(grammarRealLifeMaterials.map((material) => material.id), [
+    "article",
+    "notice",
+    "dialogue",
+    "presentation",
+    "interview",
+    "social",
+    "literature",
+    "literature-sanyuhwa",
+    "literature-dongbaek",
+    "literature-unsu"
+  ]);
   for (const material of grammarRealLifeMaterials) {
     assert.doesNotMatch(material.content, /@|\b01[016789]-?\d{3,4}-?\d{4}\b/);
     for (const mode of realLifePracticeModes) {
@@ -134,4 +145,10 @@ test("DATA: 단일 수업안과 정리 노트를 반영한 프롬프트 v7 마�
   const migration = fs.readFileSync("supabase/migrations/202609280002_add_single_course_summary_prompt.sql", "utf8");
   assert.match(migration, /writing-tutor-v7/);
   assert.match(migration, /single-course-summary-notebook/);
+});
+
+test("DATA: 문학 자율 관찰 순서를 반영한 프롬프트 v8 마이그레이션이 존재한다", () => {
+  const migration = fs.readFileSync("supabase/migrations/202609290001_add_literature_observation_prompt.sql", "utf8");
+  assert.match(migration, /writing-tutor-v8/);
+  assert.match(migration, /literature-observation-first/);
 });

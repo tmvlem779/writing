@@ -6,6 +6,7 @@ import { buildFallbackResponse } from "../src/lib/agent/fallback.ts";
 import {
   buildRealLifeTask,
   grammarRealLifeMaterials,
+  getRealLifeMaterialGroup,
   getRealLifeMaterialsForLesson,
   realLifeMaterials,
   realLifeLessonGuides,
@@ -46,18 +47,25 @@ test("P6: 5차시는 1~4차시 관점과 세 단계 실생활 과제를 통합�
 test("P6: 현재 여섯 차시 수업의 실생활 자료 원본은 나중의 재사용을 위해 보존한다", () => {
   assert.equal(getRealLifeMaterialsForLesson(5, "grammar").length, 0);
   const materials = getRealLifeMaterialsForLesson(6, "grammar");
-  assert.equal(materials.length, 7);
-  assert.equal(grammarRealLifeMaterials.length, 7);
+  assert.equal(materials.length, 10);
+  assert.equal(grammarRealLifeMaterials.length, 10);
 });
 
-test("P3·P4·P6: 문학 작품은 구조 찾기에서 표현 효과와 산문 고쳐 쓰기로 확장된다", () => {
-  const literature = grammarRealLifeMaterials.find((material) => material.id === "literature");
-  assert.ok(literature);
-  assert.match(literature.title, /김소월.*진달래꽃/);
-  assert.match(literature.sourceNote, /저작권 보호기간 만료/);
-  assert.ok(literature.analysisPrompts.some((prompt) => /절의 경계/.test(prompt)));
-  assert.ok(literature.analysisPrompts.some((prompt) => /화자의 태도/.test(prompt)));
-  assert.match(literature.rewritePrompt, /산문.*바꾼 뒤/);
+test("P3·P4·P6: 문학 작품은 시·소설을 각각 두 편씩 제공한다", () => {
+  const literature = getRealLifeMaterialsForLesson(6, "grammar", "literature");
+  assert.equal(literature.length, 4);
+  assert.equal(literature.filter((material) => material.genre === "시").length, 2);
+  assert.equal(literature.filter((material) => material.genre === "소설").length, 2);
+  assert.ok(literature.every((material) => getRealLifeMaterialGroup(material) === "literature"));
+  assert.ok(literature.every((material) => /저작권 보호기간 만료/.test(material.sourceNote)));
+  assert.ok(literature.every((material) => material.analysisPrompts.length === 2));
+  assert.ok(literature.every((material) => material.rewritePrompt.length > 20));
+});
+
+test("P6: 실생활 탭은 여섯 자료만 문학 작품과 분리한다", () => {
+  const authentic = getRealLifeMaterialsForLesson(6, "grammar", "authentic");
+  assert.deepEqual(authentic.map((material) => material.id), ["article", "notice", "dialogue", "presentation", "interview", "social"]);
+  assert.ok(authentic.every((material) => getRealLifeMaterialGroup(material) === "authentic"));
 });
 
 test("P6: 실생활 자료 활동은 서버 입력 스키마와 비계 응답에 연결된다", () => {

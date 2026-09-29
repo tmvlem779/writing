@@ -1,6 +1,18 @@
 import type { CourseLessonNumber, CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 
-export type RealLifeMaterialKind = "article" | "notice" | "dialogue" | "presentation" | "interview" | "social" | "literature";
+export type RealLifeMaterialKind =
+  | "article"
+  | "notice"
+  | "dialogue"
+  | "presentation"
+  | "interview"
+  | "social"
+  | "literature"
+  | "literature-sanyuhwa"
+  | "literature-dongbaek"
+  | "literature-unsu";
+
+export type RealLifeMaterialGroup = "all" | "literature" | "authentic";
 
 export type RealLifeMaterial = {
   id: RealLifeMaterialKind;
@@ -12,6 +24,8 @@ export type RealLifeMaterial = {
   focusConcepts: string[];
   analysisPrompts: string[];
   rewritePrompt: string;
+  genre?: "시" | "소설";
+  author?: string;
   sourceNote: "수업용 재구성 자료" | "저작권 보호기간 만료 작품 · 일부 발췌";
 };
 
@@ -233,6 +247,59 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
       "‘가실’, ‘드리우리다’의 높임·시간·의지 표현이 이별을 대하는 화자의 태도에 어떤 효과를 더하는지 근거를 들어 말해 보세요."
     ],
     rewritePrompt: "세 행의 뜻을 일상적인 산문 두 문장으로 바꾼 뒤, 원문의 구조와 문법 요소를 바꾸면서 정서와 강조점이 어떻게 달라졌는지 설명해 보세요.",
+    genre: "시",
+    author: "김소월",
+    sourceNote: "저작권 보호기간 만료 작품 · 일부 발췌"
+  },
+  {
+    id: "literature-sanyuhwa",
+    order: 8,
+    label: "문학 작품",
+    title: "김소월 〈산유화〉",
+    situation: "반복과 생략이 시의 호흡과 의미를 만드는 방식 탐구",
+    content: "산에는 꽃 피네\n꽃이 피네\n갈 봄 여름 없이\n꽃이 피네",
+    focusConcepts: ["홑문장", "문장 성분의 생략", "반복", "시적 호흡"],
+    analysisPrompts: [
+      "서로 같은 문장과 달라진 문장을 골라, 성분이 생략되었는지와 홑문장·겹문장 여부를 판단해 보세요.",
+      "같은 구조를 반복하면서 리듬과 의미의 강조점이 어떻게 만들어지는지 설명해 보세요."
+    ],
+    rewritePrompt: "반복을 살린 버전과 반복을 줄인 산문 버전을 각각 쓰고, 호흡과 강조점을 비교해 보세요.",
+    genre: "시",
+    author: "김소월",
+    sourceNote: "저작권 보호기간 만료 작품 · 일부 발췌"
+  },
+  {
+    id: "literature-dongbaek",
+    order: 9,
+    label: "문학 작품",
+    title: "김유정 〈동백꽃〉",
+    situation: "서술자가 사건을 발견하는 과정에서 문장이 확장되는 방식 탐구",
+    content: "오늘도 또 우리 수탉이 막 쫓기었다. 내가 점심을 먹고 나무를 하러 갈 양으로 나올 때이었다. 산으로 올라서려니까 등뒤에서 푸드득푸드득, 하고 닭의 횃소리가 야단이다. 깜짝 놀라서 고개를 돌려보니 아니나다르랴, 두 놈이 또 얼리었다.",
+    focusConcepts: ["홑문장·겹문장", "관형절", "종속적으로 이어진문장", "시점"],
+    analysisPrompts: [
+      "사건의 순서를 보여 주는 문장을 고르고, 그 안의 주어·서술어 관계를 세어 구조를 판단해 보세요.",
+      "짧은 문장과 긴 문장이 교차하면서 서술자의 놀람과 사건의 속도를 어떻게 드러내는지 설명해 보세요."
+    ],
+    rewritePrompt: "서술자가 본 사건을 두 개의 홑문장으로 줄였다가 다시 하나의 겹문장으로 합치고, 호흡이 어떻게 달라졌는지 설명해 보세요.",
+    genre: "소설",
+    author: "김유정",
+    sourceNote: "저작권 보호기간 만료 작품 · 일부 발췌"
+  },
+  {
+    id: "literature-unsu",
+    order: 10,
+    label: "문학 작품",
+    title: "현진건 〈운수 좋은 날〉",
+    situation: "대화와 서술을 오가는 문장 구조가 인물의 심리를 드러내는 방식 탐구",
+    content: "치삼은 의아한 듯이 김 첨지를 보며, “여보게 또 붓다니, 벌써 우리가 넉 잔씩 먹었네, 돈이 사십 전일세.”라고 주의시켰다.\n“아따 이놈아, 사십 전이 그리 끔찍하냐. 오늘 내가 돈을 막 벌었어. 참 오늘 운수가 좋았느니.”",
+    focusConcepts: ["인용절", "안은문장", "대화의 홑문장", "반어적 표현"],
+    analysisPrompts: [
+      "서술 문장과 인물의 말에서 각각 한 문장을 골라, 홑문장·겹문장과 인용절 여부를 판단해 보세요.",
+      "‘오늘 운수가 좋았느니’가 단정적인 홑문장으로 표현되었을 때 인물의 마음과 독자의 느낌에 어떤 효과가 생기는지 설명해 보세요."
+    ],
+    rewritePrompt: "인물의 말을 간접 인용으로 바꾼 뒤, 직접 인용과 비교하여 인물의 목소리와 정보 초점이 어떻게 달라졌는지 설명해 보세요.",
+    genre: "소설",
+    author: "현진건",
     sourceNote: "저작권 보호기간 만료 작품 · 일부 발췌"
   }
 ];
@@ -258,7 +325,18 @@ export const realLifeLessonGuides: RealLifeLessonGuide[] = [
 
 export const grammarRealLifeLessonGuide: RealLifeLessonGuide = {
   lessonNumber: 6,
-  materialIds: ["article", "notice", "dialogue", "presentation", "interview", "social", "literature"],
+  materialIds: [
+    "article",
+    "notice",
+    "dialogue",
+    "presentation",
+    "interview",
+    "social",
+    "literature",
+    "literature-sanyuhwa",
+    "literature-dongbaek",
+    "literature-unsu"
+  ],
   focusConcepts: ["문장 구조", "종결 표현", "높임 표현", "시간 표현", "피동·사동", "부정 표현", "인용 표현", "담화 맥락"],
   reviewPrompts: [
     "1차시: 문장 성분과 주어·서술어 관계를 찾아 기본 구조를 설명해 보세요.",
@@ -278,13 +356,22 @@ export function getRealLifeLessonGuide(trackId: CourseTrackId = "structure") {
   return trackId === "grammar" ? grammarRealLifeLessonGuide : realLifeLessonGuides[0];
 }
 
-export function getRealLifeMaterialsForLesson(lessonNumber: CourseLessonNumber, trackId: CourseTrackId = "structure") {
+export function getRealLifeMaterialsForLesson(
+  lessonNumber: CourseLessonNumber,
+  trackId: CourseTrackId = "structure",
+  materialGroup: RealLifeMaterialGroup = "all"
+) {
   const guide = getRealLifeLessonGuide(trackId);
   if (lessonNumber !== guide.lessonNumber) return [];
   const materials = trackId === "grammar" ? grammarRealLifeMaterials : realLifeMaterials;
   return guide.materialIds
     .map((id) => materials.find((material) => material.id === id))
-    .filter((material): material is RealLifeMaterial => Boolean(material));
+    .filter((material): material is RealLifeMaterial => Boolean(material))
+    .filter((material) => materialGroup === "all" || getRealLifeMaterialGroup(material) === materialGroup);
+}
+
+export function getRealLifeMaterialGroup(material: RealLifeMaterial): Exclude<RealLifeMaterialGroup, "all"> {
+  return material.genre ? "literature" : "authentic";
 }
 
 export function buildRealLifeTask(material: RealLifeMaterial, mode: RealLifePracticeMode) {
