@@ -38,7 +38,7 @@ export function RealLifeChapter({ lessonNumber, trackId }: RealLifeChapterProps)
   const [demo, setDemo] = useState(false);
 
   const material = lessonMaterials[materialIndex] ?? lessonMaterials[0];
-  const task = buildRealLifeTask(material, mode, trackId);
+  const task = buildRealLifeTask(material, mode);
   const selectedMode = realLifePracticeModes.find((item) => item.id === mode) ?? realLifePracticeModes[0];
 
   async function ensureSession() {
@@ -257,7 +257,7 @@ export function RealLifeChapter({ lessonNumber, trackId }: RealLifeChapterProps)
             </div>
           ))}
         </div>
-        <p className="privacy-reminder">실제 사람의 이름, 계정, 연락처는 입력하지 마세요. 화면의 자료는 모두 수업용으로 새로 만든 예시입니다.</p>
+        <p className="privacy-reminder">실제 사람의 이름, 계정, 연락처는 입력하지 마세요. 문학 작품 외의 화면 자료는 모두 수업용으로 새로 만든 예시입니다.</p>
       </aside>
     </div>
   );

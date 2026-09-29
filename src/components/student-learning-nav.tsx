@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 
 export type StudentSection = "diagnosis" | "challenge" | "self-study" | "wrong-notes";
 
@@ -12,7 +13,7 @@ const sections = [
 export function StudentLearningNav({ active }: { active: StudentSection }) {
   return (
     <nav className="student-learning-nav" aria-label="학생 학습 영역">
-      <Link className="student-learning-home" href="/learn" aria-label="문득문득 학습 홈">문득문득</Link>
+      <BrandLogo className="student-learning-home" href="/learn" />
       <div>
         {sections.map((section) => (
           <Link aria-current={active === section.id ? "page" : undefined} className={active === section.id ? "active" : ""} href={section.href} key={section.id}>

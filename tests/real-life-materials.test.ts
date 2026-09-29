@@ -46,8 +46,18 @@ test("P6: 5차시는 1~4차시 관점과 세 단계 실생활 과제를 통합�
 test("P6: 현재 여섯 차시 수업의 실생활 자료 원본은 나중의 재사용을 위해 보존한다", () => {
   assert.equal(getRealLifeMaterialsForLesson(5, "grammar").length, 0);
   const materials = getRealLifeMaterialsForLesson(6, "grammar");
-  assert.equal(materials.length, 6);
-  assert.equal(grammarRealLifeMaterials.length, 6);
+  assert.equal(materials.length, 7);
+  assert.equal(grammarRealLifeMaterials.length, 7);
+});
+
+test("P3·P4·P6: 문학 작품은 구조 찾기에서 표현 효과와 산문 고쳐 쓰기로 확장된다", () => {
+  const literature = grammarRealLifeMaterials.find((material) => material.id === "literature");
+  assert.ok(literature);
+  assert.match(literature.title, /김소월.*진달래꽃/);
+  assert.match(literature.sourceNote, /저작권 보호기간 만료/);
+  assert.ok(literature.analysisPrompts.some((prompt) => /절의 경계/.test(prompt)));
+  assert.ok(literature.analysisPrompts.some((prompt) => /화자의 태도/.test(prompt)));
+  assert.match(literature.rewritePrompt, /산문.*바꾼 뒤/);
 });
 
 test("P6: 실생활 자료 활동은 서버 입력 스키마와 비계 응답에 연결된다", () => {

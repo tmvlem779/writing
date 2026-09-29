@@ -1,7 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Jua, Noto_Sans_KR } from "next/font/google";
+import { BrandLogo } from "@/components/brand-logo";
 import { PasswordSetupSessionRedirect } from "@/components/password-setup-session-redirect";
 import "./globals.css";
+
+const bodyFont = Noto_Sans_KR({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-body"
+});
+
+const brandFont = Jua({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-brand"
+});
 
 export const metadata: Metadata = {
   title: "문득문득 | 문장 구조와 확장",
@@ -10,14 +25,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" data-scroll-behavior="smooth">
+    <html lang="ko" data-scroll-behavior="smooth" className={`${bodyFont.variable} ${brandFont.variable}`}>
       <body>
         <PasswordSetupSessionRedirect />
         <header className="site-header">
-          <Link className="brand" href="/" aria-label="문득문득 홈">
-            <span className="brand-mark">문</span>
-            <span>문득문득</span>
-          </Link>
+          <BrandLogo className="brand" />
           <nav aria-label="주요 메뉴">
             <Link href="/learn">학습하기</Link>
             <Link href={{ pathname: "/history" }}>나의 기록</Link>

@@ -100,14 +100,14 @@ test("P6·PRIVACY: 6차시 챕터 3은 숨기되 실생활 자료는 나중의 �
   assert.deepEqual(getCourseLesson(6, "grammar").realLifeMaterialIds, []);
   assert.equal(getRealLifeMaterialsForLesson(4, "grammar").length, 0);
   assert.equal(getRealLifeMaterialsForLesson(5, "grammar").length, 0);
-  assert.equal(getRealLifeMaterialsForLesson(6, "grammar").length, 6);
+  assert.equal(getRealLifeMaterialsForLesson(6, "grammar").length, 7);
   assert.equal(getRealLifeLessonGuide("grammar").lessonNumber, 6);
   assert.equal(getRealLifeLessonGuide("grammar").reviewPrompts.length, 5);
-  assert.deepEqual(grammarRealLifeMaterials.map((material) => material.id), ["article", "notice", "dialogue", "presentation", "interview", "social"]);
+  assert.deepEqual(grammarRealLifeMaterials.map((material) => material.id), ["article", "notice", "dialogue", "presentation", "interview", "social", "literature"]);
   for (const material of grammarRealLifeMaterials) {
     assert.doesNotMatch(material.content, /@|\b01[016789]-?\d{3,4}-?\d{4}\b/);
     for (const mode of realLifePracticeModes) {
-      assert.ok(buildRealLifeTask(material, mode.id, "grammar").length > 20);
+      assert.ok(buildRealLifeTask(material, mode.id).length > 20);
     }
   }
 });

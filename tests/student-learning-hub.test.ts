@@ -12,6 +12,8 @@ const selfStudyPage = read("src/app/learn/self-study/page.tsx");
 const wrongNotesPage = read("src/app/learn/wrong-notes/page.tsx");
 const diagnosisApi = read("src/app/api/diagnosis/route.ts");
 const migration = read("supabase/migrations/202609280003_add_wrong_answers.sql");
+const layout = read("src/app/layout.tsx");
+const styles = read("src/app/globals.css");
 
 test("학생 학습 홈은 네 학습 영역을 각각 독립 경로로 연결한다", () => {
   for (const [label, href] of [
@@ -47,6 +49,18 @@ test("P1·P3: 진단 오답은 정답을 즉시 공개하지 않고 관찰 단�
 test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 보관된 6차시 3장 자료를 사용한다", () => {
   assert.match(challengePage, /WritingStudio/);
   assert.match(selfStudyPage, /RealLifeChapter lessonNumber=\{6\} trackId="grammar"/);
+  assert.match(selfStudyPage, /문학 작품/);
+});
+
+test("학생 홈은 둥근 브랜드 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {
+  assert.match(layout, /Jua/);
+  assert.match(layout, /Noto_Sans_KR/);
+  assert.match(dashboard, /스스로 해결한 유형/);
+  assert.match(dashboard, /도움이 필요한 영역/);
+  assert.match(dashboard, /현재 비계 수준/);
+  assert.match(dashboard, /추천 다음 활동/);
+  assert.match(dashboard, /scaffoldLabel/);
+  assert.match(styles, /learning-status-list/);
 });
 
 test("PRIVACY: 오답은 학생별 RLS로 격리되고 오답노트는 로그인한 학생 행만 조회한다", () => {

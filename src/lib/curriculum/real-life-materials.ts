@@ -1,6 +1,6 @@
 import type { CourseLessonNumber, CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 
-export type RealLifeMaterialKind = "article" | "notice" | "dialogue" | "presentation" | "interview" | "social";
+export type RealLifeMaterialKind = "article" | "notice" | "dialogue" | "presentation" | "interview" | "social" | "literature";
 
 export type RealLifeMaterial = {
   id: RealLifeMaterialKind;
@@ -12,7 +12,7 @@ export type RealLifeMaterial = {
   focusConcepts: string[];
   analysisPrompts: string[];
   rewritePrompt: string;
-  sourceNote: "수업용 재구성 자료";
+  sourceNote: "수업용 재구성 자료" | "저작권 보호기간 만료 작품 · 일부 발췌";
 };
 
 export type RealLifePracticeMode = "structure" | "effect" | "rewrite";
@@ -219,6 +219,21 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     ],
     rewritePrompt: "같은 내용을 학교 누리집의 공식 기사로 바꾸고, 종결·높임·시간 표현을 왜 바꾸었는지 설명해 보세요.",
     sourceNote: "수업용 재구성 자료"
+  },
+  {
+    id: "literature",
+    order: 7,
+    label: "문학 작품",
+    title: "김소월 〈진달래꽃〉",
+    situation: "시의 문장 구조와 문법 요소가 화자의 태도를 드러내는 방식 탐구",
+    content: "나 보기가 역겨워\n가실 때에는\n말없이 고이 보내 드리우리다.",
+    focusConcepts: ["명사절", "관형절", "높임 표현", "의지·시간 표현", "시적 화자의 태도"],
+    analysisPrompts: [
+      "‘나 보기가’와 ‘가실 때’에서 절의 경계를 찾고, 각 절이 문장 안에서 어떤 역할을 하는지 설명해 보세요.",
+      "‘가실’, ‘드리우리다’의 높임·시간·의지 표현이 이별을 대하는 화자의 태도에 어떤 효과를 더하는지 근거를 들어 말해 보세요."
+    ],
+    rewritePrompt: "세 행의 뜻을 일상적인 산문 두 문장으로 바꾼 뒤, 원문의 구조와 문법 요소를 바꾸면서 정서와 강조점이 어떻게 달라졌는지 설명해 보세요.",
+    sourceNote: "저작권 보호기간 만료 작품 · 일부 발췌"
   }
 ];
 
@@ -243,7 +258,7 @@ export const realLifeLessonGuides: RealLifeLessonGuide[] = [
 
 export const grammarRealLifeLessonGuide: RealLifeLessonGuide = {
   lessonNumber: 6,
-  materialIds: ["article", "notice", "dialogue", "presentation", "interview", "social"],
+  materialIds: ["article", "notice", "dialogue", "presentation", "interview", "social", "literature"],
   focusConcepts: ["문장 구조", "종결 표현", "높임 표현", "시간 표현", "피동·사동", "부정 표현", "인용 표현", "담화 맥락"],
   reviewPrompts: [
     "1차시: 문장 성분과 주어·서술어 관계를 찾아 기본 구조를 설명해 보세요.",
@@ -272,10 +287,8 @@ export function getRealLifeMaterialsForLesson(lessonNumber: CourseLessonNumber, 
     .filter((material): material is RealLifeMaterial => Boolean(material));
 }
 
-export function buildRealLifeTask(material: RealLifeMaterial, mode: RealLifePracticeMode, trackId: CourseTrackId = "structure") {
-  const guide = getRealLifeLessonGuide(trackId);
-  const contextualize = (prompt: string) => prompt.replace("자료", `${material.label} 자료`);
-  if (mode === "structure") return contextualize(guide.analysisPrompts[0]);
-  if (mode === "effect") return contextualize(guide.analysisPrompts[1]);
-  return contextualize(guide.rewritePrompt);
+export function buildRealLifeTask(material: RealLifeMaterial, mode: RealLifePracticeMode) {
+  if (mode === "structure") return material.analysisPrompts[0];
+  if (mode === "effect") return material.analysisPrompts[1];
+  return material.rewritePrompt;
 }

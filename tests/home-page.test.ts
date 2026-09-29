@@ -4,6 +4,7 @@ import test from "node:test";
 
 const page = readFileSync(new URL("../src/app/page.tsx", import.meta.url), "utf8");
 const layout = readFileSync(new URL("../src/app/layout.tsx", import.meta.url), "utf8");
+const brandLogo = readFileSync(new URL("../src/components/brand-logo.tsx", import.meta.url), "utf8");
 
 test("첫 화면은 문득문득을 먼저 보여 주고 학습 시작을 로그인으로 연결한다", () => {
   assert.match(page, /<span>문득문득<\/span>[\s\S]*질문으로 얻고, 문장으로 깨닫다/);
@@ -22,7 +23,8 @@ test("첫 화면에서 학습 원리와 수업 흐름 소개 영역을 제거한
 
 test("공통 화면의 브랜드명을 문득문득으로 통일한다", () => {
   assert.match(layout, /문득문득 \| 문장 구조와 확장/);
-  assert.match(layout, /aria-label="문득문득 홈"/);
+  assert.match(brandLogo, /aria-label="문득문득 홈"/);
+  assert.match(brandLogo, />문득문득</);
   assert.doesNotMatch(layout, /문장나래/);
 });
 
