@@ -3,6 +3,7 @@ import fs from "node:fs";
 import test from "node:test";
 import { activitySchema } from "../src/lib/agent/schema.ts";
 import { buildFallbackResponse } from "../src/lib/agent/fallback.ts";
+import { resolveOpenAiModel } from "../src/lib/agent/model.ts";
 import { removeTrustedCurriculumPassages } from "../src/lib/safety/moderation.ts";
 import {
   buildRealLifeTask,
@@ -107,6 +108,11 @@ test("SAFE: 고정 문학 본문은 안전 검사에서 제외하되 학생 작�
 
   assert.doesNotMatch(result, /죽어도 아니 눈물/);
   assert.match(result, /제가 쓴 답은 반드시 검사되어야 합니다/);
+});
+
+test("AI: 환경 변수의 줄바꿈과 공백을 제거해 지원 모델 이름을 사용한다", () => {
+  assert.equal(resolveOpenAiModel("gpt-6-luna\r "), "gpt-6-luna");
+  assert.equal(resolveOpenAiModel("  "), "gpt-6-luna");
 });
 
 test("PRIVACY: 수업용 자료에는 연락처나 실제 계정 표기가 없다", () => {

@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { resolveOpenAiModel } from "./model";
 import { agentResponseJsonSchema, agentResponseSchema, type AgentResponse, type TurnRequest } from "./schema";
 import { PROMPT_VERSION, SYSTEM_PROMPT } from "./system-prompt";
 
@@ -7,7 +8,7 @@ export async function runOpenAiAgent(
   request: TurnRequest,
   safetyIdentifier: string
 ): Promise<{ response: AgentResponse; usage: { input: number; output: number }; model: string }> {
-  const model = process.env.OPENAI_MODEL ?? "gpt-6-luna";
+  const model = resolveOpenAiModel();
   const history = request.history.map((item) => `${item.role === "student" ? "학생" : "튜터"}: ${item.content}`).join("\n");
   const input = `
 활동: ${request.activity}
