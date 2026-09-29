@@ -3,6 +3,7 @@ import fs from "node:fs";
 import test from "node:test";
 import { activitySchema } from "../src/lib/agent/schema.ts";
 import { buildFallbackResponse } from "../src/lib/agent/fallback.ts";
+import { removeTrustedCurriculumPassages } from "../src/lib/safety/moderation.ts";
 import {
   buildRealLifeTask,
   grammarRealLifeMaterials,
@@ -97,6 +98,15 @@ test("P3·P5: 문학 겹문장 다중 선택은 정답 공개 대신 선택 근�
   assert.match(response.question, /주어·서술어 관계/);
   assert.match(response.question, /왜 겹문장/);
   assert.deepEqual(response.focusConcepts, ["홑문장·겹문장", "주어·서술어 관계", "절의 경계"]);
+});
+
+test("SAFE: 고정 문학 본문은 안전 검사에서 제외하되 학생 작성 내용은 남긴다", () => {
+  const trustedPoem = "나 보기가 역겨워 가실 때에는\n죽어도 아니 눈물 흘리오리다.";
+  const input = `[자료 본문]\n${trustedPoem}\n\n[학생 답]\n제가 쓴 답은 반드시 검사되어야 합니다.`;
+  const result = removeTrustedCurriculumPassages(input, [trustedPoem]);
+
+  assert.doesNotMatch(result, /죽어도 아니 눈물/);
+  assert.match(result, /제가 쓴 답은 반드시 검사되어야 합니다/);
 });
 
 test("PRIVACY: 수업용 자료에는 연락처나 실제 계정 표기가 없다", () => {

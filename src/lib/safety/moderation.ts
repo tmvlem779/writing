@@ -8,6 +8,24 @@ export function createSafetyIdentifier(userId: string): string {
   return createHash("sha256").update(`${salt ?? "development-only"}:${userId}`).digest("hex").slice(0, 64);
 }
 
+export function removeTrustedCurriculumPassages(input: string, trustedPassages: string[]): string {
+  const variants = new Set<string>();
+
+  for (const passage of trustedPassages) {
+    const trimmed = passage.trim();
+    if (!trimmed) continue;
+    variants.add(trimmed);
+    variants.add(trimmed.replace(/\s*\n\s*/g, " "));
+  }
+
+  let studentAuthoredInput = input;
+  for (const passage of [...variants].sort((left, right) => right.length - left.length)) {
+    studentAuthoredInput = studentAuthoredInput.replaceAll(passage, " ");
+  }
+
+  return studentAuthoredInput.replace(/\s+/g, " ").trim();
+}
+
 export async function moderateText(client: OpenAI, input: string) {
   const result = await client.moderations.create({
     model: "omni-moderation-latest",

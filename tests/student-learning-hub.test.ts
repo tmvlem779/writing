@@ -13,6 +13,7 @@ const selfStudyWorkspace = read("src/components/self-study-workspace.tsx");
 const realLifeChapter = read("src/components/real-life-chapter.tsx");
 const wrongNotesPage = read("src/app/learn/wrong-notes/page.tsx");
 const diagnosisApi = read("src/app/api/diagnosis/route.ts");
+const agentTurnApi = read("src/app/api/agent/turn/route.ts");
 const migration = read("supabase/migrations/202609280003_add_wrong_answers.sql");
 const layout = read("src/app/layout.tsx");
 const styles = read("src/app/globals.css");
@@ -67,6 +68,10 @@ test("P3·P4: 문학 학습은 겹문장을 복수 선택한 뒤 그 선택으�
   assert.match(realLifeChapter, /literatureSelectionSubmitted/);
   assert.doesNotMatch(realLifeChapter, /literature-inline-draft/);
   assert.doesNotMatch(realLifeChapter, /작품에서 고른 문장과 구조 판단/);
+  assert.doesNotMatch(styles, /literature-poem \.literature-sentence-list \{ grid-template-columns: repeat\(2/);
+  assert.match(styles, /literature-poem \.literature-sentence-list \{ width: min\(100%, 720px\)/);
+  assert.match(agentTurnApi, /grammarRealLifeMaterials/);
+  assert.match(agentTurnApi, /removeTrustedCurriculumPassages/);
 });
 
 test("학생 홈은 둥근 브랜드 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {

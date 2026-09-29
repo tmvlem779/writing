@@ -6,9 +6,15 @@ import { deriveLearningEvidence } from "@/lib/agent/learning-evidence";
 import { runOpenAiAgent } from "@/lib/agent/openai-agent";
 import { turnRequestSchema } from "@/lib/agent/schema";
 import { PROMPT_VERSION } from "@/lib/agent/system-prompt";
-import { createSafetyIdentifier, moderateText } from "@/lib/safety/moderation";
+import { grammarRealLifeMaterials, realLifeMaterials } from "@/lib/curriculum/real-life-materials";
+import { createSafetyIdentifier, moderateText, removeTrustedCurriculumPassages } from "@/lib/safety/moderation";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+const trustedCurriculumPassages = [...realLifeMaterials, ...grammarRealLifeMaterials].flatMap((material) => [
+  material.content,
+  ...(material.selectableSentences ?? [])
+]);
 
 export async function POST(request: Request) {
   const parsed = turnRequestSchema.safeParse(await request.json().catch(() => null));
@@ -72,7 +78,10 @@ export async function POST(request: Request) {
   const safetyIdentifier = createSafetyIdentifier(userId);
 
   try {
-    const inputSafety = await moderateText(client, parsed.data.message);
+    const moderationInput = parsed.data.activity === "authentic"
+      ? removeTrustedCurriculumPassages(parsed.data.message, trustedCurriculumPassages)
+      : parsed.data.message;
+    const inputSafety = await moderateText(client, moderationInput || "수업 자료 선택");
     if (inputSafety.flagged) {
       await admin?.from("safety_events").insert({
         user_id: auth.user?.id ?? null,

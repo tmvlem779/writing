@@ -262,10 +262,10 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
                   </div>
                   {response && (
                     <article className="coach-card literature-coach" aria-live="polite">
-                      <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
+                      <div className="coach-label"><span>AI 학습 도우미</span><small>{response.safety.blocked ? "안전 안내" : scaffoldLabel(response.scaffoldLevel)}</small></div>
                       <p>{response.studentMessage}</p>
                       <div className="coach-question">
-                        <span>고른 문장들을 바탕으로 한 질문</span>
+                        <span>{response.safety.blocked ? "안전한 학습을 위한 안내" : "고른 문장들을 바탕으로 한 질문"}</span>
                         <strong>{response.question}</strong>
                       </div>
                     </article>
