@@ -17,9 +17,10 @@ type Message = { role: "student" | "assistant"; content: string };
 type RealLifeChapterProps = {
   lessonNumber: CourseLessonNumber;
   trackId: CourseTrackId;
+  showOverview?: boolean;
 };
 
-export function RealLifeChapter({ lessonNumber, trackId }: RealLifeChapterProps) {
+export function RealLifeChapter({ lessonNumber, trackId, showOverview = true }: RealLifeChapterProps) {
   const courseLesson = getCourseLesson(lessonNumber, trackId);
   const track = getCourseTrack(trackId);
   const lessonGuide = getRealLifeLessonGuide(trackId);
@@ -169,21 +170,23 @@ export function RealLifeChapter({ lessonNumber, trackId }: RealLifeChapterProps)
           <p>{material.content}</p>
         </article>
 
-        <section className="analysis-guide" aria-labelledby="analysis-guide-title">
-          <div>
-            <span id="analysis-guide-title">1~{lessonNumber - 1}차시 종합 돋보기</span>
-            <h2>배운 개념을 모두 활용해 살펴보세요</h2>
-          </div>
-          <div className="concept-tags" aria-label="활용 개념">
-            {lessonGuide.focusConcepts.map((concept) => <span key={concept}>{concept}</span>)}
-          </div>
-          <ol className="concept-review-list">
-            {lessonGuide.reviewPrompts.map((prompt) => <li key={prompt}>{prompt}</li>)}
-          </ol>
-          <ol className="analysis-question-list">
-            {lessonGuide.analysisPrompts.map((prompt) => <li key={prompt}>{prompt}</li>)}
-          </ol>
-        </section>
+        {showOverview && (
+          <section className="analysis-guide" aria-labelledby="analysis-guide-title">
+            <div>
+              <span id="analysis-guide-title">1~{lessonNumber - 1}차시 종합 돋보기</span>
+              <h2>배운 개념을 모두 활용해 살펴보세요</h2>
+            </div>
+            <div className="concept-tags" aria-label="활용 개념">
+              {lessonGuide.focusConcepts.map((concept) => <span key={concept}>{concept}</span>)}
+            </div>
+            <ol className="concept-review-list">
+              {lessonGuide.reviewPrompts.map((prompt) => <li key={prompt}>{prompt}</li>)}
+            </ol>
+            <ol className="analysis-question-list">
+              {lessonGuide.analysisPrompts.map((prompt) => <li key={prompt}>{prompt}</li>)}
+            </ol>
+          </section>
+        )}
 
         <section className="real-life-practice" aria-labelledby="practice-heading">
           <span id="practice-heading">나의 분석과 연습</span>

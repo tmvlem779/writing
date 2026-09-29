@@ -49,6 +49,7 @@ test("P1·P3: 진단 오답은 정답을 즉시 공개하지 않고 관찰 단�
 test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 보관된 6차시 3장 자료를 사용한다", () => {
   assert.match(challengePage, /WritingStudio/);
   assert.match(selfStudyPage, /RealLifeChapter lessonNumber=\{6\} trackId="grammar"/);
+  assert.match(selfStudyPage, /showOverview=\{false\}/);
   assert.match(selfStudyPage, /문학 작품/);
 });
 
