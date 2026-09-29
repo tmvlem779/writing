@@ -25,6 +25,8 @@ const nextActions = {
 
 export function buildFallbackResponse(request: TurnRequest): AgentResponse {
   const asksForHelp = /(모르|도와|힌트|어려)/.test(request.message);
+  const isLiteratureMultiSelect = request.activity === "authentic"
+    && /\[첫 과제\] 작품에서 겹문장을 찾아 모두 고르시오/.test(request.message);
   const level = nextScaffoldLevel({
     currentLevel: request.scaffoldLevel,
     attemptCount: request.attemptCount,
@@ -39,12 +41,23 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
     "직접 설명을 확인한 뒤, 같은 원리를 새 문장에 적용해 봅시다."
   ][level];
 
+  const literatureQuestions = [
+    "고른 문장 가운데 하나를 택해 주어·서술어 관계를 모두 표시하고, 왜 겹문장이라고 판단했는지 설명해 볼까요?",
+    "방금 확인한 기준을 나머지 선택에도 적용하면 모든 문장에서 두 개 이상의 주어·서술어 관계가 나타나는지 살펴볼까요?",
+    "선택하지 않은 문장 중에도 같은 기준에 맞는 문장이 있는지 다시 읽고, 있다면 그 절의 경계를 표시해 볼까요?",
+    "고른 겹문장 하나를 두 홑문장으로 나누면 의미의 연결이나 호흡이 어떻게 달라지는지 비교해 볼까요?"
+  ];
+
   return {
     mode: request.activity === "error" ? "revise" : request.activity === "compare" ? "compare" : level === 4 ? "model" : level > 0 ? "hint" : "question",
     scaffoldLevel: level,
     studentMessage: `${lead} 현재 도움 단계는 ‘${scaffoldLabel(level)}’입니다.`,
-    question: activityQuestions[request.activity],
-    focusConcepts: request.activity === "authentic"
+    question: isLiteratureMultiSelect
+      ? literatureQuestions[Math.min(request.attemptCount, literatureQuestions.length - 1)]
+      : activityQuestions[request.activity],
+    focusConcepts: isLiteratureMultiSelect
+      ? ["홑문장·겹문장", "주어·서술어 관계", "절의 경계"]
+      : request.activity === "authentic"
       ? ["문장 구조", "표현 효과", "목적과 독자"]
       : ["문장 성분", "호응과 확장"],
     observations: ["개발용 규칙 기반 응답이며 실제 수업에서는 AI 진단 결과로 대체됩니다."],

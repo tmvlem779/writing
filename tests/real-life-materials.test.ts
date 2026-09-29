@@ -85,6 +85,20 @@ test("P6: 실생활 자료 활동은 서버 입력 스키마와 비계 응답에
   assert.equal(response.nextAction, "transfer");
 });
 
+test("P3·P5: 문학 겹문장 다중 선택은 정답 공개 대신 선택 근거 질문으로 이어진다", () => {
+  const response = buildFallbackResponse({
+    sessionId: "demo-session",
+    activity: "authentic",
+    message: "[첫 과제] 작품에서 겹문장을 찾아 모두 고르시오.\n[학생이 겹문장으로 고른 문장들]\n1. 산으로 올라서려니까 닭의 횃소리가 야단이다.",
+    scaffoldLevel: 0,
+    attemptCount: 0,
+    history: []
+  });
+  assert.match(response.question, /주어·서술어 관계/);
+  assert.match(response.question, /왜 겹문장/);
+  assert.deepEqual(response.focusConcepts, ["홑문장·겹문장", "주어·서술어 관계", "절의 경계"]);
+});
+
 test("PRIVACY: 수업용 자료에는 연락처나 실제 계정 표기가 없다", () => {
   const combined = realLifeMaterials.map((material) => material.content).join("\n");
   assert.doesNotMatch(combined, /@|\b01[016789]-?\d{3,4}-?\d{4}\b/);

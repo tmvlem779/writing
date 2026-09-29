@@ -158,3 +158,9 @@ test("DATA: 문학 큰 질문·근거 선택·인라인 답안을 반영한 프�
   assert.match(migration, /writing-tutor-v9/);
   assert.match(migration, /literature-question-evidence-inline-answer/);
 });
+
+test("DATA: 문학 겹문장 다중 선택과 질문 연쇄를 반영한 프롬프트 v10 마이그레이션이 존재한다", () => {
+  const migration = fs.readFileSync("supabase/migrations/202609290003_add_literature_multi_select_prompt.sql", "utf8");
+  assert.match(migration, /writing-tutor-v10/);
+  assert.match(migration, /literature-compound-sentence-multi-select/);
+});

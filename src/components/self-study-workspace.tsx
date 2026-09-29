@@ -15,7 +15,7 @@ const groups: Array<{
   {
     id: "literature",
     label: "문학 작품",
-    description: "큰 질문을 읽고, 시와 소설에서 답의 근거를 직접 골라 써요.",
+    description: "작품에서 겹문장을 모두 고른 뒤, 선택을 바탕으로 질문을 이어 가요.",
     countLabel: "시 2편 · 소설 2편"
   },
   {

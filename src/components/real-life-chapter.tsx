@@ -36,8 +36,8 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
   const [history, setHistory] = useState<Message[]>([]);
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
-  const [studentObservation, setStudentObservation] = useState("");
-  const [selectedSentence, setSelectedSentence] = useState("");
+  const [selectedSentences, setSelectedSentences] = useState<string[]>([]);
+  const [literatureSelectionSubmitted, setLiteratureSelectionSubmitted] = useState(false);
   const [attemptedMaterials, setAttemptedMaterials] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -63,9 +63,10 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
     return body.id as string;
   }
 
-  async function submit() {
-    if (!draft.trim() || pending) return;
-    const submittedDraft = draft.trim();
+  async function sendTurn(submittedDraft: string, selectionTurn = false) {
+    const normalizedDraft = submittedDraft.trim();
+    if (pending || (!selectionTurn && !normalizedDraft)) return;
+    if (selectionTurn && (!isLiterature || literatureSelectionSubmitted || selectedSentences.length === 0)) return;
     setPending(true);
     setError("");
     try {
@@ -78,18 +79,18 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
         `[자료 제목] ${material.title}`,
         `[자료 본문]\n${material.content}`,
         isLiterature
-          ? `[큰 질문] ${material.analysisPrompts[0]}`
+          ? `[첫 과제] 작품에서 겹문장을 찾아 모두 고르시오.`
           : `[현재 과제] ${task}`,
         isLiterature
-          ? `[학생이 고른 근거 부분]\n${selectedSentence.replace(/\s*\n\s*/g, " ")}`
+          ? `[학생이 겹문장으로 고른 문장들]\n${selectedSentences.map((sentence, index) => `${index + 1}. ${sentence.replace(/\s*\n\s*/g, " ")}`).join("\n")}`
           : null,
         isLiterature
-          ? `[문학 탐구 순서] 큰 질문을 읽고 작품에서 근거 부분을 고른 뒤 그 자리에서 자기 답을 작성함`
+          ? `[문학 탐구 단계] ${selectionTurn ? "학생이 겹문장 후보를 모두 골라 처음 제출함" : "학생이 선택한 문장들을 바탕으로 받은 질문에 답함"}`
           : null,
         isLiterature
-          ? `[튜터 응답 원칙] 학생이 고른 근거 부분과 답을 구체적으로 반영해 한 가지 근거만 다시 묻고, 완성 분석이나 정답은 먼저 제시하지 말 것`
+          ? `[튜터 응답 원칙] 고른 문장들을 구체적으로 반영해 한 번에 질문 하나만 제시할 것. 빠뜨리거나 과잉 선택한 문장이 있어도 정답 목록을 먼저 공개하지 말고 주어·서술어 관계나 절 경계를 확인하게 할 것`
           : null,
-        `[학생 답]\n${submittedDraft}`
+        `[학생 답]\n${selectionTurn ? "문장 다중 선택을 제출함" : normalizedDraft}`
       ].filter(Boolean).join("\n\n");
       const result = await fetch("/api/agent/turn", {
         method: "POST",
@@ -110,19 +111,35 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
       setDemo((current) => current || Boolean(next.demo));
       setScaffoldLevel(next.scaffoldLevel);
       setAttemptCount((count) => count + 1);
-      if (isLiterature && !studentObservation) setStudentObservation(submittedDraft);
+      if (selectionTurn) setLiteratureSelectionSubmitted(true);
       setAttemptedMaterials((current) => new Set(current).add(material.id));
       setHistory((items) => [
         ...items,
-        { role: "student", content: submittedDraft },
+        {
+          role: "student",
+          content: selectionTurn
+            ? `겹문장 후보 ${selectedSentences.length}개 선택: ${selectedSentences.join(" / ")}`
+            : normalizedDraft
+        },
         { role: "assistant", content: `${next.studentMessage} ${next.question}` }
       ]);
-      if (isLiterature) setDraft("");
+      if (isLiterature) {
+        setDraft("");
+        requestAnimationFrame(() => draftRef.current?.focus());
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "문제가 생겼습니다.");
     } finally {
       setPending(false);
     }
+  }
+
+  async function submit() {
+    await sendTurn(draft);
+  }
+
+  async function submitLiteratureSelection() {
+    await sendTurn("문장 다중 선택", true);
   }
 
   function changeMaterial(index: number) {
@@ -134,18 +151,16 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
     setHistory([]);
     setScaffoldLevel(0);
     setAttemptCount(0);
-    setStudentObservation("");
-    setSelectedSentence("");
+    setSelectedSentences([]);
+    setLiteratureSelectionSubmitted(false);
     setError("");
   }
 
   function chooseLiteratureSentence(sentence: string) {
-    if (!isLiterature || studentObservation || pending) return;
-    setSelectedSentence(sentence);
-    setDraft("");
-    requestAnimationFrame(() => {
-      draftRef.current?.focus();
-    });
+    if (!isLiterature || literatureSelectionSubmitted || pending) return;
+    setSelectedSentences((current) => current.includes(sentence)
+      ? current.filter((item) => item !== sentence)
+      : [...current, sentence]);
   }
 
   function changeMode(nextMode: RealLifePracticeMode) {
@@ -204,70 +219,75 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
           {isLiterature && material.selectableSentences ? (
             <>
               <section className="literature-big-question" aria-labelledby="literature-big-question-title">
-                <span>먼저 생각할 큰 질문</span>
-                <strong id="literature-big-question-title">{material.analysisPrompts[0]}</strong>
-                <small>답의 근거가 되는 작품 부분을 누르면, 그 자리에서 답을 쓸 수 있어요.</small>
+                <span>첫 번째 과제</span>
+                <strong id="literature-big-question-title">작품에서 겹문장을 찾아 모두 고르시오.</strong>
+                <small>겹문장이라고 판단한 문장은 여러 개 선택할 수 있어요. 선택을 마친 뒤 한 번에 제출하세요.</small>
               </section>
-              <p className="sentence-pick-guide">작품을 충분히 읽고 근거가 되는 부분을 누르세요. 시에서는 하나의 문장으로 읽히는 행 묶음을 선택할 수 있어요.</p>
-              <div className="literature-sentence-list" aria-label="클릭해서 분석할 문장 고르기">
+              <p className="sentence-pick-guide">문장을 누르면 선택되고, 다시 누르면 선택이 해제됩니다. 시에서는 하나의 문장으로 읽히는 행 묶음을 선택하세요.</p>
+              <div className="literature-sentence-list" aria-label="겹문장이라고 판단한 문장 모두 고르기">
                 {material.selectableSentences.map((sentence, index) => {
-                  const isSelected = selectedSentence === sentence;
+                  const isSelected = selectedSentences.includes(sentence);
                   return (
-                    <div className={isSelected ? "literature-sentence-wrap selected" : "literature-sentence-wrap"} key={`${material.id}-${index}`}>
-                      <button
-                        aria-pressed={isSelected}
-                        className={isSelected ? "literature-sentence selected" : "literature-sentence"}
-                        disabled={(Boolean(studentObservation) && !isSelected) || pending}
-                        onClick={() => chooseLiteratureSentence(sentence)}
-                        type="button"
-                      >
-                        <span>{sentence}</span>
-                        {isSelected && <small>근거로 선택한 부분</small>}
-                      </button>
-                      {isSelected && (
-                        <section className="inline-literature-answer" aria-label="선택한 부분에 답 쓰기">
-                          {studentObservation && (
-                            <article className="student-observation-card">
-                              <span>이 부분을 근거로 쓴 내 답</span>
-                              <p>{studentObservation}</p>
-                            </article>
-                          )}
-                          {response && (
-                            <article className="coach-card literature-coach" aria-live="polite">
-                              <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
-                              <p>{response.studentMessage}</p>
-                              <div className="coach-question">
-                                <span>선택한 부분에서 이어진 질문</span>
-                                <strong>{response.question}</strong>
-                              </div>
-                            </article>
-                          )}
-                          <label className="draft-label" htmlFor="literature-inline-draft">
-                            {studentObservation ? "AI의 다음 질문에 대한 내 설명" : "선택한 부분을 근거로 한 내 답"}
-                          </label>
-                          <textarea
-                            id="literature-inline-draft"
-                            maxLength={2500}
-                            onChange={(event) => setDraft(event.target.value)}
-                            placeholder={studentObservation
-                              ? "AI가 물은 한 가지에 대해 작품의 표현을 근거로 설명해 보세요."
-                              : "큰 질문에 대한 내 생각을 쓰세요. 주어·서술어 관계나 절의 경계를 근거로 들면 좋아요."}
-                            ref={draftRef}
-                            value={draft}
-                          />
-                          <div className="editor-footer">
-                            <span>{draft.length.toLocaleString()} / 2,500자</span>
-                            <button className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
-                              {pending ? "생각을 살펴보는 중…" : studentObservation ? "내 설명 보내기" : "이 부분을 근거로 답 보내기"}
-                            </button>
-                          </div>
-                          {error && <div className="error-panel" role="alert">{error}</div>}
-                        </section>
-                      )}
-                    </div>
+                    <button
+                      aria-pressed={isSelected}
+                      className={isSelected ? "literature-sentence selected" : "literature-sentence"}
+                      disabled={literatureSelectionSubmitted || pending}
+                      key={`${material.id}-${index}`}
+                      onClick={() => chooseLiteratureSentence(sentence)}
+                      type="button"
+                    >
+                      <span>{sentence}</span>
+                      {isSelected && <small>겹문장으로 선택</small>}
+                    </button>
                   );
                 })}
               </div>
+              {!literatureSelectionSubmitted ? (
+                <div className="literature-selection-actions">
+                  <span><strong>{selectedSentences.length}개</strong> 문장을 선택했어요.</span>
+                  <button
+                    className="primary-button"
+                    disabled={pending || selectedSentences.length === 0}
+                    onClick={submitLiteratureSelection}
+                    type="button"
+                  >
+                    {pending ? "선택을 살펴보는 중…" : "선택 완료하고 질문 받기"}
+                  </button>
+                </div>
+              ) : (
+                <section className="literature-followup-panel" aria-label="선택한 문장 기반 질문">
+                  <div className="selected-sentence-summary">
+                    <span>내가 고른 겹문장 후보 · {selectedSentences.length}개</span>
+                    <ol>{selectedSentences.map((sentence) => <li key={sentence}>{sentence.replace(/\s*\n\s*/g, " ")}</li>)}</ol>
+                  </div>
+                  {response && (
+                    <article className="coach-card literature-coach" aria-live="polite">
+                      <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
+                      <p>{response.studentMessage}</p>
+                      <div className="coach-question">
+                        <span>고른 문장들을 바탕으로 한 질문</span>
+                        <strong>{response.question}</strong>
+                      </div>
+                    </article>
+                  )}
+                  <label className="draft-label" htmlFor="literature-followup-draft">질문에 대한 내 답</label>
+                  <textarea
+                    id="literature-followup-draft"
+                    maxLength={2500}
+                    onChange={(event) => setDraft(event.target.value)}
+                    placeholder="선택한 문장의 주어·서술어 관계나 절의 경계를 근거로 답해 보세요."
+                    ref={draftRef}
+                    value={draft}
+                  />
+                  <div className="editor-footer">
+                    <span>{draft.length.toLocaleString()} / 2,500자</span>
+                    <button className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
+                      {pending ? "답을 살펴보는 중…" : "답 보내고 다음 질문 받기"}
+                    </button>
+                  </div>
+                </section>
+              )}
+              {error && <div className="error-panel" role="alert">{error}</div>}
             </>
           ) : (
             <p>{material.content}</p>
@@ -357,16 +377,16 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
         <dl>
           <div><dt>살펴본 자료</dt><dd>{attemptedMaterials.size}/{lessonMaterials.length}</dd></div>
           <div><dt>현재 도움</dt><dd>{scaffoldLevel + 1}/5</dd></div>
-          <div><dt>현재 단계</dt><dd>{isLiterature ? studentObservation ? "후속 탐구" : selectedSentence ? "답 작성" : "근거 선택" : selectedMode.label}</dd></div>
+          <div><dt>현재 단계</dt><dd>{isLiterature ? literatureSelectionSubmitted ? "질문 이어가기" : selectedSentences.length > 0 ? "선택 확인" : "겹문장 찾기" : selectedMode.label}</dd></div>
         </dl>
         <div className="transfer-sequence">
           {isLiterature
             ? [
-                ["큰 질문", "작품을 읽기 전에 탐구할 질문 하나를 확인해요."],
-                ["근거 선택·답", "작품에서 근거 부분을 누르고 바로 아래에 답을 써요."],
-                ["후속 탐구", "AI가 선택한 부분과 내 답을 바탕으로 한 가지를 물어요."]
+                ["겹문장 찾기", "작품에서 겹문장이라고 판단한 문장을 모두 골라요."],
+                ["선택 제출", "고른 문장을 한 번에 제출하고 판단을 점검해요."],
+                ["질문 이어가기", "AI가 선택한 문장들을 바탕으로 질문을 하나씩 이어 가요."]
               ].map(([label, description], index) => (
-                <div className={index === (studentObservation ? 2 : selectedSentence ? 1 : 0) ? "active" : ""} key={label}>
+                <div className={index === (literatureSelectionSubmitted ? 2 : selectedSentences.length > 0 ? 1 : 0) ? "active" : ""} key={label}>
                   <span>{index + 1}</span>
                   <p><strong>{label}</strong><small>{description}</small></p>
                 </div>

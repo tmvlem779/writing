@@ -58,12 +58,14 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 문�
   assert.match(selfStudyPage, /문학 작품/);
 });
 
-test("P3·P4: 문학 학습은 큰 질문 뒤 근거 부분을 골라 그 자리에서 답하게 한다", () => {
-  assert.match(realLifeChapter, /먼저 생각할 큰 질문/);
-  assert.match(realLifeChapter, /literature-sentence-wrap/);
-  assert.match(realLifeChapter, /inline-literature-answer/);
-  assert.match(realLifeChapter, /학생이 고른 근거 부분/);
-  assert.match(realLifeChapter, /선택한 부분에서 이어진 질문/);
+test("P3·P4: 문학 학습은 겹문장을 복수 선택한 뒤 그 선택으로 질문을 이어 간다", () => {
+  assert.match(realLifeChapter, /작품에서 겹문장을 찾아 모두 고르시오/);
+  assert.match(realLifeChapter, /selectedSentences/);
+  assert.match(realLifeChapter, /submitLiteratureSelection/);
+  assert.match(realLifeChapter, /선택 완료하고 질문 받기/);
+  assert.match(realLifeChapter, /고른 문장들을 바탕으로 한 질문/);
+  assert.match(realLifeChapter, /literatureSelectionSubmitted/);
+  assert.doesNotMatch(realLifeChapter, /literature-inline-draft/);
   assert.doesNotMatch(realLifeChapter, /작품에서 고른 문장과 구조 판단/);
 });
 
