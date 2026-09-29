@@ -24,9 +24,13 @@ export type RealLifeMaterial = {
   focusConcepts: string[];
   analysisPrompts: string[];
   rewritePrompt: string;
+  selectableSentences?: string[];
   genre?: "시" | "소설";
   author?: string;
-  sourceNote: "수업용 재구성 자료" | "저작권 보호기간 만료 작품 · 일부 발췌";
+  sourceNote:
+    | "수업용 재구성 자료"
+    | "저작권 보호기간 만료 작품 · 전문"
+    | "저작권 보호기간 만료 작품 · 확대 발췌";
 };
 
 export type RealLifePracticeMode = "structure" | "effect" | "rewrite";
@@ -143,6 +147,47 @@ export const realLifeMaterials: RealLifeMaterial[] = [
   }
 ];
 
+const jindallaekkotSentences = [
+  "나 보기가 역겨워\n가실 때에는\n말없이 고이 보내드리오리다.",
+  "영변(寧邊)에 약산(藥山)\n진달래꽃\n아름따다 가실 길에 뿌리오리다.",
+  "가시는 걸음 걸음\n놓인 그 꽃을\n사뿐히 즈려밟고 가시옵소서.",
+  "나 보기가 역겨워\n가실 때에는\n죽어도 아니 눈물 흘리오리다."
+];
+
+const sanyuhwaSentences = [
+  "산에는 꽃 피네\n꽃이 피네\n갈 봄 여름없이\n꽃이 피네",
+  "산에\n산에\n피는 꽃은\n저만치 혼자서 피어 있네",
+  "산에서 우는 작은 새요\n꽃이 좋아\n산에서\n사노라네",
+  "산에는 꽃 지네\n꽃이 지네\n갈 봄 여름없이\n꽃이 지네"
+];
+
+const dongbaekkotSentences = [
+  "오늘도 또 우리 수탉이 막 쫓기었다.",
+  "내가 점심을 먹고 나무를 하러 갈 양으로 나올 때이었다.",
+  "산으로 올라서려니까 등뒤에서 푸드득푸드득, 하고 닭의 횃소리가 야단이다.",
+  "깜짝 놀라서 고개를 돌려보니 아니나다르랴, 두 놈이 또 얼리었다.",
+  "점순네 수탉(은 대강이가 크고 똑 오소리같이 실팍하게 생긴 놈)이 덩저리 작은 우리 수탉을 함부로 해내는 것이다.",
+  "그것도 그냥 해내는 것이 아니라 푸드득하고 면두를 쪼고 물러섰다가 좀 사이를 두고 푸드득하고 모가지를 쪼았다.",
+  "이렇게 멋을 부려 가며 여지없이 닦아 놓는다.",
+  "그러면 이 못생긴 것은 쪼일 적마다 주둥이로 땅을 받으며 그 비명이 킥, 킥, 할 뿐이다.",
+  "물론 미처 아물지도 않은 면두를 또 쪼이며 붉은 선혈은 뚝뚝 떨어진다.",
+  "이걸 가만히 내려다보자니 내 대강이가 터져서 피가 흐르는 것같이 두 눈에서 불이 번쩍 난다.",
+  "대뜸 지게막대기를 메고 달려들어 점순네 닭을 후려칠까 하다가 생각을 고쳐먹고 헛매질로 떼어만 놓았다."
+];
+
+const unsuSentences = [
+  "새침하게 흐린 품이 눈이 올 듯하더니 눈은 아니 오고 얼다가 만 비가 추적추적 내리었다.",
+  "이날이야말로 동소문 안에서 인력거꾼 노릇을 하는 김 첨지에게는 오래간만에도 닥친 운수 좋은 날이었다.",
+  "문안에 들어간답시는 앞집 마나님을 전찻길까지 모셔다 드린 것을 비롯으로 행여나 손님이 있을까 하고 정류장에서 어정어정하며 내리는 사람 하나하나에게 거의 비는 듯한 눈결을 보내고 있다가 마침내 교원인 듯한 양복장이를 동광학교까지 태워다 주기로 되었다.",
+  "첫번에 삼십 전, 둘째 번에 오십 전―아침 댓바람에 그리 흔치 않은 일이었다.",
+  "그야말로 재수가 옴붙어서 근 열흘 동안 돈 구경도 못한 김 첨지는 십 전짜리 백통화 서 푼, 또는 다섯 푼이 찰깍하고 손바닥에 떨어질 제 거의 눈물을 흘릴 만큼 기뻤었다.",
+  "더구나 이날 이때에 이 팔십 전이라는 돈이 그에게 얼마나 유용한지 몰랐다.",
+  "컬컬한 목에 모주 한 잔도 적실 수 있거니와 그보다도 앓는 아내에게 설렁탕 한 그릇도 사다줄 수 있음이다.",
+  "그의 아내가 기침으로 쿨럭거리기는 벌써 달포가 넘었다.",
+  "조밥도 굶기를 먹다시피 하는 형편이니 물론 약 한 첩 써 본 일이 없다.",
+  "구태여 쓰려면 못 쓸 바도 아니로되 그는 병이란 놈에게 약을 주어 보내면 재미를 붙여서 자꾸 온다는 자기의 신조에 어디까지 충실하였다."
+];
+
 export const grammarRealLifeMaterials: RealLifeMaterial[] = [
   {
     id: "article",
@@ -240,7 +285,8 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     label: "문학 작품",
     title: "김소월 〈진달래꽃〉",
     situation: "시의 문장 구조와 문법 요소가 화자의 태도를 드러내는 방식 탐구",
-    content: "나 보기가 역겨워\n가실 때에는\n말없이 고이 보내 드리우리다.",
+    content: jindallaekkotSentences.join("\n\n"),
+    selectableSentences: jindallaekkotSentences,
     focusConcepts: ["명사절", "관형절", "높임 표현", "의지·시간 표현", "시적 화자의 태도"],
     analysisPrompts: [
       "‘나 보기가’와 ‘가실 때’에서 절의 경계를 찾고, 각 절이 문장 안에서 어떤 역할을 하는지 설명해 보세요.",
@@ -249,7 +295,7 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     rewritePrompt: "세 행의 뜻을 일상적인 산문 두 문장으로 바꾼 뒤, 원문의 구조와 문법 요소를 바꾸면서 정서와 강조점이 어떻게 달라졌는지 설명해 보세요.",
     genre: "시",
     author: "김소월",
-    sourceNote: "저작권 보호기간 만료 작품 · 일부 발췌"
+    sourceNote: "저작권 보호기간 만료 작품 · 전문"
   },
   {
     id: "literature-sanyuhwa",
@@ -257,7 +303,8 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     label: "문학 작품",
     title: "김소월 〈산유화〉",
     situation: "반복과 생략이 시의 호흡과 의미를 만드는 방식 탐구",
-    content: "산에는 꽃 피네\n꽃이 피네\n갈 봄 여름 없이\n꽃이 피네",
+    content: sanyuhwaSentences.join("\n\n"),
+    selectableSentences: sanyuhwaSentences,
     focusConcepts: ["홑문장", "문장 성분의 생략", "반복", "시적 호흡"],
     analysisPrompts: [
       "서로 같은 문장과 달라진 문장을 골라, 성분이 생략되었는지와 홑문장·겹문장 여부를 판단해 보세요.",
@@ -266,7 +313,7 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     rewritePrompt: "반복을 살린 버전과 반복을 줄인 산문 버전을 각각 쓰고, 호흡과 강조점을 비교해 보세요.",
     genre: "시",
     author: "김소월",
-    sourceNote: "저작권 보호기간 만료 작품 · 일부 발췌"
+    sourceNote: "저작권 보호기간 만료 작품 · 전문"
   },
   {
     id: "literature-dongbaek",
@@ -274,7 +321,8 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     label: "문학 작품",
     title: "김유정 〈동백꽃〉",
     situation: "서술자가 사건을 발견하는 과정에서 문장이 확장되는 방식 탐구",
-    content: "오늘도 또 우리 수탉이 막 쫓기었다. 내가 점심을 먹고 나무를 하러 갈 양으로 나올 때이었다. 산으로 올라서려니까 등뒤에서 푸드득푸드득, 하고 닭의 횃소리가 야단이다. 깜짝 놀라서 고개를 돌려보니 아니나다르랴, 두 놈이 또 얼리었다.",
+    content: dongbaekkotSentences.join(" "),
+    selectableSentences: dongbaekkotSentences,
     focusConcepts: ["홑문장·겹문장", "관형절", "종속적으로 이어진문장", "시점"],
     analysisPrompts: [
       "사건의 순서를 보여 주는 문장을 고르고, 그 안의 주어·서술어 관계를 세어 구조를 판단해 보세요.",
@@ -283,7 +331,7 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     rewritePrompt: "서술자가 본 사건을 두 개의 홑문장으로 줄였다가 다시 하나의 겹문장으로 합치고, 호흡이 어떻게 달라졌는지 설명해 보세요.",
     genre: "소설",
     author: "김유정",
-    sourceNote: "저작권 보호기간 만료 작품 · 일부 발췌"
+    sourceNote: "저작권 보호기간 만료 작품 · 확대 발췌"
   },
   {
     id: "literature-unsu",
@@ -291,7 +339,8 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     label: "문학 작품",
     title: "현진건 〈운수 좋은 날〉",
     situation: "대화와 서술을 오가는 문장 구조가 인물의 심리를 드러내는 방식 탐구",
-    content: "치삼은 의아한 듯이 김 첨지를 보며, “여보게 또 붓다니, 벌써 우리가 넉 잔씩 먹었네, 돈이 사십 전일세.”라고 주의시켰다.\n“아따 이놈아, 사십 전이 그리 끔찍하냐. 오늘 내가 돈을 막 벌었어. 참 오늘 운수가 좋았느니.”",
+    content: unsuSentences.join(" "),
+    selectableSentences: unsuSentences,
     focusConcepts: ["인용절", "안은문장", "대화의 홑문장", "반어적 표현"],
     analysisPrompts: [
       "서술 문장과 인물의 말에서 각각 한 문장을 골라, 홑문장·겹문장과 인용절 여부를 판단해 보세요.",
@@ -300,7 +349,7 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     rewritePrompt: "인물의 말을 간접 인용으로 바꾼 뒤, 직접 인용과 비교하여 인물의 목소리와 정보 초점이 어떻게 달라졌는지 설명해 보세요.",
     genre: "소설",
     author: "현진건",
-    sourceNote: "저작권 보호기간 만료 작품 · 일부 발췌"
+    sourceNote: "저작권 보호기간 만료 작품 · 확대 발췌"
   }
 ];
 

@@ -152,3 +152,9 @@ test("DATA: 문학 자율 관찰 순서를 반영한 프롬프트 v8 마이그�
   assert.match(migration, /writing-tutor-v8/);
   assert.match(migration, /literature-observation-first/);
 });
+
+test("DATA: 문학 큰 질문·근거 선택·인라인 답안을 반영한 프롬프트 v9 마이그레이션이 존재한다", () => {
+  const migration = fs.readFileSync("supabase/migrations/202609290002_add_literature_evidence_prompt.sql", "utf8");
+  assert.match(migration, /writing-tutor-v9/);
+  assert.match(migration, /literature-question-evidence-inline-answer/);
+});

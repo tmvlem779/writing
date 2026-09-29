@@ -58,10 +58,13 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 문�
   assert.match(selfStudyPage, /문학 작품/);
 });
 
-test("P3·P4: 문학 학습은 학생의 구조 판단을 먼저 받은 뒤 그 답으로 질문한다", () => {
-  assert.match(realLifeChapter, /내 판단 먼저 보내기/);
-  assert.match(realLifeChapter, /학생이 쓴 구체적인 문장과 구조 판단을 반영/);
-  assert.match(realLifeChapter, /내가 고른 문장에서 이어진 질문/);
+test("P3·P4: 문학 학습은 큰 질문 뒤 근거 부분을 골라 그 자리에서 답하게 한다", () => {
+  assert.match(realLifeChapter, /먼저 생각할 큰 질문/);
+  assert.match(realLifeChapter, /literature-sentence-wrap/);
+  assert.match(realLifeChapter, /inline-literature-answer/);
+  assert.match(realLifeChapter, /학생이 고른 근거 부분/);
+  assert.match(realLifeChapter, /선택한 부분에서 이어진 질문/);
+  assert.doesNotMatch(realLifeChapter, /작품에서 고른 문장과 구조 판단/);
 });
 
 test("학생 홈은 둥근 브랜드 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {

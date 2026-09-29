@@ -253,10 +253,33 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
 .dashboard-progress > footer { display: flex; flex-wrap: wrap; gap: 8px 18px; padding-top: 12px; border-top: 1px solid #e7ece9; color: var(--muted); font-size: 10px; }
 .dashboard-progress > footer strong { margin-left: 3px; color: var(--green); font-size: 12px; }
 
-.material-literature { position: relative; overflow: hidden; border-color: #d9c8a2; background: linear-gradient(145deg, #fffdf7, #f5efe0); }
+.material-literature { min-height: clamp(560px, 68vh, 760px); position: relative; overflow: hidden; display: flex; flex-direction: column; border-color: #d9c8a2; background: linear-gradient(145deg, #fffdf7, #f5efe0); }
 .material-literature::before { content: "“"; position: absolute; right: 24px; top: 14px; color: rgba(138,104,50,.12); font: 400 92px/1 Georgia, serif; }
 .material-literature .material-meta span { background: #735d37; }
 .material-literature > p { position: relative; padding: 12px 0 6px 24px; border-left: 3px solid #cab27c; font-family: var(--font-brand), var(--font-body), sans-serif; font-size: 19px; line-height: 2.1; }
+.literature-big-question { position: relative; margin-top: 20px; padding: 22px 24px; display: grid; gap: 7px; border: 1px solid #c9b47e; border-radius: 16px; background: #fffdf8; box-shadow: 0 10px 24px rgba(92,72,34,.08); }
+.literature-big-question span { color: #856d3e; font-size: 11px; font-weight: 850; letter-spacing: .08em; }
+.literature-big-question strong { max-width: 720px; font-size: 21px; line-height: 1.55; }
+.literature-big-question small { color: var(--muted); line-height: 1.6; }
+.material-literature > .sentence-pick-guide { margin: 18px 0 0; padding: 10px 14px; border: 0; border-radius: 10px; background: rgba(115,93,55,.08); color: #6b5a3f; font-family: var(--font-body), sans-serif; font-size: 13px; line-height: 1.65; }
+.literature-sentence-list { position: relative; display: grid; gap: 9px; align-content: start; margin-top: 16px; }
+.literature-sentence-wrap { min-width: 0; }
+.literature-sentence { width: 100%; padding: 11px 14px; display: grid; gap: 7px; border: 1px solid transparent; border-radius: 11px; background: transparent; color: #2c291f; cursor: pointer; text-align: left; transition: background .16s ease, border-color .16s ease, transform .16s ease; }
+.literature-sentence > span { white-space: pre-line; font-family: var(--font-brand), var(--font-body), sans-serif; font-size: 17px; line-height: 1.85; }
+.literature-sentence:hover { border-color: #c9b47e; background: rgba(255,255,255,.74); transform: translateY(-1px); }
+.literature-sentence:focus-visible { outline: 3px solid rgba(36,91,67,.22); outline-offset: 2px; }
+.literature-sentence.selected { border-color: #856d3e; background: #fffdf8; box-shadow: 0 8px 20px rgba(92,72,34,.1); }
+.literature-sentence small { color: var(--green); font-size: 11px; font-weight: 800; }
+.literature-sentence:disabled { cursor: default; transform: none; }
+.literature-poem .literature-sentence-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.literature-poem .literature-sentence-wrap.selected { grid-column: 1 / -1; }
+.literature-poem .literature-sentence { min-height: 190px; align-content: center; padding: 22px; }
+.literature-poem .literature-sentence > span { text-align: center; font-size: 19px; line-height: 1.9; }
+.inline-literature-answer { margin: 8px 0 16px; padding: 20px; display: grid; gap: 12px; border: 1px solid #b9cdbf; border-radius: 14px; background: #f6faf6; box-shadow: 0 12px 28px rgba(36,91,67,.09); }
+.inline-literature-answer .draft-label { margin: 0; }
+.inline-literature-answer textarea { width: 100%; min-height: 150px; resize: vertical; padding: 17px; border: 1px solid #cbd6ce; border-radius: 12px; background: #fff; color: var(--ink); font: inherit; line-height: 1.75; }
+.inline-literature-answer textarea:focus { border-color: var(--green); outline: 3px solid rgba(36,91,67,.1); }
+.inline-literature-answer .student-observation-card, .inline-literature-answer .coach-card { margin-top: 0; }
 
 @media (max-width: 1000px) {
   .student-dashboard-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -287,4 +310,10 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
   .learning-status-item p { display: grid; gap: 2px; }
   .learning-status-item p span { text-align: left; }
   .material-literature > p { padding-left: 16px; font-size: 17px; }
+  .material-literature { min-height: 0; }
+  .literature-big-question { padding: 18px; }
+  .literature-big-question strong { font-size: 18px; }
+  .literature-poem .literature-sentence-list { grid-template-columns: 1fr; }
+  .literature-poem .literature-sentence { min-height: 0; padding: 18px; }
+  .literature-sentence > span, .literature-poem .literature-sentence > span { font-size: 16px; line-height: 1.8; }
 }

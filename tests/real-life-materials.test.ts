@@ -58,6 +58,9 @@ test("P3·P4·P6: 문학 작품은 시·소설을 각각 두 편씩 제공한다
   assert.equal(literature.filter((material) => material.genre === "소설").length, 2);
   assert.ok(literature.every((material) => getRealLifeMaterialGroup(material) === "literature"));
   assert.ok(literature.every((material) => /저작권 보호기간 만료/.test(material.sourceNote)));
+  assert.ok(literature.every((material) => (material.selectableSentences?.length ?? 0) >= 4));
+  assert.ok(literature.every((material) => material.content.length >= 100));
+  assert.ok(literature.filter((material) => material.genre === "소설").every((material) => (material.selectableSentences?.length ?? 0) >= 10));
   assert.ok(literature.every((material) => material.analysisPrompts.length === 2));
   assert.ok(literature.every((material) => material.rewritePrompt.length > 20));
 });

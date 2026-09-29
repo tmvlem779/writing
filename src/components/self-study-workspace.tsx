@@ -15,7 +15,7 @@ const groups: Array<{
   {
     id: "literature",
     label: "문학 작품",
-    description: "시와 소설을 먼저 읽고, 내가 발견한 문장에서 질문을 시작해요.",
+    description: "큰 질문을 읽고, 시와 소설에서 답의 근거를 직접 골라 써요.",
     countLabel: "시 2편 · 소설 2편"
   },
   {
