@@ -23,7 +23,7 @@ Browser → Next.js on Vercel → Supabase Auth/RLS/Postgres
 
 ## 핵심 결정
 
-- 모델 기본값: `gpt-6-luna`, 환경 변수로 교체 가능
+- 모델 기본값: `gpt-5-nano`, 환경 변수로 교체 가능
 - 응답: 비스트리밍 Structured Output
 - 비용: 월 미화 6달러 앱 한도, 학생별 일일 턴 제한
 - 데이터 보관: 기본 무기한, 관리자 삭제·내보내기 가능
