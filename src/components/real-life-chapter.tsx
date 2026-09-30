@@ -16,7 +16,16 @@ import {
 
 type Message = { role: "student" | "assistant"; content: string };
 
-const novelRelationOptions = ["나란히 이어짐", "원인·이유", "조건", "시간의 흐름", "잘 모르겠어요"] as const;
+type NovelSentenceWork = {
+  markedTokenIndexes: number[];
+  relation: string;
+  questionReady: boolean;
+  answerSubmitted: boolean;
+  draft: string;
+  response: AgentResponse | null;
+};
+
+const novelStructureOptions = ["한 가지 내용", "둘 이상의 내용", "잘 모르겠어요"] as const;
 
 type RealLifeChapterProps = {
   lessonNumber: CourseLessonNumber;
@@ -39,8 +48,12 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
   const [selectedSentences, setSelectedSentences] = useState<string[]>([]);
+  const [novelSentenceIndex, setNovelSentenceIndex] = useState(0);
+  const [completedNovelSentenceIndexes, setCompletedNovelSentenceIndexes] = useState<number[]>([]);
+  const [novelSentenceWork, setNovelSentenceWork] = useState<Record<number, NovelSentenceWork>>({});
   const [markedNovelTokenIndexes, setMarkedNovelTokenIndexes] = useState<number[]>([]);
   const [novelRelation, setNovelRelation] = useState("");
+  const [novelAnswerSubmitted, setNovelAnswerSubmitted] = useState(false);
   const [literatureSelectionSubmitted, setLiteratureSelectionSubmitted] = useState(false);
   const [attemptedMaterials, setAttemptedMaterials] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState(false);
@@ -53,9 +66,15 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
   const isPoem = isLiterature && material.genre === "시";
   const literatureTaskTitle = isPoem
     ? "시에서 표현 효과를 만드는 문법 요소가 드러난 구절을 고르시오."
-    : "겹문장이라고 생각하는 문장 하나를 고른 뒤, 이어 주는 표현에 밑줄을 그으시오.";
+    : "작품의 모든 문장을 차례로 살펴보고, 문장 구조의 단서에 밑줄을 그으시오.";
   const literatureSelectionLabel = isPoem ? "문법 요소 탐구 구절" : "문장";
-  const selectedNovelTokens = selectedSentences[0]?.split(/\s+/) ?? [];
+  const activeNovelSentence = !isPoem ? material.selectableSentences?.[novelSentenceIndex] : undefined;
+  const selectedNovelTokens = activeNovelSentence?.split(/\s+/) ?? [];
+  const novelGuideQuestion = novelRelation === "한 가지 내용"
+    ? "밑줄 친 말이 나타내는 중심 행동이나 상태는 무엇인가요? 짧게 써 보세요."
+    : novelRelation === "둘 이상의 내용"
+      ? "밑줄 친 말의 앞과 뒤에서는 각각 어떤 일이 일어나나요? 짧게 써 보세요."
+      : "밑줄 친 말 주변에서 일어나는 일을 하나만 찾아 짧게 써 보세요.";
   const task = buildRealLifeTask(material, mode);
   const selectedMode = realLifePracticeModes.find((item) => item.id === mode) ?? realLifePracticeModes[0];
 
@@ -80,7 +99,6 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
       !isLiterature
       || literatureSelectionSubmitted
       || selectedSentences.length === 0
-      || (!isPoem && (markedNovelTokenIndexes.length === 0 || !novelRelation))
     )) return;
     setPending(true);
     setError("");
@@ -98,21 +116,24 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
           ? `[첫 과제] ${literatureTaskTitle}`
           : `[현재 과제] ${task}`,
         isLiterature
-          ? `[학생이 고른 ${literatureSelectionLabel}]\n${selectedSentences.map((sentence, index) => `${index + 1}. ${sentence.replace(/\s*\n\s*/g, " ")}`).join("\n")}`
+          ? `[학생이 살펴보는 ${literatureSelectionLabel}]\n${(isPoem ? selectedSentences : activeNovelSentence ? [activeNovelSentence] : []).map((sentence, index) => `${index + 1}. ${sentence.replace(/\s*\n\s*/g, " ")}`).join("\n")}`
           : null,
         isLiterature && !isPoem
           ? `[학생이 문장 안에서 밑줄 친 연결 표현] ${markedNovelTokenIndexes.map((index) => selectedNovelTokens[index]).filter(Boolean).join(" · ")}`
           : null,
         isLiterature && !isPoem
-          ? `[학생이 고른 앞뒤 내용의 관계] ${novelRelation}`
+          ? `[학생이 고른 문장 구조] ${novelRelation}`
+          : null,
+        isLiterature && !isPoem
+          ? `[학생이 받은 질문] ${novelGuideQuestion}`
           : null,
         isLiterature
-          ? `[문학 탐구 단계] ${selectionTurn ? `학생이 ${literatureSelectionLabel}을 골라 처음 제출함` : "학생이 선택한 부분을 바탕으로 받은 질문에 답함"}`
+          ? `[문학 탐구 단계] ${isPoem && selectionTurn ? `학생이 ${literatureSelectionLabel}을 골라 처음 제출함` : isPoem ? "학생이 선택한 부분을 바탕으로 받은 질문에 답함" : `전체 ${material.selectableSentences?.length ?? 0}문장 중 ${novelSentenceIndex + 1}번째 문장에 직접 표시하고 질문에 답함`}`
           : null,
         isLiterature
           ? isPoem
             ? `[튜터 응답 원칙] 고른 구절을 구체적으로 반영해 한 번에 질문 하나만 제시할 것. 문법 요소의 형태를 먼저 찾게 하고, 그 요소가 화자의 태도·시간·정서·호흡에 만드는 효과로 질문을 넓힐 것. 완성 분석은 먼저 제시하지 말 것`
-            : `[튜터 응답 원칙] 학생이 문장 안에 직접 밑줄 친 표현과 고른 의미 관계를 반영할 것. 주어·서술어 개수나 절 경계를 표시하라고 요구하지 말고, 두 내용을 어떻게 이어 주는지만 일상적인 말과 두 개의 선택지로 한 번에 하나씩 물을 것`
+            : `[튜터 응답 원칙] 학생이 문장 안에 직접 밑줄 친 표현, 고른 구조, 짧은 답을 반영해 한두 문장으로 확인해 줄 것. 정답이나 완성 분석을 먼저 제시하지 말고, 다음 문장에서도 같은 방법으로 시도하도록 격려하는 짧은 질문으로 마칠 것`
           : null,
         `[학생 답]\n${selectionTurn ? `${literatureSelectionLabel} 선택을 제출함` : normalizedDraft}`
       ].filter(Boolean).join("\n\n");
@@ -144,12 +165,29 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
           content: selectionTurn
             ? isPoem
               ? `${literatureSelectionLabel} ${selectedSentences.length}개 선택: ${selectedSentences.join(" / ")}`
-              : `${literatureSelectionLabel}: ${selectedSentences[0]} / 밑줄: ${markedNovelTokenIndexes.map((index) => selectedNovelTokens[index]).filter(Boolean).join(" · ")} / 관계: ${novelRelation}`
+              : `${literatureSelectionLabel}: ${activeNovelSentence} / 밑줄: ${markedNovelTokenIndexes.map((index) => selectedNovelTokens[index]).filter(Boolean).join(" · ")} / 구조: ${novelRelation}`
             : normalizedDraft
         },
         { role: "assistant", content: `${next.studentMessage} ${next.question}` }
       ]);
       if (isLiterature) {
+        if (!isPoem && !selectionTurn) {
+          setNovelAnswerSubmitted(true);
+          setCompletedNovelSentenceIndexes((current) => current.includes(novelSentenceIndex)
+            ? current
+            : [...current, novelSentenceIndex]);
+          setNovelSentenceWork((current) => ({
+            ...current,
+            [novelSentenceIndex]: {
+              markedTokenIndexes: markedNovelTokenIndexes,
+              relation: novelRelation,
+              questionReady: true,
+              answerSubmitted: true,
+              draft: "",
+              response: next
+            }
+          }));
+        }
         setDraft("");
         requestAnimationFrame(() => draftRef.current?.focus());
       }
@@ -178,23 +216,21 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
     setScaffoldLevel(0);
     setAttemptCount(0);
     setSelectedSentences([]);
+    setNovelSentenceIndex(0);
+    setCompletedNovelSentenceIndexes([]);
+    setNovelSentenceWork({});
     setMarkedNovelTokenIndexes([]);
     setNovelRelation("");
+    setNovelAnswerSubmitted(false);
     setLiteratureSelectionSubmitted(false);
     setError("");
   }
 
   function chooseLiteratureSentence(sentence: string) {
-    if (!isLiterature || literatureSelectionSubmitted || pending) return;
-    if (isPoem) {
-      setSelectedSentences((current) => current.includes(sentence)
-        ? current.filter((item) => item !== sentence)
-        : [...current, sentence]);
-      return;
-    }
-    setSelectedSentences((current) => current[0] === sentence ? [] : [sentence]);
-    setMarkedNovelTokenIndexes([]);
-    setNovelRelation("");
+    if (!isPoem || literatureSelectionSubmitted || pending) return;
+    setSelectedSentences((current) => current.includes(sentence)
+      ? current.filter((item) => item !== sentence)
+      : [...current, sentence]);
   }
 
   function toggleNovelToken(index: number) {
@@ -202,6 +238,47 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
     setMarkedNovelTokenIndexes((current) => current.includes(index)
       ? current.filter((item) => item !== index)
       : [...current, index]);
+  }
+
+  function prepareNovelQuestion() {
+    if (isPoem || pending || markedNovelTokenIndexes.length === 0 || !novelRelation) return;
+    setLiteratureSelectionSubmitted(true);
+    setNovelAnswerSubmitted(false);
+    setDraft("");
+    setResponse(null);
+    requestAnimationFrame(() => draftRef.current?.focus());
+  }
+
+  function selectNovelSentence(index: number) {
+    if (isPoem || pending || index === novelSentenceIndex) return;
+    setNovelSentenceWork((current) => ({
+      ...current,
+      [novelSentenceIndex]: {
+        markedTokenIndexes: markedNovelTokenIndexes,
+        relation: novelRelation,
+        questionReady: literatureSelectionSubmitted,
+        answerSubmitted: novelAnswerSubmitted,
+        draft,
+        response
+      }
+    }));
+    const saved = novelSentenceWork[index];
+    setNovelSentenceIndex(index);
+    setMarkedNovelTokenIndexes(saved?.markedTokenIndexes ?? []);
+    setNovelRelation(saved?.relation ?? "");
+    setLiteratureSelectionSubmitted(saved?.questionReady ?? false);
+    setNovelAnswerSubmitted(saved?.answerSubmitted ?? false);
+    setDraft(saved?.draft ?? "");
+    setResponse(saved?.response ?? null);
+    setAttemptCount(0);
+    setScaffoldLevel(saved?.response?.scaffoldLevel ?? 0);
+    setHistory([]);
+  }
+
+  function advanceNovelSentence() {
+    if (isPoem || !material.selectableSentences) return;
+    if (novelSentenceIndex >= material.selectableSentences.length - 1) return;
+    selectNovelSentence(novelSentenceIndex + 1);
   }
 
   function changeMode(nextMode: RealLifePracticeMode) {
@@ -264,134 +341,171 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
                 <strong id="literature-big-question-title">{literatureTaskTitle}</strong>
                 <small>{isPoem
                   ? "높임·시간·부정·종결·생략·반복 표현 등을 살펴보고, 표현 효과가 궁금한 구절을 하나 이상 고르세요."
-                  : "문장 하나를 고른 뒤, 두 내용을 이어 주는 말만 눌러 밑줄을 그으세요."}</small>
+                  : "첫 문장부터 마지막 문장까지 하나씩 표시하고, 짧은 질문에 답해 보세요."}</small>
               </section>
-              <p className="sentence-pick-guide">{isPoem
-                ? "시를 전체 흐름으로 읽고, 문법 요소가 표현 효과를 만드는 구절을 누르세요. 다시 누르면 선택이 해제됩니다."
-                : "먼저 겹문장 같아 보이는 문장 하나만 누르세요. 정답이 아니어도 괜찮아요."}</p>
-              <div className="literature-sentence-list" aria-label={isPoem ? "문법 요소가 표현 효과를 만드는 구절 고르기" : "겹문장이라고 생각하는 문장 하나 고르기"}>
-                {material.selectableSentences.map((sentence, index) => {
-                  const isSelected = selectedSentences.includes(sentence);
-                  return (
-                    <button
-                      aria-pressed={isSelected}
-                      className={isSelected ? "literature-sentence selected" : "literature-sentence"}
-                      disabled={literatureSelectionSubmitted || pending}
-                      key={`${material.id}-${index}`}
-                      onClick={() => chooseLiteratureSentence(sentence)}
-                      type="button"
-                    >
-                      <span>{sentence}</span>
-                      {isSelected && <small>{isPoem ? "문법 요소 탐구 구절로 선택" : "표시할 문장으로 선택"}</small>}
-                    </button>
-                  );
-                })}
-              </div>
-              {!isPoem && selectedSentences.length === 1 && !literatureSelectionSubmitted && (
-                <section className="novel-marking-panel" aria-labelledby="novel-marking-title">
-                  <div>
-                    <span>문장에 직접 표시하기</span>
-                    <strong id="novel-marking-title">두 내용을 이어 주는 말을 눌러 밑줄을 그으세요.</strong>
-                    <small>예: ‘-고’, ‘-지만’, ‘-니까’, ‘-면’이 붙은 말을 찾아보세요.</small>
-                  </div>
-                  <p className="novel-token-line" aria-label="선택한 문장에서 연결 표현 밑줄 긋기">
-                    {selectedNovelTokens.map((token, index) => {
-                      const isMarked = markedNovelTokenIndexes.includes(index);
+              {isPoem ? (
+                <>
+                  <p className="sentence-pick-guide">시를 전체 흐름으로 읽고, 문법 요소가 표현 효과를 만드는 구절을 누르세요. 다시 누르면 선택이 해제됩니다.</p>
+                  <div className="literature-sentence-list" aria-label="문법 요소가 표현 효과를 만드는 구절 고르기">
+                    {material.selectableSentences.map((sentence, index) => {
+                      const isSelected = selectedSentences.includes(sentence);
                       return (
                         <button
-                          aria-pressed={isMarked}
-                          className={isMarked ? "novel-token marked" : "novel-token"}
-                          key={`${token}-${index}`}
-                          onClick={() => toggleNovelToken(index)}
+                          aria-pressed={isSelected}
+                          className={isSelected ? "literature-sentence selected" : "literature-sentence"}
+                          disabled={literatureSelectionSubmitted || pending}
+                          key={`${material.id}-${index}`}
+                          onClick={() => chooseLiteratureSentence(sentence)}
                           type="button"
                         >
-                          {token}
+                          <span>{sentence}</span>
+                          {isSelected && <small>문법 요소 탐구 구절로 선택</small>}
                         </button>
                       );
                     })}
-                  </p>
-                  <fieldset className="novel-relation-picker">
-                    <legend>밑줄 친 말은 앞뒤 내용을 어떻게 이어 주나요?</legend>
-                    <div>
-                      {novelRelationOptions.map((option) => (
+                  </div>
+                  {!literatureSelectionSubmitted ? (
+                    <div className="literature-selection-actions">
+                      <span><strong>{selectedSentences.length}개</strong> 구절을 선택했어요.</span>
+                      <button className="primary-button" disabled={pending || selectedSentences.length === 0} onClick={submitLiteratureSelection} type="button">
+                        {pending ? "선택을 살펴보는 중…" : "선택 완료하고 질문 받기"}
+                      </button>
+                    </div>
+                  ) : (
+                    <section className="literature-followup-panel" aria-label="선택한 구절 기반 질문">
+                      <div className="selected-sentence-summary">
+                        <span>내가 고른 {literatureSelectionLabel} · {selectedSentences.length}개</span>
+                        <ol>{selectedSentences.map((sentence) => <li key={sentence}>{sentence.replace(/\s*\n\s*/g, " ")}</li>)}</ol>
+                      </div>
+                      {response && (
+                        <article className="coach-card literature-coach" aria-live="polite">
+                          <div className="coach-label"><span>AI 학습 도우미</span><small>{response.safety.blocked ? "안전 안내" : scaffoldLabel(response.scaffoldLevel)}</small></div>
+                          <p>{response.studentMessage}</p>
+                          <div className="coach-question">
+                            <span>{response.safety.blocked ? "안전한 학습을 위한 안내" : "고른 구절을 바탕으로 한 질문"}</span>
+                            <strong>{response.question}</strong>
+                          </div>
+                        </article>
+                      )}
+                      <label className="draft-label" htmlFor="literature-followup-draft">질문에 대한 내 답</label>
+                      <textarea id="literature-followup-draft" maxLength={2500} onChange={(event) => setDraft(event.target.value)} placeholder="선택한 구절의 문법 형태와 그 표현 효과를 근거로 답해 보세요." ref={draftRef} value={draft} />
+                      <div className="editor-footer">
+                        <span>{draft.length.toLocaleString()} / 2,500자</span>
+                        <button className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
+                          {pending ? "답을 살펴보는 중…" : "답 보내고 다음 질문 받기"}
+                        </button>
+                      </div>
+                    </section>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="sentence-pick-guide">모든 문장은 처음부터 열려 있습니다. 원하는 문장을 눌러 자유롭게 표시하고 답해 보세요.</p>
+                  <div className="novel-sentence-progress-list" aria-label="소설 전체 문장 활동 진행 현황">
+                    {material.selectableSentences.map((sentence, index) => {
+                      const isComplete = completedNovelSentenceIndexes.includes(index);
+                      const isCurrent = novelSentenceIndex === index;
+                      return (
                         <button
-                          aria-pressed={novelRelation === option}
-                          className={novelRelation === option ? "active" : ""}
-                          key={option}
-                          onClick={() => setNovelRelation(option)}
+                          aria-current={isCurrent ? "step" : undefined}
+                          className={isComplete ? "complete" : isCurrent ? "current" : "available"}
+                          key={`${material.id}-${index}`}
+                          onClick={() => selectNovelSentence(index)}
                           type="button"
                         >
-                          {option}
+                          <span>{index + 1}</span>
+                          <p>{sentence}</p>
+                          <small>{isComplete ? "답변 완료 ✓" : isCurrent ? "현재 활동" : "열어 보기"}</small>
                         </button>
-                      ))}
-                    </div>
-                  </fieldset>
-                </section>
-              )}
-              {!literatureSelectionSubmitted ? (
-                <div className="literature-selection-actions">
-                  <span>{isPoem
-                    ? <><strong>{selectedSentences.length}개</strong> 구절을 선택했어요.</>
-                    : selectedSentences.length === 0
-                      ? "표시할 문장을 먼저 고르세요."
-                      : markedNovelTokenIndexes.length === 0
-                        ? "문장 안에서 이어 주는 말을 눌러 보세요."
-                        : !novelRelation
-                          ? "마지막으로 앞뒤 내용의 관계를 골라 보세요."
-                          : "문장 표시를 마쳤어요."}</span>
-                  <button
-                    className="primary-button"
-                    disabled={pending || selectedSentences.length === 0 || (!isPoem && (markedNovelTokenIndexes.length === 0 || !novelRelation))}
-                    onClick={submitLiteratureSelection}
-                    type="button"
-                  >
-                    {pending ? "표시를 살펴보는 중…" : isPoem ? "선택 완료하고 질문 받기" : "표시 완료하고 확인받기"}
-                  </button>
-                </div>
-              ) : (
-                <section className="literature-followup-panel" aria-label="선택한 문장 기반 질문">
-                  <div className="selected-sentence-summary">
-                    <span>내가 고른 {literatureSelectionLabel} · {selectedSentences.length}개</span>
-                    <ol>{selectedSentences.map((sentence) => (
-                      <li key={sentence}>
-                        {isPoem
-                          ? sentence.replace(/\s*\n\s*/g, " ")
-                          : sentence.split(/\s+/).map((token, index) => (
-                            <span className={markedNovelTokenIndexes.includes(index) ? "summary-marked-token" : undefined} key={`${token}-${index}`}>
-                              {token}{index < sentence.split(/\s+/).length - 1 ? " " : ""}
-                            </span>
-                          ))}
-                      </li>
-                    ))}</ol>
+                      );
+                    })}
                   </div>
-                  {response && (
-                    <article className="coach-card literature-coach" aria-live="polite">
-                      <div className="coach-label"><span>AI 학습 도우미</span><small>{response.safety.blocked ? "안전 안내" : scaffoldLabel(response.scaffoldLevel)}</small></div>
-                      <p>{response.studentMessage}</p>
-                      <div className="coach-question">
-                        <span>{response.safety.blocked ? "안전한 학습을 위한 안내" : isPoem ? "고른 구절을 바탕으로 한 질문" : "내 밑줄 표시를 바탕으로 한 질문"}</span>
-                        <strong>{response.question}</strong>
+                  {!literatureSelectionSubmitted ? (
+                    <>
+                      <section className="novel-marking-panel" aria-labelledby="novel-marking-title">
+                        <div>
+                          <span>문장 {novelSentenceIndex + 1}/{material.selectableSentences.length} · 직접 표시하기</span>
+                          <strong id="novel-marking-title">문장 구조를 판단하는 데 도움이 되는 말에 밑줄을 그으세요.</strong>
+                          <small>행동이나 상태를 나타내는 말, 또는 내용을 이어 주는 말을 눌러 보세요.</small>
+                        </div>
+                        <p className="novel-token-line" aria-label={`${novelSentenceIndex + 1}번째 문장에 밑줄 긋기`}>
+                          {selectedNovelTokens.map((token, index) => {
+                            const isMarked = markedNovelTokenIndexes.includes(index);
+                            return (
+                              <button aria-pressed={isMarked} className={isMarked ? "novel-token marked" : "novel-token"} key={`${token}-${index}`} onClick={() => toggleNovelToken(index)} type="button">
+                                {token}
+                              </button>
+                            );
+                          })}
+                        </p>
+                        <fieldset className="novel-relation-picker">
+                          <legend>이 문장은 몇 가지 내용을 담고 있나요?</legend>
+                          <div>
+                            {novelStructureOptions.map((option) => (
+                              <button aria-pressed={novelRelation === option} className={novelRelation === option ? "active" : ""} key={option} onClick={() => setNovelRelation(option)} type="button">
+                                {option}
+                              </button>
+                            ))}
+                          </div>
+                        </fieldset>
+                      </section>
+                      <div className="literature-selection-actions">
+                        <span>{markedNovelTokenIndexes.length === 0
+                          ? "문장 안에서 구조의 단서를 눌러 보세요."
+                          : !novelRelation
+                            ? "이 문장이 담은 내용의 수를 골라 보세요."
+                            : "밑줄 표시와 구조 선택을 마쳤어요."}</span>
+                        <button className="primary-button" disabled={pending || markedNovelTokenIndexes.length === 0 || !novelRelation} onClick={prepareNovelQuestion} type="button">
+                          표시 완료하고 질문 보기
+                        </button>
                       </div>
-                    </article>
+                    </>
+                  ) : (
+                    <section className="literature-followup-panel" aria-label={`${novelSentenceIndex + 1}번째 문장 질문과 답변`}>
+                      <div className="selected-sentence-summary">
+                        <span>문장 {novelSentenceIndex + 1}/{material.selectableSentences.length} · 내가 표시한 문장</span>
+                        <ol><li>{selectedNovelTokens.map((token, index) => (
+                          <span className={markedNovelTokenIndexes.includes(index) ? "summary-marked-token" : undefined} key={`${token}-${index}`}>
+                            {token}{index < selectedNovelTokens.length - 1 ? " " : ""}
+                          </span>
+                        ))}</li></ol>
+                      </div>
+                      {!response && (
+                        <article className="coach-card literature-coach">
+                          <div className="coach-label"><span>문장 표시를 바탕으로 한 질문</span><small>짧게 답해요</small></div>
+                          <p>밑줄 친 부분과 ‘{novelRelation}’ 선택을 바탕으로 생각해 보세요.</p>
+                          <div className="coach-question"><span>한 문장 질문</span><strong>{novelGuideQuestion}</strong></div>
+                        </article>
+                      )}
+                      {response && (
+                        <article className="coach-card literature-coach" aria-live="polite">
+                          <div className="coach-label"><span>AI 학습 도우미</span><small>{response.safety.blocked ? "안전 안내" : scaffoldLabel(response.scaffoldLevel)}</small></div>
+                          <p>{response.studentMessage}</p>
+                          <div className="coach-question"><span>{response.safety.blocked ? "안전한 학습을 위한 안내" : "이 문장 확인"}</span><strong>{response.question}</strong></div>
+                        </article>
+                      )}
+                      {!novelAnswerSubmitted ? (
+                        <>
+                          <label className="draft-label" htmlFor="literature-followup-draft">질문에 대한 내 답</label>
+                          <textarea id="literature-followup-draft" maxLength={600} onChange={(event) => setDraft(event.target.value)} placeholder="한두 문장으로 짧게 답해 보세요." ref={draftRef} value={draft} />
+                          <div className="editor-footer">
+                            <span>{draft.length.toLocaleString()} / 600자</span>
+                            <button className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
+                              {pending ? "답을 살펴보는 중…" : "답 보내고 이 문장 완료"}
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="novel-sentence-complete-actions">
+                          <span><strong>{completedNovelSentenceIndexes.length}/{material.selectableSentences.length}</strong> 문장을 완료했어요.</span>
+                          {novelSentenceIndex < material.selectableSentences.length - 1
+                            ? <button className="primary-button" onClick={advanceNovelSentence} type="button">다음 문장으로</button>
+                            : <strong>모든 문장 활동을 마쳤어요!</strong>}
+                        </div>
+                      )}
+                    </section>
                   )}
-                  <label className="draft-label" htmlFor="literature-followup-draft">질문에 대한 내 답</label>
-                  <textarea
-                    id="literature-followup-draft"
-                    maxLength={2500}
-                    onChange={(event) => setDraft(event.target.value)}
-                    placeholder={isPoem
-                      ? "선택한 구절의 문법 형태와 그 표현 효과를 근거로 답해 보세요."
-                      : "두 선택지 중 하나를 고르고, 짧게 이유를 써 보세요."}
-                    ref={draftRef}
-                    value={draft}
-                  />
-                  <div className="editor-footer">
-                    <span>{draft.length.toLocaleString()} / 2,500자</span>
-                    <button className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
-                      {pending ? "답을 살펴보는 중…" : "답 보내고 다음 질문 받기"}
-                    </button>
-                  </div>
-                </section>
+                </>
               )}
               {error && <div className="error-panel" role="alert">{error}</div>}
             </>
@@ -483,7 +597,12 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
         <dl>
           <div><dt>살펴본 자료</dt><dd>{attemptedMaterials.size}/{lessonMaterials.length}</dd></div>
           <div><dt>현재 도움</dt><dd>{scaffoldLevel + 1}/5</dd></div>
-          <div><dt>현재 단계</dt><dd>{isLiterature ? literatureSelectionSubmitted ? "질문 이어가기" : selectedSentences.length > 0 ? isPoem ? "선택 확인" : "문장에 표시하기" : isPoem ? "문법 요소 찾기" : "문장 고르기" : selectedMode.label}</dd></div>
+          <div><dt>현재 단계</dt><dd>{isLiterature
+            ? isPoem
+              ? literatureSelectionSubmitted ? "질문 이어가기" : selectedSentences.length > 0 ? "선택 확인" : "문법 요소 찾기"
+              : novelAnswerSubmitted ? "문장 완료" : literatureSelectionSubmitted ? "질문에 답하기" : `문장 ${novelSentenceIndex + 1} 표시`
+            : selectedMode.label}</dd></div>
+          {!isPoem && isLiterature && <div><dt>문장 진행</dt><dd>{completedNovelSentenceIndexes.length}/{material.selectableSentences?.length ?? 0}</dd></div>}
         </dl>
         <div className="transfer-sequence">
           {isLiterature
@@ -492,11 +611,13 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
                 ["선택 제출", "고른 구절을 한 번에 제출하고 문법 형태를 살펴봐요."],
                 ["질문 이어가기", "AI가 선택한 구절을 바탕으로 형태와 표현 효과를 하나씩 물어요."]
               ] : [
-                ["문장 하나 고르기", "겹문장 같아 보이는 문장 하나를 골라요."],
-                ["문장에 표시하기", "이어 주는 말에 밑줄을 긋고 앞뒤 내용의 관계를 골라요."],
-                ["간단히 확인하기", "AI가 두 개의 선택지로 짧게 확인해 줘요."]
+                ["문장에 표시하기", "현재 문장의 구조 단서에 직접 밑줄을 그어요."],
+                ["질문에 답하기", "표시를 바탕으로 나온 짧은 질문에 답해요."],
+                ["다음 문장", "답을 확인한 뒤 다음 문장도 같은 방법으로 살펴봐요."]
               ]).map(([label, description], index) => (
-                <div className={index === (literatureSelectionSubmitted ? 2 : selectedSentences.length > 0 ? 1 : 0) ? "active" : ""} key={label}>
+                <div className={index === (isPoem
+                  ? literatureSelectionSubmitted ? 2 : selectedSentences.length > 0 ? 1 : 0
+                  : novelAnswerSubmitted ? 2 : literatureSelectionSubmitted ? 1 : 0) ? "active" : ""} key={label}>
                   <span>{index + 1}</span>
                   <p><strong>{label}</strong><small>{description}</small></p>
                 </div>

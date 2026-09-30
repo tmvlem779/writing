@@ -87,19 +87,19 @@ test("P6: 실생활 자료 활동은 서버 입력 스키마와 비계 응답에
   assert.equal(response.nextAction, "transfer");
 });
 
-test("P3·P5: 소설 문장 표시는 연결 표현과 쉬운 의미 관계 질문으로 이어진다", () => {
+test("P3·P5: 소설 전체 문장 표시는 짧은 확인 뒤 다음 문장으로 이어진다", () => {
   const response = buildFallbackResponse({
     sessionId: "demo-session",
     activity: "authentic",
-    message: "[첫 과제] 겹문장이라고 생각하는 문장 하나를 고른 뒤, 이어 주는 표현에 밑줄을 그으시오.\n[학생이 문장 안에서 밑줄 친 연결 표현] 올라서려니까\n[학생이 고른 앞뒤 내용의 관계] 시간의 흐름",
+    message: "[첫 과제] 작품의 모든 문장을 차례로 살펴보고, 문장 구조의 단서에 밑줄을 그으시오.\n[학생이 문장 안에서 밑줄 친 연결 표현] 올라서려니까\n[학생이 고른 문장 구조] 둘 이상의 내용\n[학생 답] 산에 올라가려는 일과 닭 우는 소리를 담고 있다.",
     scaffoldLevel: 0,
     attemptCount: 0,
     history: []
   });
-  assert.match(response.question, /차례로 일어남/);
-  assert.match(response.question, /앞일 때문에 뒷일이 생김/);
+  assert.match(response.studentMessage, /둘 이상의 내용/);
+  assert.match(response.question, /다음 문장/);
   assert.doesNotMatch(response.question, /주어·서술어|절 경계/);
-  assert.deepEqual(response.focusConcepts, ["이어 주는 표현", "두 내용의 관계", "겹문장"]);
+  assert.deepEqual(response.focusConcepts, ["문장 구조 단서", "홑문장·겹문장", "자기 설명"]);
 });
 
 test("P3·P4: 시의 선택은 문법 형태와 표현 효과 질문으로 이어진다", () => {

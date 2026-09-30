@@ -15,7 +15,7 @@ const groups: Array<{
   {
     id: "literature",
     label: "문학 작품",
-    description: "시에서는 문법 요소를, 소설에서는 겹문장을 찾아 선택을 바탕으로 질문을 이어 가요.",
+    description: "시에서는 문법 요소를 찾고, 소설에서는 모든 문장에 직접 밑줄을 그으며 질문에 답해요.",
     countLabel: "시 2편 · 소설 2편"
   },
   {

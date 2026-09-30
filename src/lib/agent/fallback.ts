@@ -28,7 +28,7 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
   const isPoetryGrammarSelection = request.activity === "authentic"
     && /\[첫 과제\] 시에서 표현 효과를 만드는 문법 요소가 드러난 구절을 고르시오/.test(request.message);
   const isNovelSentenceMarking = request.activity === "authentic"
-    && /\[첫 과제\] 겹문장이라고 생각하는 문장 하나를 고른 뒤, 이어 주는 표현에 밑줄을 그으시오/.test(request.message);
+    && /\[첫 과제\] 작품의 모든 문장을 차례로 살펴보고, 문장 구조의 단서에 밑줄을 그으시오/.test(request.message);
   const level = nextScaffoldLevel({
     currentLevel: request.scaffoldLevel,
     attemptCount: request.attemptCount,
@@ -44,10 +44,10 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
   ][level];
 
   const novelMarkingQuestions = [
-    "밑줄 친 말 앞뒤의 일이 ‘차례로 일어남’과 ‘앞일 때문에 뒷일이 생김’ 중 어디에 더 가까운가요?",
-    "밑줄 친 표현을 빼면 두 내용의 관계가 더 분명해질까요, 덜 분명해질까요? 둘 중 하나를 골라볼까요?",
-    "같은 연결 표현이 쓰인 다른 문장을 작품에서 하나 더 찾을 수 있을까요?",
-    "밑줄 친 표현을 다른 연결 표현으로 바꾸면 두 내용의 관계가 어떻게 달라질까요?"
+    "다음 문장에서도 행동·상태를 나타내는 말이나 내용을 이어 주는 말을 먼저 표시해 볼까요?",
+    "다음 문장은 한 가지 내용과 둘 이상의 내용 중 어디에 가까운지 같은 방법으로 살펴볼까요?",
+    "다음 문장에서도 표시한 말이 구조 판단에 어떤 도움을 주는지 짧게 답해 볼까요?",
+    "마지막까지 같은 방법으로 표시하고 답하며 작품의 문장 구조를 비교해 볼까요?"
   ];
 
   const poetryGrammarQuestions = [
@@ -60,7 +60,9 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
   return {
     mode: request.activity === "error" ? "revise" : request.activity === "compare" ? "compare" : level === 4 ? "model" : level > 0 ? "hint" : "question",
     scaffoldLevel: level,
-    studentMessage: `${lead} 현재 도움 단계는 ‘${scaffoldLabel(level)}’입니다.`,
+    studentMessage: isNovelSentenceMarking
+      ? `답을 확인했어요. 밑줄 친 단서와 ‘${/\[학생이 고른 문장 구조\] ([^\n]+)/.exec(request.message)?.[1] ?? "구조 선택"}’을 연결해 생각한 과정이 기록됐습니다.`
+      : `${lead} 현재 도움 단계는 ‘${scaffoldLabel(level)}’입니다.`,
     question: isPoetryGrammarSelection
       ? poetryGrammarQuestions[Math.min(request.attemptCount, poetryGrammarQuestions.length - 1)]
       : isNovelSentenceMarking
@@ -69,7 +71,7 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
     focusConcepts: isPoetryGrammarSelection
       ? ["종결 표현", "높임·시간·부정 표현", "표현 효과"]
       : isNovelSentenceMarking
-      ? ["이어 주는 표현", "두 내용의 관계", "겹문장"]
+      ? ["문장 구조 단서", "홑문장·겹문장", "자기 설명"]
       : request.activity === "authentic"
       ? ["문장 구조", "표현 효과", "목적과 독자"]
       : ["문장 성분", "호응과 확장"],

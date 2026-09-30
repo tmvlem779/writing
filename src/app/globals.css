@@ -275,6 +275,18 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
 .novel-marking-panel > div:first-child > span { color: var(--green); font-size: 12px; font-weight: 800; }
 .novel-marking-panel > div:first-child > strong { font-size: 17px; line-height: 1.55; }
 .novel-marking-panel > div:first-child > small { color: var(--muted); line-height: 1.55; }
+.novel-sentence-progress-list { margin-top: 16px; display: grid; gap: 9px; }
+.novel-sentence-progress-list button { width: 100%; padding: 12px 14px; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: start; border: 1px solid #dedfd8; border-radius: 11px; background: rgba(255,255,255,.52); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.novel-sentence-progress-list button:hover, .novel-sentence-progress-list button:focus-visible { border-color: #80aa90; background: #f7fbf7; outline: none; }
+.novel-sentence-progress-list button > span { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: #e9ebe5; color: var(--muted); font-size: 12px; font-weight: 800; }
+.novel-sentence-progress-list button > p { margin: 1px 0 0; line-height: 1.65; }
+.novel-sentence-progress-list button > small { margin-top: 4px; color: var(--muted); font-size: 11px; font-weight: 800; white-space: nowrap; }
+.novel-sentence-progress-list button.current { border-color: #80aa90; background: #f4faf5; box-shadow: 0 8px 20px rgba(36,91,67,.08); }
+.novel-sentence-progress-list button.current > span { background: var(--green); color: #fff; }
+.novel-sentence-progress-list button.current > small { color: var(--green); }
+.novel-sentence-progress-list button.complete { border-color: #c9dbc6; background: #f1f7ef; }
+.novel-sentence-progress-list button.complete > span { background: #d7ead4; color: #28623c; }
+.novel-sentence-progress-list button.complete > small { color: #28623c; }
 .novel-token-line { margin: 0; padding: 18px; display: flex; gap: 5px; flex-wrap: wrap; align-items: baseline; border: 1px solid #dce6df; border-radius: 12px; background: #fff; line-height: 2.2; }
 .novel-token { padding: 2px 3px 4px; border: 0; border-bottom: 3px solid transparent; border-radius: 4px 4px 0 0; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
 .novel-token:hover, .novel-token:focus-visible { background: #edf5ef; outline: none; }
@@ -285,6 +297,10 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
 .novel-relation-picker button { padding: 9px 13px; border: 1px solid #cbd8ce; border-radius: 999px; background: #fff; color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
 .novel-relation-picker button:hover, .novel-relation-picker button:focus-visible { border-color: var(--green); outline: none; }
 .novel-relation-picker button.active { border-color: var(--green); background: var(--green); color: #fff; }
+.novel-sentence-complete-actions { padding-top: 16px; display: flex; justify-content: space-between; gap: 14px; align-items: center; border-top: 1px solid #d5e1d7; }
+.novel-sentence-complete-actions > span { color: var(--muted); font-size: 13px; }
+.novel-sentence-complete-actions > span strong { color: var(--green); font-size: 17px; }
+.novel-sentence-complete-actions > strong { color: var(--green); }
 .literature-poem .literature-sentence-list { width: min(100%, 720px); margin: 20px auto 0; padding: 28px clamp(18px, 6vw, 54px); display: block; border: 1px solid #ded2b6; border-radius: 14px; background: rgba(255,255,255,.6); box-shadow: inset 0 0 0 5px rgba(202,178,124,.06); }
 .literature-poem .literature-sentence { min-height: 0; align-content: center; padding: 13px 18px; }
 .literature-poem .literature-sentence + .literature-sentence { margin-top: 7px; }
@@ -342,4 +358,8 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
   .novel-marking-panel { padding: 16px; }
   .novel-token-line { padding: 14px; }
   .novel-relation-picker > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .novel-sentence-progress-list button { grid-template-columns: 30px minmax(0, 1fr); }
+  .novel-sentence-progress-list button > small { grid-column: 2; }
+  .novel-sentence-complete-actions { align-items: stretch; display: grid; }
+  .novel-sentence-complete-actions .primary-button { width: 100%; }
 }

@@ -176,3 +176,9 @@ test("DATA: 소설 문장 직접 표시를 반영한 프롬프트 v12 마이그�
   assert.match(migration, /writing-tutor-v12/);
   assert.match(migration, /novel-direct-connection-marking/);
 });
+
+test("DATA: 소설 전체 문장 순차 표시를 반영한 프롬프트 v13 마이그레이션이 존재한다", () => {
+  const migration = fs.readFileSync("supabase/migrations/202609300001_add_novel_all_sentence_marking_prompt.sql", "utf8");
+  assert.match(migration, /writing-tutor-v13/);
+  assert.match(migration, /novel-all-sentence-direct-marking/);
+});

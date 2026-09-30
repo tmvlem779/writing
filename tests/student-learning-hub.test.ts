@@ -57,26 +57,42 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 문�
   assert.match(selfStudyWorkspace, /materialGroup=\{activeGroup\}/);
   assert.match(selfStudyWorkspace, /showOverview=\{false\}/);
   assert.match(selfStudyPage, /시에서는 문법 요소와 표현 효과를/);
-  assert.match(selfStudyPage, /소설에서는 겹문장 구조를/);
+  assert.match(selfStudyPage, /소설에서는 모든 문장에 직접 표시하며 구조 질문에 답합니다/);
 });
 
-test("P3·P4: 시는 문법 요소를 고르고 소설은 문장 안의 연결 표현을 직접 표시한다", () => {
+test("P3·P4: 시는 문법 요소를 고르고 소설은 모든 문장에 직접 표시하고 답한다", () => {
   assert.match(realLifeChapter, /시에서 표현 효과를 만드는 문법 요소가 드러난 구절을 고르시오/);
-  assert.match(realLifeChapter, /겹문장이라고 생각하는 문장 하나를 고른 뒤, 이어 주는 표현에 밑줄을 그으시오/);
+  assert.match(realLifeChapter, /작품의 모든 문장을 차례로 살펴보고, 문장 구조의 단서에 밑줄을 그으시오/);
   assert.match(realLifeChapter, /isPoem/);
   assert.match(realLifeChapter, /문법 요소 탐구 구절/);
+  assert.match(realLifeChapter, /novelSentenceIndex/);
+  assert.match(realLifeChapter, /completedNovelSentenceIndexes/);
   assert.match(realLifeChapter, /markedNovelTokenIndexes/);
-  assert.match(realLifeChapter, /novelRelationOptions/);
+  assert.match(realLifeChapter, /novelStructureOptions/);
+  assert.match(realLifeChapter, /novel-sentence-progress-list/);
   assert.match(realLifeChapter, /novel-token marked/);
   assert.match(realLifeChapter, /잘 모르겠어요/);
+  assert.match(realLifeChapter, /한 가지 내용/);
+  assert.match(realLifeChapter, /둘 이상의 내용/);
   assert.match(realLifeChapter, /selectedSentences/);
   assert.match(realLifeChapter, /submitLiteratureSelection/);
-  assert.match(realLifeChapter, /표시 완료하고 확인받기/);
-  assert.match(realLifeChapter, /내 밑줄 표시를 바탕으로 한 질문/);
+  assert.match(realLifeChapter, /prepareNovelQuestion/);
+  assert.match(realLifeChapter, /advanceNovelSentence/);
+  assert.match(realLifeChapter, /selectNovelSentence/);
+  assert.match(realLifeChapter, /novelSentenceWork/);
+  assert.match(realLifeChapter, /표시 완료하고 질문 보기/);
+  assert.match(realLifeChapter, /답 보내고 이 문장 완료/);
+  assert.match(realLifeChapter, /다음 문장으로/);
+  assert.match(realLifeChapter, /모든 문장 활동을 마쳤어요/);
+  assert.match(realLifeChapter, /모든 문장은 처음부터 열려 있습니다/);
+  assert.match(realLifeChapter, /열어 보기/);
   assert.match(realLifeChapter, /summary-marked-token/);
   assert.match(realLifeChapter, /literatureSelectionSubmitted/);
   assert.match(styles, /\.novel-token\.marked/);
+  assert.match(styles, /\.novel-sentence-progress-list/);
   assert.doesNotMatch(realLifeChapter, /literature-inline-draft/);
+  assert.doesNotMatch(realLifeChapter, /표시할 문장을 먼저 고르세요/);
+  assert.doesNotMatch(realLifeChapter, /차례를 기다려요/);
   assert.doesNotMatch(realLifeChapter, /작품에서 고른 문장과 구조 판단/);
   assert.doesNotMatch(styles, /literature-poem \.literature-sentence-list \{ grid-template-columns: repeat\(2/);
   assert.match(styles, /literature-poem \.literature-sentence-list \{ width: min\(100%, 720px\)/);
