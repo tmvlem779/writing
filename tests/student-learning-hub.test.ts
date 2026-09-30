@@ -56,16 +56,26 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 문�
   assert.match(selfStudyWorkspace, /실생활 자료/);
   assert.match(selfStudyWorkspace, /materialGroup=\{activeGroup\}/);
   assert.match(selfStudyWorkspace, /showOverview=\{false\}/);
-  assert.match(selfStudyPage, /문학 작품/);
+  assert.match(selfStudyPage, /시에서는 문법 요소와 표현 효과를/);
+  assert.match(selfStudyPage, /소설에서는 겹문장 구조를/);
 });
 
-test("P3·P4: 문학 학습은 겹문장을 복수 선택한 뒤 그 선택으로 질문을 이어 간다", () => {
-  assert.match(realLifeChapter, /작품에서 겹문장을 찾아 모두 고르시오/);
+test("P3·P4: 시는 문법 요소를 고르고 소설은 문장 안의 연결 표현을 직접 표시한다", () => {
+  assert.match(realLifeChapter, /시에서 표현 효과를 만드는 문법 요소가 드러난 구절을 고르시오/);
+  assert.match(realLifeChapter, /겹문장이라고 생각하는 문장 하나를 고른 뒤, 이어 주는 표현에 밑줄을 그으시오/);
+  assert.match(realLifeChapter, /isPoem/);
+  assert.match(realLifeChapter, /문법 요소 탐구 구절/);
+  assert.match(realLifeChapter, /markedNovelTokenIndexes/);
+  assert.match(realLifeChapter, /novelRelationOptions/);
+  assert.match(realLifeChapter, /novel-token marked/);
+  assert.match(realLifeChapter, /잘 모르겠어요/);
   assert.match(realLifeChapter, /selectedSentences/);
   assert.match(realLifeChapter, /submitLiteratureSelection/);
-  assert.match(realLifeChapter, /선택 완료하고 질문 받기/);
-  assert.match(realLifeChapter, /고른 문장들을 바탕으로 한 질문/);
+  assert.match(realLifeChapter, /표시 완료하고 확인받기/);
+  assert.match(realLifeChapter, /내 밑줄 표시를 바탕으로 한 질문/);
+  assert.match(realLifeChapter, /summary-marked-token/);
   assert.match(realLifeChapter, /literatureSelectionSubmitted/);
+  assert.match(styles, /\.novel-token\.marked/);
   assert.doesNotMatch(realLifeChapter, /literature-inline-draft/);
   assert.doesNotMatch(realLifeChapter, /작품에서 고른 문장과 구조 판단/);
   assert.doesNotMatch(styles, /literature-poem \.literature-sentence-list \{ grid-template-columns: repeat\(2/);

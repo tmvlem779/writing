@@ -287,7 +287,7 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     situation: "시의 문장 구조와 문법 요소가 화자의 태도를 드러내는 방식 탐구",
     content: jindallaekkotSentences.join("\n\n"),
     selectableSentences: jindallaekkotSentences,
-    focusConcepts: ["명사절", "관형절", "높임 표현", "의지·시간 표현", "시적 화자의 태도"],
+    focusConcepts: ["높임 표현", "시간 표현", "부정 표현", "종결 표현", "시적 화자의 태도"],
     analysisPrompts: [
       "‘나 보기가’와 ‘가실 때’에서 절의 경계를 찾고, 각 절이 문장 안에서 어떤 역할을 하는지 설명해 보세요.",
       "‘가실’, ‘드리우리다’의 높임·시간·의지 표현이 이별을 대하는 화자의 태도에 어떤 효과를 더하는지 근거를 들어 말해 보세요."
@@ -305,7 +305,7 @@ export const grammarRealLifeMaterials: RealLifeMaterial[] = [
     situation: "반복과 생략이 시의 호흡과 의미를 만드는 방식 탐구",
     content: sanyuhwaSentences.join("\n\n"),
     selectableSentences: sanyuhwaSentences,
-    focusConcepts: ["홑문장", "문장 성분의 생략", "반복", "시적 호흡"],
+    focusConcepts: ["종결 표현", "시간 표현", "문장 성분의 생략", "반복 표현", "시적 호흡"],
     analysisPrompts: [
       "서로 같은 문장과 달라진 문장을 골라, 성분이 생략되었는지와 홑문장·겹문장 여부를 판단해 보세요.",
       "같은 구조를 반복하면서 리듬과 의미의 강조점이 어떻게 만들어지는지 설명해 보세요."

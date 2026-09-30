@@ -87,18 +87,40 @@ test("P6: 실생활 자료 활동은 서버 입력 스키마와 비계 응답에
   assert.equal(response.nextAction, "transfer");
 });
 
-test("P3·P5: 문학 겹문장 다중 선택은 정답 공개 대신 선택 근거 질문으로 이어진다", () => {
+test("P3·P5: 소설 문장 표시는 연결 표현과 쉬운 의미 관계 질문으로 이어진다", () => {
   const response = buildFallbackResponse({
     sessionId: "demo-session",
     activity: "authentic",
-    message: "[첫 과제] 작품에서 겹문장을 찾아 모두 고르시오.\n[학생이 겹문장으로 고른 문장들]\n1. 산으로 올라서려니까 닭의 횃소리가 야단이다.",
+    message: "[첫 과제] 겹문장이라고 생각하는 문장 하나를 고른 뒤, 이어 주는 표현에 밑줄을 그으시오.\n[학생이 문장 안에서 밑줄 친 연결 표현] 올라서려니까\n[학생이 고른 앞뒤 내용의 관계] 시간의 흐름",
     scaffoldLevel: 0,
     attemptCount: 0,
     history: []
   });
-  assert.match(response.question, /주어·서술어 관계/);
-  assert.match(response.question, /왜 겹문장/);
-  assert.deepEqual(response.focusConcepts, ["홑문장·겹문장", "주어·서술어 관계", "절의 경계"]);
+  assert.match(response.question, /차례로 일어남/);
+  assert.match(response.question, /앞일 때문에 뒷일이 생김/);
+  assert.doesNotMatch(response.question, /주어·서술어|절 경계/);
+  assert.deepEqual(response.focusConcepts, ["이어 주는 표현", "두 내용의 관계", "겹문장"]);
+});
+
+test("P3·P4: 시의 선택은 문법 형태와 표현 효과 질문으로 이어진다", () => {
+  const response = buildFallbackResponse({
+    sessionId: "demo-session",
+    activity: "authentic",
+    message: "[첫 과제] 시에서 표현 효과를 만드는 문법 요소가 드러난 구절을 고르시오.\n[학생이 문법 요소 탐구 구절로 고른 부분]\n1. 죽어도 아니 눈물 흘리오리다.",
+    scaffoldLevel: 0,
+    attemptCount: 0,
+    history: []
+  });
+
+  assert.match(response.question, /어미|문법 형태/);
+  assert.doesNotMatch(response.question, /왜 겹문장/);
+  assert.deepEqual(response.focusConcepts, ["종결 표현", "높임·시간·부정 표현", "표현 효과"]);
+});
+
+test("P3·P4: 시 자료의 초점 개념은 문법 요소와 표현 효과를 우선한다", () => {
+  const poems = getRealLifeMaterialsForLesson(6, "grammar", "literature").filter((material) => material.genre === "시");
+  assert.ok(poems.every((material) => material.focusConcepts.some((concept) => /종결 표현/.test(concept))));
+  assert.ok(poems.every((material) => material.focusConcepts.every((concept) => !/홑문장|명사절|관형절/.test(concept))));
 });
 
 test("SAFE: 고정 문학 본문은 안전 검사에서 제외하되 학생 작성 내용은 남긴다", () => {

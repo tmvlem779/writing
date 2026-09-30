@@ -270,6 +270,21 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
 .literature-sentence.selected { border-color: #856d3e; background: #fffdf8; box-shadow: 0 8px 20px rgba(92,72,34,.1); }
 .literature-sentence small { color: var(--green); font-size: 11px; font-weight: 800; }
 .literature-sentence:disabled { cursor: default; transform: none; }
+.novel-marking-panel { margin-top: 20px; padding: 20px; display: grid; gap: 18px; border: 1px solid #b9cdbf; border-radius: 16px; background: #f7faf6; }
+.novel-marking-panel > div:first-child { display: grid; gap: 5px; }
+.novel-marking-panel > div:first-child > span { color: var(--green); font-size: 12px; font-weight: 800; }
+.novel-marking-panel > div:first-child > strong { font-size: 17px; line-height: 1.55; }
+.novel-marking-panel > div:first-child > small { color: var(--muted); line-height: 1.55; }
+.novel-token-line { margin: 0; padding: 18px; display: flex; gap: 5px; flex-wrap: wrap; align-items: baseline; border: 1px solid #dce6df; border-radius: 12px; background: #fff; line-height: 2.2; }
+.novel-token { padding: 2px 3px 4px; border: 0; border-bottom: 3px solid transparent; border-radius: 4px 4px 0 0; background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
+.novel-token:hover, .novel-token:focus-visible { background: #edf5ef; outline: none; }
+.novel-token.marked { border-bottom-color: #ee7953; background: #fff0e7; color: #8f351b; font-weight: 800; }
+.novel-relation-picker { margin: 0; padding: 0; border: 0; }
+.novel-relation-picker legend { margin-bottom: 10px; font-weight: 800; }
+.novel-relation-picker > div { display: flex; gap: 8px; flex-wrap: wrap; }
+.novel-relation-picker button { padding: 9px 13px; border: 1px solid #cbd8ce; border-radius: 999px; background: #fff; color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.novel-relation-picker button:hover, .novel-relation-picker button:focus-visible { border-color: var(--green); outline: none; }
+.novel-relation-picker button.active { border-color: var(--green); background: var(--green); color: #fff; }
 .literature-poem .literature-sentence-list { width: min(100%, 720px); margin: 20px auto 0; padding: 28px clamp(18px, 6vw, 54px); display: block; border: 1px solid #ded2b6; border-radius: 14px; background: rgba(255,255,255,.6); box-shadow: inset 0 0 0 5px rgba(202,178,124,.06); }
 .literature-poem .literature-sentence { min-height: 0; align-content: center; padding: 13px 18px; }
 .literature-poem .literature-sentence + .literature-sentence { margin-top: 7px; }
@@ -278,6 +293,7 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
 .literature-selection-actions > span { color: var(--muted); font-size: 13px; }
 .literature-selection-actions > span strong { color: var(--green); font-size: 17px; }
 .literature-followup-panel { margin-top: 22px; padding: 22px; display: grid; gap: 14px; border: 1px solid #b9cdbf; border-radius: 16px; background: #f6faf6; box-shadow: 0 12px 28px rgba(36,91,67,.09); }
+.summary-marked-token { padding-bottom: 1px; border-bottom: 3px solid #ee7953; color: #8f351b; font-weight: 800; }
 .selected-sentence-summary { padding: 16px 18px; border-radius: 12px; background: #fff; }
 .selected-sentence-summary > span { color: var(--green); font-size: 12px; font-weight: 850; }
 .selected-sentence-summary ol { margin: 10px 0 0; padding-left: 20px; color: #414940; font-size: 13px; line-height: 1.7; }
@@ -323,4 +339,7 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
   .literature-selection-actions { align-items: stretch; display: grid; }
   .literature-selection-actions .primary-button { width: 100%; }
   .literature-followup-panel { padding: 17px; }
+  .novel-marking-panel { padding: 16px; }
+  .novel-token-line { padding: 14px; }
+  .novel-relation-picker > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

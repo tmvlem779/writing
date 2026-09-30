@@ -164,3 +164,15 @@ test("DATA: 문학 겹문장 다중 선택과 질문 연쇄를 반영한 프롬�
   assert.match(migration, /writing-tutor-v10/);
   assert.match(migration, /literature-compound-sentence-multi-select/);
 });
+
+test("DATA: 시 문법 요소·소설 겹문장 분화를 반영한 프롬프트 v11 마이그레이션이 존재한다", () => {
+  const migration = fs.readFileSync("supabase/migrations/202609290004_add_poetry_grammar_elements_prompt.sql", "utf8");
+  assert.match(migration, /writing-tutor-v11/);
+  assert.match(migration, /poetry-grammar-elements-novel-compound-sentences/);
+});
+
+test("DATA: 소설 문장 직접 표시를 반영한 프롬프트 v12 마이그레이션이 존재한다", () => {
+  const migration = fs.readFileSync("supabase/migrations/202609290005_add_novel_direct_marking_prompt.sql", "utf8");
+  assert.match(migration, /writing-tutor-v12/);
+  assert.match(migration, /novel-direct-connection-marking/);
+});

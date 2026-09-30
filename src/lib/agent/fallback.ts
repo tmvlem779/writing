@@ -25,8 +25,10 @@ const nextActions = {
 
 export function buildFallbackResponse(request: TurnRequest): AgentResponse {
   const asksForHelp = /(모르|도와|힌트|어려)/.test(request.message);
-  const isLiteratureMultiSelect = request.activity === "authentic"
-    && /\[첫 과제\] 작품에서 겹문장을 찾아 모두 고르시오/.test(request.message);
+  const isPoetryGrammarSelection = request.activity === "authentic"
+    && /\[첫 과제\] 시에서 표현 효과를 만드는 문법 요소가 드러난 구절을 고르시오/.test(request.message);
+  const isNovelSentenceMarking = request.activity === "authentic"
+    && /\[첫 과제\] 겹문장이라고 생각하는 문장 하나를 고른 뒤, 이어 주는 표현에 밑줄을 그으시오/.test(request.message);
   const level = nextScaffoldLevel({
     currentLevel: request.scaffoldLevel,
     attemptCount: request.attemptCount,
@@ -41,22 +43,33 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
     "직접 설명을 확인한 뒤, 같은 원리를 새 문장에 적용해 봅시다."
   ][level];
 
-  const literatureQuestions = [
-    "고른 문장 가운데 하나를 택해 주어·서술어 관계를 모두 표시하고, 왜 겹문장이라고 판단했는지 설명해 볼까요?",
-    "방금 확인한 기준을 나머지 선택에도 적용하면 모든 문장에서 두 개 이상의 주어·서술어 관계가 나타나는지 살펴볼까요?",
-    "선택하지 않은 문장 중에도 같은 기준에 맞는 문장이 있는지 다시 읽고, 있다면 그 절의 경계를 표시해 볼까요?",
-    "고른 겹문장 하나를 두 홑문장으로 나누면 의미의 연결이나 호흡이 어떻게 달라지는지 비교해 볼까요?"
+  const novelMarkingQuestions = [
+    "밑줄 친 말 앞뒤의 일이 ‘차례로 일어남’과 ‘앞일 때문에 뒷일이 생김’ 중 어디에 더 가까운가요?",
+    "밑줄 친 표현을 빼면 두 내용의 관계가 더 분명해질까요, 덜 분명해질까요? 둘 중 하나를 골라볼까요?",
+    "같은 연결 표현이 쓰인 다른 문장을 작품에서 하나 더 찾을 수 있을까요?",
+    "밑줄 친 표현을 다른 연결 표현으로 바꾸면 두 내용의 관계가 어떻게 달라질까요?"
+  ];
+
+  const poetryGrammarQuestions = [
+    "고른 구절 하나에서 눈에 띄는 어미나 문법 형태를 그대로 찾아 쓰고, 어떤 문법 요소인지 말해 볼까요?",
+    "그 문법 요소가 화자의 태도나 시간, 정서, 시의 호흡 가운데 무엇을 드러내는지 구절을 근거로 설명해 볼까요?",
+    "다른 선택 구절에도 같은 문법 요소가 반복되는지, 또는 다른 요소가 쓰였는지 비교해 볼까요?",
+    "고른 구절의 문법 요소를 다른 형태로 바꾸어 보고, 원문과 비교해 표현 효과가 어떻게 달라지는지 말해 볼까요?"
   ];
 
   return {
     mode: request.activity === "error" ? "revise" : request.activity === "compare" ? "compare" : level === 4 ? "model" : level > 0 ? "hint" : "question",
     scaffoldLevel: level,
     studentMessage: `${lead} 현재 도움 단계는 ‘${scaffoldLabel(level)}’입니다.`,
-    question: isLiteratureMultiSelect
-      ? literatureQuestions[Math.min(request.attemptCount, literatureQuestions.length - 1)]
+    question: isPoetryGrammarSelection
+      ? poetryGrammarQuestions[Math.min(request.attemptCount, poetryGrammarQuestions.length - 1)]
+      : isNovelSentenceMarking
+      ? novelMarkingQuestions[Math.min(request.attemptCount, novelMarkingQuestions.length - 1)]
       : activityQuestions[request.activity],
-    focusConcepts: isLiteratureMultiSelect
-      ? ["홑문장·겹문장", "주어·서술어 관계", "절의 경계"]
+    focusConcepts: isPoetryGrammarSelection
+      ? ["종결 표현", "높임·시간·부정 표현", "표현 효과"]
+      : isNovelSentenceMarking
+      ? ["이어 주는 표현", "두 내용의 관계", "겹문장"]
       : request.activity === "authentic"
       ? ["문장 구조", "표현 효과", "목적과 독자"]
       : ["문장 성분", "호응과 확장"],
