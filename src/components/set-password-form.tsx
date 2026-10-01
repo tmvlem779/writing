@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { MondeukLoading, MondeukLoadingOverlay } from "@/components/mondeuk-loading";
 import { meetsPasswordRequirements, PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/auth/password-policy";
 
 export function SetPasswordForm() {
@@ -28,8 +29,8 @@ export function SetPasswordForm() {
       body: JSON.stringify({ password })
     });
     const body = await response.json().catch(() => null) as { error?: string } | null;
-    setPending(false);
     if (!response.ok) {
+      setPending(false);
       setMessage(body?.error ?? "비밀번호를 설정하지 못했습니다. 잠시 후 다시 시도해 주세요.");
       return;
     }
@@ -40,7 +41,10 @@ export function SetPasswordForm() {
   return <form className="auth-form" onSubmit={submit}>
     <label>새 비밀번호<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} maxLength={128} autoComplete="new-password" required /></label>
     <label>새 비밀번호 확인<input type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength={8} maxLength={128} autoComplete="new-password" required /></label>
-    <button className="primary-button full-button" type="submit" disabled={pending}>{pending ? "설정 중…" : "비밀번호 설정"}</button>
+    <button aria-busy={pending} className="primary-button full-button" type="submit" disabled={pending}>
+      {pending ? <MondeukLoading compact message="새 비밀번호를 안전하게 저장하고 있어요." /> : "비밀번호 설정"}
+    </button>
+    {pending && <MondeukLoadingOverlay message="비밀번호를 저장하고 학습 화면을 준비하고 있어요." />}
     {message && <p className="form-message" role="status">{message}</p>}
   </form>;
 }

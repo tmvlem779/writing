@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { MondeukLoading, MondeukLoadingOverlay } from "@/components/mondeuk-loading";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export function LogoutButton() {
@@ -16,5 +17,12 @@ export function LogoutButton() {
     router.refresh();
   }
 
-  return <button className="dashboard-logout" disabled={pending} onClick={logout} type="button">{pending ? "나가는 중…" : "로그아웃"}</button>;
+  return (
+    <>
+      <button aria-busy={pending} className="dashboard-logout" disabled={pending} onClick={logout} type="button">
+        {pending ? <MondeukLoading compact message="안전하게 로그아웃하고 있어요." /> : "로그아웃"}
+      </button>
+      {pending && <MondeukLoadingOverlay message="안전하게 로그아웃하고 있어요." />}
+    </>
+  );
 }

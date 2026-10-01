@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { MondeukLoading, MondeukLoadingOverlay } from "@/components/mondeuk-loading";
 import { buildPasswordResetRedirect } from "@/lib/auth/password-setup-redirect";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
@@ -22,8 +23,8 @@ export function LoginForm() {
     setPendingAction("login");
     setMessage("");
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    setPendingAction(null);
     if (error) {
+      setPendingAction(null);
       setMessage("로그인 정보를 확인하거나 담당 교사에게 계정 초대를 요청하세요.");
       return;
     }
@@ -70,12 +71,13 @@ export function LoginForm() {
         비밀번호
         <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" minLength={8} required />
       </label>
-      <button className="primary-button full-button" type="submit" disabled={pendingAction !== null}>
-        {pendingAction === "login" ? "확인 중…" : "로그인"}
+      <button aria-busy={pendingAction === "login"} className="primary-button full-button" type="submit" disabled={pendingAction !== null}>
+        {pendingAction === "login" ? <MondeukLoading compact message="학교 계정을 확인하고 있어요." /> : "로그인"}
       </button>
-      <button className="secondary-button full-button" type="button" onClick={requestPasswordSetup} disabled={pendingAction !== null}>
-        {pendingAction === "reset" ? "메일 보내는 중…" : "비밀번호 설정 메일 받기"}
+      <button aria-busy={pendingAction === "reset"} className="secondary-button full-button" type="button" onClick={requestPasswordSetup} disabled={pendingAction !== null}>
+        {pendingAction === "reset" ? <MondeukLoading compact message="비밀번호 설정 메일을 보내고 있어요." /> : "비밀번호 설정 메일 받기"}
       </button>
+      {pendingAction === "login" && <MondeukLoadingOverlay message="로그인했어요. 학습 화면을 준비하고 있어요." />}
       {message && <p className="form-message" role="status">{message}</p>}
       <p className="form-note">계정은 담당 교사가 초대합니다. 공개 회원가입은 제공하지 않습니다.</p>
     </form>

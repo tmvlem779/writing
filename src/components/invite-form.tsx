@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MondeukLoading } from "@/components/mondeuk-loading";
 
 export function InviteForm({ classId }: { classId: string }) {
   const [email, setEmail] = useState("");
@@ -24,7 +25,9 @@ export function InviteForm({ classId }: { classId: string }) {
   return (
     <form className="invite-form" onSubmit={submit}>
       <label>학생 이메일<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
-      <button type="submit" className="secondary-button" disabled={pending}>{pending ? "보내는 중…" : "학생 초대"}</button>
+      <button aria-busy={pending} type="submit" className="secondary-button" disabled={pending}>
+        {pending ? <MondeukLoading compact message="학생 초대 메일을 보내고 있어요." /> : "학생 초대"}
+      </button>
       {message && <span role="status">{message}</span>}
     </form>
   );

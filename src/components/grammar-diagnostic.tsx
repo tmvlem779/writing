@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { MondeukLoading } from "@/components/mondeuk-loading";
 import { grammarDiagnosticQuestions, scoreDiagnosticAnswers } from "@/lib/diagnosis/grammar-diagnostic";
 import { recordWrongAnswer, resolveWrongAnswer } from "@/lib/learning/wrong-answer-client";
 
@@ -132,7 +134,9 @@ export function GrammarDiagnostic() {
                 {!feedback ? (
                   <button className="primary-button" disabled={!selected} onClick={submitAnswer} type="button">답 확인하기</button>
                 ) : (
-                  <button className="primary-button" disabled={saving} onClick={nextQuestion} type="button">{saving ? "결과 저장 중…" : question.order === grammarDiagnosticQuestions.length ? "결과 보기" : "다음 문항"}</button>
+                  <button aria-busy={saving} className="primary-button" disabled={saving} onClick={nextQuestion} type="button">
+                    {saving ? <MondeukLoading compact message="진단 결과를 저장하고 있어요." /> : question.order === grammarDiagnosticQuestions.length ? "결과 보기" : "다음 문항"}
+                  </button>
                 )}
               </div>
             </article>
@@ -150,8 +154,8 @@ export function GrammarDiagnostic() {
               ))}
             </div>
             <div className="diagnostic-result-actions">
-              <a className="primary-button" href="/learn/challenge">오늘의 챌린지로</a>
-              <a className="secondary-button" href="/learn/wrong-notes">오답 확인하기</a>
+              <Link className="primary-button" href="/learn/challenge">오늘의 챌린지로</Link>
+              <Link className="secondary-button" href="/learn/wrong-notes">오답 확인하기</Link>
               <button onClick={restart} type="button">다시 진단하기</button>
             </div>
           </section>

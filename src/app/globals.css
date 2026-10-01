@@ -46,7 +46,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .secondary-button { background: transparent; color: var(--green); }
 .primary-button:hover, .secondary-button:hover { transform: translateY(-2px); }
 .primary-button:disabled, .secondary-button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-.primary-button[aria-busy="true"] { opacity: 1; }
+.primary-button[aria-busy="true"], .secondary-button[aria-busy="true"], .dashboard-logout[aria-busy="true"] { opacity: 1; }
 .mondeuk-loading { margin-top: 16px; padding: 16px 18px; display: flex; align-items: center; justify-content: center; gap: 14px; border: 1px solid #c8dbc9; border-radius: 14px; background: linear-gradient(135deg, #edf5ed, #fff8ea); color: var(--green-dark); box-shadow: 0 9px 24px rgba(36,91,67,.08); }
 .mondeuk-loading.compact { margin: 0; padding: 0; gap: 9px; border: 0; background: transparent; color: inherit; box-shadow: none; }
 .mondeuk-loading-syllables { display: inline-flex; gap: 3px; min-width: max-content; }
@@ -57,6 +57,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .mondeuk-loading.compact .mondeuk-loading-syllables i { width: 21px; height: 21px; background: rgba(255,255,255,.18); font-size: 11px; }
 .mondeuk-loading-message { font-size: 13px; font-weight: 750; }
 .mondeuk-loading.compact .mondeuk-loading-message { font-size: 12px; }
+.mondeuk-loading-overlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 24px; background: rgba(249,248,242,.88); backdrop-filter: blur(5px); }
+.mondeuk-loading-overlay .mondeuk-loading { width: min(430px, 100%); margin: 0; min-height: 104px; }
 @keyframes mondeuk-pulse {
   0%, 70%, 100% { opacity: .38; transform: translateY(0) scale(.92); }
   35% { opacity: 1; transform: translateY(-3px) scale(1); }

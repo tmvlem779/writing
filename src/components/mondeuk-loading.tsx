@@ -3,6 +3,10 @@ type MondeukLoadingProps = {
   message?: string;
 };
 
+type MondeukLoadingOverlayProps = {
+  message?: string;
+};
+
 const syllables = ["문", "득", "문", "득"];
 
 export function MondeukLoading({
@@ -23,4 +27,14 @@ export function MondeukLoading({
   }
 
   return <div className="mondeuk-loading" role="status" aria-live="polite">{content}</div>;
+}
+
+export function MondeukLoadingOverlay({
+  message = "문득문득이 화면을 준비하고 있어요."
+}: MondeukLoadingOverlayProps) {
+  return (
+    <div className="mondeuk-loading-overlay">
+      <MondeukLoading message={message} />
+    </div>
+  );
 }
