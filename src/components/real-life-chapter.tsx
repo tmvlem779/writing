@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { MondeukLoading } from "@/components/mondeuk-loading";
 import type { AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
 import { getCourseLesson, getCourseTrack, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
@@ -312,7 +313,7 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
         ))}
       </aside>
 
-      <section className="material-workspace" aria-labelledby="material-title">
+      <section className="material-workspace" aria-busy={pending} aria-labelledby="material-title">
         <header className="material-header">
           <div>
             <span className="eyebrow">{isLiterature ? `${material.genre} · 질문·근거 탐구` : `${lessonNumber}차시 · ${material.label} 탐구`}</span>
@@ -367,8 +368,8 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
                   {!literatureSelectionSubmitted ? (
                     <div className="literature-selection-actions">
                       <span><strong>{selectedSentences.length}개</strong> 구절을 선택했어요.</span>
-                      <button className="primary-button" disabled={pending || selectedSentences.length === 0} onClick={submitLiteratureSelection} type="button">
-                        {pending ? "선택을 살펴보는 중…" : "선택 완료하고 질문 받기"}
+                      <button aria-busy={pending} className="primary-button" disabled={pending || selectedSentences.length === 0} onClick={submitLiteratureSelection} type="button">
+                        {pending ? <MondeukLoading compact message="선택한 구절을 살펴보고 있어요." /> : "선택 완료하고 질문 받기"}
                       </button>
                     </div>
                   ) : (
@@ -391,8 +392,8 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
                       <textarea id="literature-followup-draft" maxLength={2500} onChange={(event) => setDraft(event.target.value)} placeholder="선택한 구절의 문법 형태와 그 표현 효과를 근거로 답해 보세요." ref={draftRef} value={draft} />
                       <div className="editor-footer">
                         <span>{draft.length.toLocaleString()} / 2,500자</span>
-                        <button className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
-                          {pending ? "답을 살펴보는 중…" : "답 보내고 다음 질문 받기"}
+                        <button aria-busy={pending} className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
+                          {pending ? <MondeukLoading compact /> : "답 보내고 다음 질문 받기"}
                         </button>
                       </div>
                     </section>
@@ -490,8 +491,8 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
                           <textarea id="literature-followup-draft" maxLength={600} onChange={(event) => setDraft(event.target.value)} placeholder="한두 문장으로 짧게 답해 보세요." ref={draftRef} value={draft} />
                           <div className="editor-footer">
                             <span>{draft.length.toLocaleString()} / 600자</span>
-                            <button className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
-                              {pending ? "답을 살펴보는 중…" : "답 보내고 이 문장 완료"}
+                            <button aria-busy={pending} className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
+                              {pending ? <MondeukLoading compact /> : "답 보내고 이 문장 완료"}
                             </button>
                           </div>
                         </>
@@ -566,10 +567,12 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
             />
             <div className="editor-footer">
               <span>{draft.length.toLocaleString()} / 2,500자</span>
-              <button className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
-                {pending ? "생각을 살펴보는 중…" : "질문과 힌트 받기"}
+              <button aria-busy={pending} className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
+                {pending ? <MondeukLoading compact /> : "질문과 힌트 받기"}
               </button>
             </div>
+
+            {pending && <MondeukLoading />}
 
             {error && <div className="error-panel" role="alert">{error}</div>}
             {response && (

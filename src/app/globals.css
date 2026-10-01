@@ -46,6 +46,24 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .secondary-button { background: transparent; color: var(--green); }
 .primary-button:hover, .secondary-button:hover { transform: translateY(-2px); }
 .primary-button:disabled, .secondary-button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.primary-button[aria-busy="true"] { opacity: 1; }
+.mondeuk-loading { margin-top: 16px; padding: 16px 18px; display: flex; align-items: center; justify-content: center; gap: 14px; border: 1px solid #c8dbc9; border-radius: 14px; background: linear-gradient(135deg, #edf5ed, #fff8ea); color: var(--green-dark); box-shadow: 0 9px 24px rgba(36,91,67,.08); }
+.mondeuk-loading.compact { margin: 0; padding: 0; gap: 9px; border: 0; background: transparent; color: inherit; box-shadow: none; }
+.mondeuk-loading-syllables { display: inline-flex; gap: 3px; min-width: max-content; }
+.mondeuk-loading-syllables i { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; background: var(--green); color: white; font-family: var(--font-brand), var(--font-body), sans-serif; font-size: 13px; font-style: normal; font-weight: 800; animation: mondeuk-pulse 1.15s ease-in-out infinite both; }
+.mondeuk-loading-syllables i:nth-child(2) { animation-delay: .14s; }
+.mondeuk-loading-syllables i:nth-child(3) { animation-delay: .28s; }
+.mondeuk-loading-syllables i:nth-child(4) { animation-delay: .42s; }
+.mondeuk-loading.compact .mondeuk-loading-syllables i { width: 21px; height: 21px; background: rgba(255,255,255,.18); font-size: 11px; }
+.mondeuk-loading-message { font-size: 13px; font-weight: 750; }
+.mondeuk-loading.compact .mondeuk-loading-message { font-size: 12px; }
+@keyframes mondeuk-pulse {
+  0%, 70%, 100% { opacity: .38; transform: translateY(0) scale(.92); }
+  35% { opacity: 1; transform: translateY(-3px) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mondeuk-loading-syllables i { animation: none; opacity: 1; transform: none; }
+}
 .concept-tags span { padding: 7px 12px; background: rgba(255,255,255,.65); border: 1px solid rgba(36,91,67,.13); border-radius: 999px; font-size: 12px; font-weight: 700; }
 .section-heading > span, .section-title-row span, .sidebar-heading span, .task-card > span { color: var(--orange); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
 .teacher-section h2 { font-size: clamp(32px, 4vw, 48px); letter-spacing: -.045em; line-height: 1.2; margin: 10px 0; }

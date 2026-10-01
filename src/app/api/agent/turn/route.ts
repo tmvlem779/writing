@@ -108,7 +108,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "안전 검사를 통과하지 못해 응답을 표시하지 않았습니다." }, { status: 422 });
     }
 
-    const cost = estimateTurnCostUsd(result.usage.input, result.usage.output);
+    const cost = estimateTurnCostUsd(result.usage.input, result.usage.output, result.model);
     if (admin && auth.user) {
       const evidence = deriveLearningEvidence(parsed.data.activity, result.response);
       const { error: recordError } = await admin.rpc("record_learning_turn", {

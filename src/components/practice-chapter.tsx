@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { MondeukLoading } from "@/components/mondeuk-loading";
 import type { AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
 import { getCourseLesson, getCourseTrack, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
@@ -125,7 +126,7 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
         </div>
       </aside>
 
-      <section className="workspace" aria-labelledby="workspace-title">
+      <section className="workspace" aria-busy={pending} aria-labelledby="workspace-title">
         <header className="workspace-header">
           <div>
             <span className="eyebrow">{lessonNumber}차시 · {selected.label}</span>
@@ -154,10 +155,12 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
         />
         <div className="editor-footer">
           <span>{draft.length.toLocaleString()} / 4,000자</span>
-          <button className="primary-button" onClick={submit} disabled={pending || !draft.trim()} type="button">
-            {pending ? "생각을 살펴보는 중…" : "질문과 힌트 받기"}
+          <button aria-busy={pending} className="primary-button" onClick={submit} disabled={pending || !draft.trim()} type="button">
+            {pending ? <MondeukLoading compact /> : "질문과 힌트 받기"}
           </button>
         </div>
+
+        {pending && <MondeukLoading />}
 
         {error && <div className="error-panel" role="alert">{error}</div>}
 

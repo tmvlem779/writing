@@ -31,8 +31,8 @@
 ## 2. OpenAI
 
 1. 프로젝트 전용 API 키와 월 사용량 알림을 만든다.
-2. 앱 내부 한도 `MONTHLY_OPENAI_BUDGET_USD=6`을 유지한다.
-3. 기본 모델은 저비용 `gpt-5-nano`, `store: false`, 비스트리밍 구조화 출력이다.
+2. 앱 내부 한도 `MONTHLY_OPENAI_BUDGET_USD=6`을 유지한다. 사용량 기록은 `gpt-5.6-luna` 공식 단가(입력 $0.20/백만 토큰, 출력 $1.20/백만 토큰)로 계산하며 알 수 없는 모델은 보수적인 상한 단가를 적용한다.
+3. 기본 모델은 비용 민감·대량 처리용 `gpt-5.6-luna`, `reasoning.effort: none`, `store: false`, 비스트리밍 구조화 출력이다.
 4. 실제 학생 사용 전 대표 P1~P6 사례를 국어 교사가 표본 검토한다.
 
 ## 3. Vercel
@@ -46,7 +46,7 @@ GitHub 저장소를 연결한 뒤 Development, Preview, Production 환경을 분
 - `NEXT_PUBLIC_SITE_URL`
 - `SUPABASE_SECRET_KEY`
 - `OPENAI_API_KEY`
-- `OPENAI_MODEL=gpt-5-nano`
+- `OPENAI_MODEL=gpt-5.6-luna`
 - 충분히 긴 임의 문자열인 `SAFETY_IDENTIFIER_SALT`
 - `APP_ENV=production`
 - `MAX_TURNS_PER_SESSION=30`

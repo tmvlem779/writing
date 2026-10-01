@@ -133,8 +133,8 @@ test("SAFE: 고정 문학 본문은 안전 검사에서 제외하되 학생 작�
 });
 
 test("AI: 환경 변수의 줄바꿈과 공백을 제거해 지원 모델 이름을 사용한다", () => {
-  assert.equal(resolveOpenAiModel("gpt-5-nano\r "), "gpt-5-nano");
-  assert.equal(resolveOpenAiModel("  "), "gpt-5-nano");
+  assert.equal(resolveOpenAiModel("gpt-5.6-luna\r "), "gpt-5.6-luna");
+  assert.equal(resolveOpenAiModel("  "), "gpt-5.6-luna");
 });
 
 test("PRIVACY: 수업용 자료에는 연락처나 실제 계정 표기가 없다", () => {
