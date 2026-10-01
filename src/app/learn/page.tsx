@@ -21,9 +21,8 @@ const activityLabels: Record<string, string> = {
 };
 
 const dashboardCards = [
-  { href: "/learn/diagnosis", kicker: "출발점 찾기", title: "AI 진단평가", description: "문장 구조와 문법 요소의 현재 이해를 8문항으로 살펴봐요.", accent: "orange", icon: "diagnosis" },
   { href: "/learn/challenge", kicker: "6차시 수업", title: "오늘의 챌린지", description: "구조+문법 요소 수업안으로 개념을 배우고 문장을 직접 만들어요.", accent: "green", icon: "challenge" },
-  { href: "/learn/self-study", kicker: "실생활·문학 적용", title: "스스로 유형 학습", description: "실생활 자료와 문학 작품의 문장을 분석하고 직접 고쳐 써요.", accent: "lime", icon: "practice" },
+  { href: "/learn/self-study", kicker: "문학·실생활·상황 적용", title: "스스로 유형 학습", description: "자료를 분석하고 그림 속 상황을 관찰해 자신의 문장을 직접 만들어요.", accent: "lime", icon: "practice" },
   { href: "/learn/wrong-notes", kicker: "다시 보기", title: "오답노트", description: "어느 학습 영역에서 어떤 문제를 놓쳤는지 확인하고 다시 도전해요.", accent: "paper", icon: "review" }
 ] as const;
 
@@ -65,10 +64,10 @@ export default async function LearnPage() {
   const nextActivity: { href: Route; label: string; note: string } = wrongAnswerCount > 0
     ? { href: "/learn/wrong-notes", label: "오답 다시 설명하기", note: "놓친 문제부터 다시 살펴봐요!" }
     : totalEvidence === 0
-      ? { href: "/learn/diagnosis", label: "문장 구조 진단", note: "현재 출발점을 먼저 찾아봐요!" }
+      ? { href: "/learn/self-study", label: "그림·상황 문장 만들기", note: "한 장면을 보고 첫 문장을 만들어 봐요!" }
       : practiceConcepts.length > 0
         ? { href: "/learn/challenge", label: `${practiceConcepts[0]} 연습`, note: "조금 더 필요한 영역을 연습해요!" }
-        : { href: "/learn/self-study", label: "문학 작품 문장 분석", note: "배운 개념을 작품에 적용해 봐요!" };
+        : { href: "/learn/self-study", label: "그림·상황 문장 만들기", note: "배운 개념을 새 장면에 적용해 봐요!" };
 
   return (
     <section className="student-dashboard">
@@ -84,7 +83,7 @@ export default async function LearnPage() {
       <div className="student-dashboard-intro">
         <span>오늘도 질문에서 시작해요</span>
         <h1>{studentLabel}의 문법 학습 공간</h1>
-        <p>현재 실력을 살피고, 오늘의 수업에 도전하고, 실제 언어 자료로 스스로 연습해 보세요.</p>
+        <p>오늘의 수업에 도전하고, 문학·실생활 자료와 그림 속 상황으로 스스로 문장을 만들어 보세요.</p>
       </div>
 
       <div className="student-dashboard-cards">

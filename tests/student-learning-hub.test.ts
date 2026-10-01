@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { grammarDiagnosticQuestions, scoreDiagnosticAnswers } from "../src/lib/diagnosis/grammar-diagnostic.ts";
+import { situationScenes } from "../src/lib/curriculum/situation-writing.ts";
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const dashboard = read("src/app/learn/page.tsx");
@@ -10,6 +11,7 @@ const diagnosisPage = read("src/app/learn/diagnosis/page.tsx");
 const challengePage = read("src/app/learn/challenge/page.tsx");
 const selfStudyPage = read("src/app/learn/self-study/page.tsx");
 const selfStudyWorkspace = read("src/components/self-study-workspace.tsx");
+const situationWritingActivity = read("src/components/situation-writing-activity.tsx");
 const realLifeChapter = read("src/components/real-life-chapter.tsx");
 const wrongNotesPage = read("src/app/learn/wrong-notes/page.tsx");
 const diagnosisApi = read("src/app/api/diagnosis/route.ts");
@@ -18,9 +20,8 @@ const migration = read("supabase/migrations/202609280003_add_wrong_answers.sql")
 const layout = read("src/app/layout.tsx");
 const styles = read("src/app/globals.css");
 
-test("학생 학습 홈은 네 학습 영역을 각각 독립 경로로 연결한다", () => {
+test("ver.2 학생 학습 홈과 공통 탭에서는 AI 진단평가를 제외한다", () => {
   for (const [label, href] of [
-    ["AI 진단평가", "/learn/diagnosis"],
     ["오늘의 챌린지", "/learn/challenge"],
     ["스스로 유형 학습", "/learn/self-study"],
     ["오답노트", "/learn/wrong-notes"]
@@ -28,6 +29,9 @@ test("학생 학습 홈은 네 학습 영역을 각각 독립 경로로 연결�
     assert.match(dashboard, new RegExp(label));
     assert.match(nav, new RegExp(href));
   }
+  assert.doesNotMatch(dashboard, /title: "AI 진단평가"/);
+  assert.doesNotMatch(nav, /label: "AI 진단평가"/);
+  assert.doesNotMatch(dashboard, /href: "\/learn\/diagnosis"/);
 });
 
 test("P1·P3: 진단평가는 문장 기초부터 맥락과 의미까지 8문항으로 파악한다", () => {
@@ -49,15 +53,35 @@ test("P1·P3: 진단 오답은 정답을 즉시 공개하지 않고 관찰 단�
   }
 });
 
-test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 문학·실생활 자료를 분리한다", () => {
+test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 문학·실생활·상황 생성을 분리한다", () => {
   assert.match(challengePage, /WritingStudio/);
   assert.match(selfStudyPage, /SelfStudyWorkspace/);
   assert.match(selfStudyWorkspace, /문학 작품/);
   assert.match(selfStudyWorkspace, /실생활 자료/);
+  assert.match(selfStudyWorkspace, /그림·상황 문장 만들기/);
+  assert.match(selfStudyWorkspace, /SituationWritingActivity/);
+  assert.match(selfStudyWorkspace, /activeGroup === "sentence-making"/);
   assert.match(selfStudyWorkspace, /materialGroup=\{activeGroup\}/);
   assert.match(selfStudyWorkspace, /showOverview=\{false\}/);
-  assert.match(selfStudyPage, /시에서는 문법 요소와 표현 효과를/);
-  assert.match(selfStudyPage, /소설에서는 모든 문장에 직접 표시하며 구조 질문에 답합니다/);
+  assert.match(selfStudyPage, /읽고, 관찰하고, 내 문장으로 표현해요/);
+  assert.match(selfStudyPage, /그림 속 학교생활 상황을 관찰해/);
+});
+
+test("P2·P3·P4: 그림 상황에서는 학생이 먼저 문장을 만들고 그 문장으로 질문을 이어 간다", () => {
+  assert.equal(situationScenes.length, 3);
+  assert.ok(situationScenes.every((scene) => scene.observations.length >= 3));
+  assert.ok(situationScenes.every((scene) => scene.firstCondition.length > 20));
+  assert.match(situationWritingActivity, /role="img"/);
+  assert.match(situationWritingActivity, /내가 만든 문장/);
+  assert.match(situationWritingActivity, /문장 보내고 질문 받기/);
+  assert.match(situationWritingActivity, /activity: "create"/);
+  assert.match(situationWritingActivity, /\[학생이 만든 문장\]/);
+  assert.match(situationWritingActivity, /AI 학습 도우미/);
+  assert.match(situationWritingActivity, /고친 문장 다시 보내기/);
+  assert.doesNotMatch(situationWritingActivity, /모범 답안|정답 문장:/);
+  assert.ok(situationWritingActivity.indexOf('className="coach-card situation-coach"') < situationWritingActivity.indexOf('htmlFor="situation-sentence"'));
+  assert.match(styles, /\.situation-writing-shell/);
+  assert.match(styles, /\.situation-illustration/);
 });
 
 test("P3·P4: 시는 문법 요소를 고르고 소설은 모든 문장에 직접 표시하고 답한다", () => {

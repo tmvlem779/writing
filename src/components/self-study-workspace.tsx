@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { RealLifeChapter } from "@/components/real-life-chapter";
+import { SituationWritingActivity } from "@/components/situation-writing-activity";
 import type { RealLifeMaterialGroup } from "@/lib/curriculum/real-life-materials";
 
-type SelfStudyGroup = Exclude<RealLifeMaterialGroup, "all">;
+type SelfStudyGroup = Exclude<RealLifeMaterialGroup, "all"> | "sentence-making";
 
 const groups: Array<{
   id: SelfStudyGroup;
@@ -23,6 +24,12 @@ const groups: Array<{
     label: "실생활 자료",
     description: "기사·안내문·대화·발표·인터뷰·SNS의 문장을 분석하고 바꾸어 써요.",
     countLabel: "6가지 실제 언어 맥락"
+  },
+  {
+    id: "sentence-making",
+    label: "그림·상황 문장 만들기",
+    description: "그림을 먼저 관찰하고, 보이는 사실과 상황에 맞는 문장을 직접 만들어요.",
+    countLabel: "3가지 학교생활 장면"
   }
 ];
 
@@ -46,13 +53,17 @@ export function SelfStudyWorkspace() {
           </button>
         ))}
       </section>
-      <RealLifeChapter
-        key={activeGroup}
-        lessonNumber={6}
-        materialGroup={activeGroup}
-        showOverview={false}
-        trackId="grammar"
-      />
+      {activeGroup === "sentence-making" ? (
+        <SituationWritingActivity />
+      ) : (
+        <RealLifeChapter
+          key={activeGroup}
+          lessonNumber={6}
+          materialGroup={activeGroup}
+          showOverview={false}
+          trackId="grammar"
+        />
+      )}
     </>
   );
 }

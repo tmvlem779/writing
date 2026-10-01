@@ -50,8 +50,8 @@ export default async function WrongNotesPage() {
           <section className="wrong-notes-empty">
             <span aria-hidden="true">✓</span>
             <h2>아직 기록된 오답이 없어요</h2>
-            <p>AI 진단평가나 오늘의 챌린지를 풀면 다시 살펴볼 문제가 이곳에 모입니다.</p>
-            <Link className="primary-button" href="/learn/diagnosis">진단평가 시작하기</Link>
+            <p>오늘의 챌린지나 스스로 유형 학습에서 다시 살펴볼 문제가 생기면 이곳에 모입니다.</p>
+            <Link className="primary-button" href="/learn/challenge">오늘의 챌린지 시작하기</Link>
           </section>
         ) : (
           <div className="wrong-note-list">

@@ -182,3 +182,9 @@ test("DATA: 소설 전체 문장 순차 표시를 반영한 프롬프트 v13 마
   assert.match(migration, /writing-tutor-v13/);
   assert.match(migration, /novel-all-sentence-direct-marking/);
 });
+
+test("DATA: 그림·상황 문장 생성을 반영한 프롬프트 v14 마이그레이션이 존재한다", () => {
+  const migration = fs.readFileSync("supabase/migrations/202610010001_add_situation_sentence_prompt.sql", "utf8");
+  assert.match(migration, /writing-tutor-v14/);
+  assert.match(migration, /situation-observation-sentence-generation/);
+});
