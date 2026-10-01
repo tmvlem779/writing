@@ -145,25 +145,6 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
           <p>{selected.prompt}</p>
         </div>
 
-        <label className="draft-label" htmlFor="student-draft">내 문장과 생각</label>
-        <textarea
-          id="student-draft"
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="완벽하게 쓰려고 하지 않아도 괜찮아요. 먼저 생각나는 문장을 적어 보세요."
-          maxLength={4000}
-        />
-        <div className="editor-footer">
-          <span>{draft.length.toLocaleString()} / 4,000자</span>
-          <button aria-busy={pending} className="primary-button" onClick={submit} disabled={pending || !draft.trim()} type="button">
-            {pending ? <MondeukLoading compact /> : "질문과 힌트 받기"}
-          </button>
-        </div>
-
-        {pending && <MondeukLoading />}
-
-        {error && <div className="error-panel" role="alert">{error}</div>}
-
         {response && (
           <article className="coach-card" aria-live="polite">
             <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
@@ -179,6 +160,23 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
             )}
           </article>
         )}
+
+        <label className="draft-label" htmlFor="student-draft">내 문장과 생각</label>
+        <textarea
+          id="student-draft"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder="완벽하게 쓰려고 하지 않아도 괜찮아요. 먼저 생각나는 문장을 적어 보세요."
+          maxLength={4000}
+        />
+        <div className="editor-footer">
+          <span>{draft.length.toLocaleString()} / 4,000자</span>
+          <button aria-busy={pending} className="primary-button" onClick={submit} disabled={pending || !draft.trim()} type="button">
+            {pending ? <MondeukLoading compact /> : "질문과 힌트 받기"}
+          </button>
+        </div>
+
+        {error && <div className="error-panel" role="alert">{error}</div>}
       </section>
 
       <aside className="evidence-panel" aria-label="학습 기록">

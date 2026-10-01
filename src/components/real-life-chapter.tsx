@@ -572,8 +572,6 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
               </button>
             </div>
 
-            {pending && <MondeukLoading />}
-
             {error && <div className="error-panel" role="alert">{error}</div>}
             {response && (
             <article className="coach-card" aria-live="polite">
