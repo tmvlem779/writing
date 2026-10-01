@@ -21,6 +21,7 @@ test("로딩 애니메이션은 움직임 축소 설정을 존중한다", () => 
   const css = fs.readFileSync("src/app/globals.css", "utf8");
   assert.match(css, /@keyframes mondeuk-pulse/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(css, /\.mondeuk-loading-overlay \.mondeuk-loading \{[^}]*background: transparent;[^}]*box-shadow: none;/s);
 });
 
 test("로그인 뒤 화면 전환과 학습 경로 이동에도 전체 화면 로딩을 제공한다", () => {
