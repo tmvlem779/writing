@@ -71,11 +71,19 @@ const supabaseConfig = fs.readFileSync("supabase/config.toml", "utf8");
 for (const required of [
   "enable_signup = false",
   "enable_anonymous_sign_ins = false",
-  "minimum_password_length = 10",
-  'password_requirements = "lower_upper_letters_digits_symbols"'
+  "minimum_password_length = 8",
+  'password_requirements = "letters_digits"'
 ]) {
   if (!supabaseConfig.includes(required)) {
     console.error(`Supabase Auth 보안 설정 누락: ${required}`);
+    process.exit(1);
+  }
+}
+
+const passwordPolicy = fs.readFileSync("src/lib/auth/password-policy.ts", "utf8");
+for (const required of ["password.length >= 8", "/^[a-z0-9]+$/", "/[a-z]/", "/\\d/"]) {
+  if (!passwordPolicy.includes(required)) {
+    console.error(`앱 비밀번호 정책 누락: ${required}`);
     process.exit(1);
   }
 }

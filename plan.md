@@ -94,7 +94,7 @@
 
 ### 백엔드
 
-- Supabase Auth: 교사 초대 기반 이메일 로그인. 학교에서 Google Workspace를 요구하면 Google OAuth로 교체할 수 있게 인증 계층을 분리
+- Supabase Auth: 교사가 발급한 학교 아이디와 초기 비밀번호로 로그인한다. 실제 이메일은 수집하지 않고, 서버와 로그인 클라이언트가 동일한 예약 도메인의 내부 인증 주소로 변환한다. 공개 회원가입은 전역 설정으로 차단한다.
 - Supabase Postgres: 세션, 초안, 대화, 진단, 숙달 상태, 안전 이벤트 저장
 - Row Level Security(RLS): 학생은 자신의 데이터만 조회·수정
 - Supabase CLI migration으로 스키마와 정책을 코드화

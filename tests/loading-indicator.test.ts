@@ -24,6 +24,7 @@ test("로딩 애니메이션은 움직임 축소 설정을 존중한다", () => 
   assert.match(css, /\.mondeuk-loading-overlay \.mondeuk-loading \{[^}]*background: transparent;[^}]*box-shadow: none;/s);
   assert.match(css, /\.mondeuk-loading-syllables i \{[^}]*background: transparent;[^}]*font-size: 40px;/s);
   for (const index of [1, 2, 3, 4]) assert.match(css, new RegExp(`\\.mondeuk-loading-syllables i:nth-child\\(${index}\\) \\{ color:`));
+  for (const color of ["#245b43", "#d66a3f", "#789321", "#667b8c"]) assert.match(css, new RegExp(color));
 });
 
 test("로그인 뒤 화면 전환과 학습 경로 이동에도 전체 화면 로딩을 제공한다", () => {
@@ -35,7 +36,7 @@ test("로그인 뒤 화면 전환과 학습 경로 이동에도 전체 화면 �
   assert.match(learnLoading, /MondeukLoadingOverlay/);
   assert.match(login, /pendingAction === "login" && <MondeukLoadingOverlay/);
   assert.match(login, /if \(error\) \{\s*setPendingAction\(null\)/);
-  const loginSubmit = login.slice(login.indexOf("async function onSubmit"), login.indexOf("async function requestPasswordSetup"));
+  const loginSubmit = login.slice(login.indexOf("async function onSubmit"), login.indexOf("  return ("));
   assert.ok(loginSubmit.indexOf("if (error)") < loginSubmit.indexOf("setPendingAction(null)"));
 });
 

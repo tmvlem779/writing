@@ -12,11 +12,13 @@ additional_redirect_urls = [
 enable_signup = false
 enable_anonymous_sign_ins = false
 enable_manual_linking = false
-minimum_password_length = 10
-password_requirements = "lower_upper_letters_digits_symbols"
+minimum_password_length = 8
+password_requirements = "letters_digits"
 
 [auth.email]
-enable_signup = false
+# 학교 아이디는 내부 전용 이메일 식별자로 변환해 로그인한다. 공개 가입은
+# 위의 auth.enable_signup=false가 차단하므로 이메일 공급자는 활성 상태여야 한다.
+enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
 secure_password_change = true

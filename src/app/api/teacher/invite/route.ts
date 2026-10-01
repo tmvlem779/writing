@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { meetsPasswordRequirements } from "@/lib/auth/password-policy";
+import { isValidLoginId, normalizeLoginId, toSchoolAccountEmail } from "@/lib/auth/school-account";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const inviteSchema = z.object({
-  email: z.string().email(),
+  loginId: z.string().transform(normalizeLoginId).refine(isValidLoginId),
+  password: z.string().refine(meetsPasswordRequirements),
   classId: z.string().uuid()
 });
 
 export async function POST(request: Request) {
   const input = inviteSchema.safeParse(await request.json().catch(() => null));
-  if (!input.success) return NextResponse.json({ error: "이메일과 학급을 확인해 주세요." }, { status: 400 });
+  if (!input.success) return NextResponse.json({ error: "아이디, 비밀번호와 학급을 확인해 주세요." }, { status: 400 });
 
   const supabase = await createServerSupabaseClient();
   const admin = createAdminSupabaseClient();
@@ -28,21 +31,30 @@ export async function POST(request: Request) {
     .maybeSingle();
   if (!membership) return NextResponse.json({ error: "교사 권한이 필요합니다." }, { status: 403 });
 
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(input.data.email, {
-    data: { role: "student", class_id: input.data.classId },
-    redirectTo: `${origin}/auth/confirm?next=/set-password`
+  const { data, error } = await admin.auth.admin.createUser({
+    email: toSchoolAccountEmail(input.data.loginId),
+    password: input.data.password,
+    email_confirm: true,
+    user_metadata: {
+      role: "student",
+      class_id: input.data.classId,
+      login_id: input.data.loginId,
+      display_alias: input.data.loginId
+    }
   });
-  if (error) return NextResponse.json({ error: "초대 메일을 보낼 수 없습니다." }, { status: 500 });
+  if (error) return NextResponse.json({ error: "이미 사용 중인 아이디이거나 계정을 만들 수 없습니다." }, { status: 409 });
 
   if (data.user) {
     const { error: membershipError } = await admin.from("class_memberships").upsert({
       class_id: input.data.classId,
       user_id: data.user.id,
       role: "student",
-      status: "invited"
+      status: "active"
     });
-    if (membershipError) return NextResponse.json({ error: "학생을 학급에 연결하지 못했습니다." }, { status: 500 });
+    if (membershipError) {
+      await admin.auth.admin.deleteUser(data.user.id);
+      return NextResponse.json({ error: "학생을 학급에 연결하지 못했습니다." }, { status: 500 });
+    }
   }
-  return NextResponse.json({ invited: true });
+  return NextResponse.json({ created: true });
 }
