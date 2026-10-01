@@ -10,6 +10,7 @@ test("AI 요청 중에는 문득문득 네 글자 로딩 상태를 즉시 보여
   assert.match(loader, /\["문", "득", "문", "득"\]/);
   assert.match(loader, /role="status"/);
   assert.match(loader, /aria-live="polite"/);
+  assert.doesNotMatch(loader, /mondeuk-loading-message/);
   assert.match(practice, /pending && <MondeukLoading \/>/);
   assert.match(realLife, /pending && <MondeukLoading \/>/);
   assert.match(practice, /aria-busy=\{pending\}/);
