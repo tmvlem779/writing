@@ -1089,6 +1089,11 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
   animation: none;
 }
 .v3-visual-stack figure:first-child { visibility: hidden; }
+.story-step-0 .v3-visual-stack figure:first-child {
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+}
 .v3-story-copy {
   width: min(530px, 38vw);
   min-height: 400px;

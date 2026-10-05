@@ -28,7 +28,7 @@ test("첫 화면에서 학습 원리와 수업 흐름 소개 영역을 제거한
 test("ver.3 첫 화면은 종이 앞뒤와 그림자가 보이는 책장 넘김으로 전환된다", () => {
   assert.match(bookJourney, /requestAnimationFrame/);
   assert.match(bookJourney, /const open = clamp\(progress \/ 0\.14\)/);
-  assert.match(bookJourney, /progress < 0\.19 \? 0/);
+  assert.match(bookJourney, /progress < 0\.14 \? 0/);
   assert.match(bookJourney, /--book-open/);
   assert.match(bookJourney, /--book-explore/);
   assert.match(bookJourney, /--page-write/);
@@ -49,6 +49,7 @@ test("ver.3 첫 화면은 종이 앞뒤와 그림자가 보이는 책장 넘김�
   assert.match(styles, /\.v3-book-viewport \{[^}]*width: 100vw/s);
   assert.match(styles, /\.story-step-0 \.v3-story-copy \{ opacity: 0; \}/);
   assert.match(styles, /\.v3-visual-stack figure:first-child \{ visibility: hidden; \}/);
+  assert.match(styles, /\.story-step-0 \.v3-visual-stack figure:first-child \{[^}]*display: none/s);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
 

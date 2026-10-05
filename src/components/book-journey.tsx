@@ -87,7 +87,7 @@ export function BookJourney() {
       journey.style.setProperty("--page-write", write.toFixed(4));
       journey.style.setProperty("--journey-finish", finish.toFixed(4));
 
-      const nextStep = progress < 0.19 ? 0 : progress < 0.4 ? 1 : progress < 0.64 ? 2 : progress < 0.84 ? 3 : 4;
+      const nextStep = progress < 0.14 ? 0 : progress < 0.38 ? 1 : progress < 0.63 ? 2 : progress < 0.84 ? 3 : 4;
       if (nextStep !== lastStepRef.current) {
         setTurnDirection(nextStep > lastStepRef.current ? "forward" : "backward");
         lastStepRef.current = nextStep;
