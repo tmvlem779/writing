@@ -14,7 +14,8 @@ test("첫 화면은 문득문득을 먼저 보여 주고 학습 시작을 로그
   assert.match(bookJourney, /title: "질문으로 얻고,\\n문장으로 깨닫다"/);
   assert.match(bookJourney, /문득문득은 답을 대신 써주지 않습니다/);
   assert.match(bookJourney, /단계별 질문으로 생각의 문을 열고, 스스로 올바른 문장을 쓰도록 돕습니다/);
-  assert.match(bookJourney, /href="\/login">학습 시작하기/);
+  assert.match(bookJourney, /<LoginForm \/>/);
+  assert.match(bookJourney, /학교 계정으로 학습 이어가기/);
   assert.doesNotMatch(bookJourney, /학교 계정으로 로그인/);
 });
 
@@ -34,6 +35,8 @@ test("ver.3 첫 화면은 스크롤 진행도에 따라 표지가 열리고 책 
   assert.match(bookJourney, /v3-page-spread/);
   assert.match(styles, /\.v3-book-stage \{[^}]*position: sticky/s);
   assert.match(styles, /rotateY\(calc\(var\(--book-open\) \* -172deg\)\)/);
+  assert.match(styles, /\.v3-book-viewport \{[^}]*width: 100vw/s);
+  assert.match(styles, /\.v3-page-spread \{[^}]*grid-template-columns: 1fr 18px 1fr/s);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
 

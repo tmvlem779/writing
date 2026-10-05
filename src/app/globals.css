@@ -620,6 +620,94 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
   .teacher-header { gap: 10px; }.teacher-header h1 { font-size: 44px; }.invite-form { grid-template-columns: 1fr; }
 }
 
+/* 문득문득 ver.3.1: 화면 전체가 책이 되는 표지·로그인 장면 */
+.v3-book-viewport { width: 100vw; height: 100svh; aspect-ratio: auto; inset: 0; right: auto; top: auto; perspective: 2600px; transform: none; transform-origin: left center; opacity: 1; filter: none; }
+.v3-book-shadow { display: none; }
+.v3-book { transform: none; }
+.v3-page-spread { grid-template-columns: 1fr 18px 1fr; border-radius: 0; transform: none; box-shadow: inset 0 -8px 0 #d8cfb4; }
+.v3-book-cover { border-radius: 0; box-shadow: inset 20px 0 28px rgba(0,0,0,.18), 18px 0 65px rgba(0,0,0,.35); }
+.v3-cover-title { left: auto; right: 9%; top: 33%; }
+.v3-cover-rule { width: 24%; }
+.v3-story-copy { width: min(570px, 41vw); z-index: 9; }
+.story-step-1 .v3-story-panel, .story-step-2 .v3-story-panel, .story-step-3 .v3-story-panel, .story-step-4 .v3-story-panel { color: #183e2e; }
+.story-step-1 .v3-story-panel > span, .story-step-2 .v3-story-panel > span, .story-step-3 .v3-story-panel > span, .story-step-4 .v3-story-panel > span { color: #cc6845; }
+.story-step-1 .v3-story-panel p, .story-step-2 .v3-story-panel p, .story-step-3 .v3-story-panel p, .story-step-4 .v3-story-panel p { color: #6b746b; }
+.story-step-1 .v3-journey-header, .story-step-2 .v3-journey-header, .story-step-3 .v3-journey-header, .story-step-4 .v3-journey-header { border-color: rgba(24,62,46,.12); color: #183e2e; }
+.story-step-1 .v3-wordmark, .story-step-2 .v3-wordmark, .story-step-3 .v3-wordmark, .story-step-4 .v3-wordmark { color: #183e2e; }
+.story-step-1 .v3-wordmark i, .story-step-2 .v3-wordmark i, .story-step-3 .v3-wordmark i, .story-step-4 .v3-wordmark i { border-color: rgba(24,62,46,.35); color: #245b43; }
+.story-step-1 .v3-journey-header > span, .story-step-2 .v3-journey-header > span, .story-step-3 .v3-journey-header > span, .story-step-4 .v3-journey-header > span { color: #66726d; }
+.story-step-1 .v3-progress span, .story-step-2 .v3-progress span, .story-step-3 .v3-progress span, .story-step-4 .v3-progress span { color: rgba(24,62,46,.28); }
+.story-step-1 .v3-progress span.active, .story-step-2 .v3-progress span.active, .story-step-3 .v3-progress span.active, .story-step-4 .v3-progress span.active { color: #df7449; }
+.story-step-1 .v3-progress span.passed, .story-step-2 .v3-progress span.passed, .story-step-3 .v3-progress span.passed, .story-step-4 .v3-progress span.passed { color: #76913d; }
+.story-step-4 .v3-story-copy { width: min(520px, 42vw); min-height: calc(100svh - 140px); top: 92px; transform: none; }
+.story-step-4 .v3-story-panel { justify-content: flex-start; padding-top: clamp(14px, 2vh, 28px); }
+.story-step-4 .v3-story-panel h1 { margin: 8px 0 7px; font-size: clamp(32px, 3.6vw, 52px); }
+.story-step-4 .v3-story-panel > p { font-size: 13px; line-height: 1.55; }
+.v3-inline-login { width: min(430px, 100%); margin-top: 16px; padding: 18px 22px 16px; border: 1px solid rgba(36,91,67,.18); border-radius: 18px; background: rgba(255,254,249,.86); box-shadow: 0 18px 45px rgba(46,54,42,.11); backdrop-filter: blur(10px); }
+.v3-inline-login > span { display: block; color: #245b43; font-size: 12px; font-weight: 850; letter-spacing: .035em; }
+.v3-inline-login .auth-form { gap: 10px; margin-top: 12px; }
+.v3-inline-login .auth-form label { gap: 4px; color: #34433b; font-size: 11px; }
+.v3-inline-login .auth-form input { height: 42px; background: rgba(255,255,255,.9); }
+.v3-inline-login .auth-form button { min-height: 42px; }
+.v3-inline-login .form-note { margin: 2px 0 0; color: #7a817b; font-size: 9px; }
+.v3-inline-login .form-message { margin: 0; font-size: 10px; }
+.v3-inline-login .v3-privacy-link { display: inline-block; margin-top: 8px; color: #64726a; }
+
+/* 학생 학습 공간: 탭 순서에 맞춘 양방향 책장 전환 */
+.learning-book-shell { min-height: 100vh; position: relative; background: #e5dfcf; }
+.book-turn-transition { position: fixed; inset: 0; z-index: 100; overflow: hidden; pointer-events: all; perspective: 2600px; }
+.book-turn-transition::before { content: ""; position: absolute; inset: 0; background: rgba(24,40,31,.16); animation: book-turn-dim .92s ease both; }
+.book-turn-announcement { width: 1px; height: 1px; padding: 0; position: absolute; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.book-turn-spine { width: 22px; position: absolute; inset: 0 auto 0 50%; z-index: 3; transform: translateX(-50%); background: linear-gradient(90deg, transparent, rgba(39,38,27,.2), rgba(255,255,255,.5), rgba(39,38,27,.18), transparent); opacity: .72; }
+.book-turn-sheet { width: calc(50vw + 11px); height: 100%; position: absolute; top: 0; z-index: 4; transform-style: preserve-3d; }
+.direction-forward .book-turn-sheet { right: 0; transform-origin: left center; animation: book-turn-forward .9s cubic-bezier(.65,.02,.24,1) both; }
+.direction-backward .book-turn-sheet { left: 0; transform-origin: right center; animation: book-turn-backward .9s cubic-bezier(.65,.02,.24,1) both; }
+.book-turn-face { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; gap: 8px; overflow: hidden; backface-visibility: hidden; background: repeating-linear-gradient(0deg, transparent 0 31px, rgba(55,72,62,.05) 32px), linear-gradient(100deg, #eee5cb, #fffdf2 12%, #f8f3df 92%); color: #1c4634; box-shadow: 0 0 70px rgba(32,36,25,.3); }
+.book-turn-face::after { content: ""; width: 180px; height: 180px; position: absolute; right: -80px; bottom: -70px; border: 1px solid rgba(36,91,67,.12); border-radius: 50%; }
+.book-turn-face small { color: #df7449; font-size: 11px; font-weight: 850; letter-spacing: .12em; }
+.book-turn-face strong { max-width: 70%; font: 400 clamp(26px, 3vw, 48px)/1.25 var(--font-brand), sans-serif; text-align: center; }
+.book-turn-face i { width: 48px; height: 3px; margin-top: 13px; border-radius: 99px; background: #d9e78a; }
+.book-turn-back { transform: rotateY(180deg); background: repeating-linear-gradient(0deg, transparent 0 31px, rgba(55,72,62,.05) 32px), linear-gradient(80deg, #e8dfc5, #fffdf2 12%, #f8f3df 92%); }
+@keyframes book-turn-forward { 0% { transform: rotateY(0deg); } 48% { box-shadow: -35px 0 70px rgba(26,32,24,.3); } 100% { transform: rotateY(-180deg); } }
+@keyframes book-turn-backward { 0% { transform: rotateY(0deg); } 48% { box-shadow: 35px 0 70px rgba(26,32,24,.3); } 100% { transform: rotateY(180deg); } }
+@keyframes book-turn-dim { 0%, 100% { opacity: 0; } 28%, 72% { opacity: 1; } }
+
+@media (max-width: 900px) {
+  .v3-book-viewport { width: 100vw; height: 100svh; inset: 0; transform: none; }
+  .v3-story-copy { width: calc(50% - 44px); min-height: 360px; left: 28px; top: 50%; transform: translateY(-42%); }
+  .v3-story-panel h1 { font-size: clamp(30px, 5.8vw, 54px); }
+  .v3-page { padding: 100px 28px 34px; }
+  .v3-cover-title { right: 7%; }
+  .story-step-4 .v3-story-copy { width: calc(50% - 38px); left: 24px; top: 78px; }
+  .story-step-4 .v3-story-panel h1 { font-size: clamp(27px, 4.6vw, 42px); }
+  .v3-inline-login { padding: 15px; }
+}
+
+@media (max-width: 620px) {
+  .v3-book-stage { min-height: 620px; }
+  .v3-book-viewport { width: 100vw; height: 100svh; right: auto; top: auto; transform: none; }
+  .v3-page-spread { grid-template-columns: 1fr; }
+  .v3-page-left, .v3-book-gutter { display: none; }
+  .v3-turning-page { width: 100%; }
+  .v3-story-copy { width: calc(100% - 42px); left: 21px; top: 48%; }
+  .story-step-1 .v3-story-copy, .story-step-2 .v3-story-copy, .story-step-3 .v3-story-copy { padding: 18px; border-radius: 18px; background: rgba(255,253,242,.82); backdrop-filter: blur(8px); }
+  .story-step-4 .v3-story-copy { width: calc(100% - 32px); min-height: calc(100svh - 76px); left: 16px; top: 70px; }
+  .story-step-4 .v3-story-panel { padding-top: 4px; }
+  .story-step-4 .v3-story-panel h1 { font-size: 28px; }
+  .story-step-4 .v3-story-panel > p { display: none; }
+  .v3-inline-login { width: 100%; margin-top: 9px; }
+  .v3-cover-title { display: none; }
+  .book-turn-sheet { width: calc(88vw + 8px); }
+  .direction-forward .book-turn-sheet { right: -38vw; }
+  .direction-backward .book-turn-sheet { left: -38vw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-turn-transition { display: none; }
+  .v3-reduced-summary { color: #fffdf3; }
+  .v3-reduced-summary .v3-inline-login { margin-right: auto; margin-left: auto; text-align: left; }
+}
+
 @media (max-width: 720px) {
   .dashboard-brand { font-size: 24px; }
   .dashboard-brand .brand-logo-mark { width: 36px; height: 36px; }

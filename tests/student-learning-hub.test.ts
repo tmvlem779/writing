@@ -22,6 +22,8 @@ const agentTurnApi = read("src/app/api/agent/turn/route.ts");
 const migration = read("supabase/migrations/202609280003_add_wrong_answers.sql");
 const layout = read("src/app/layout.tsx");
 const styles = read("src/app/globals.css");
+const learnLayout = read("src/app/learn/layout.tsx");
+const learningBookShell = read("src/components/learning-book-shell.tsx");
 
 test("ver.2 학생 학습 홈과 공통 탭에서는 AI 진단평가를 제외한다", () => {
   for (const [label, href] of [
@@ -75,6 +77,18 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 매�
   assert.match(dailyPracticeToday, /showOverview=\{false\}/);
   assert.match(dailyPracticeToday, /일 연속 학습/);
   assert.match(selfStudyPage, /하루 한 걸음, 문법 감각을 이어 가요/);
+});
+
+test("학생 학습 탭은 앞뒤 순서에 따라 오른쪽 또는 왼쪽 책장을 넘긴다", () => {
+  assert.match(learnLayout, /LearningBookShell/);
+  assert.match(nav, /useBookTurn/);
+  assert.match(nav, /turnTo\(href, label\)/);
+  assert.match(learningBookShell, /targetIndex > fromIndex \? "forward" : "backward"/);
+  assert.match(learningBookShell, /prefers-reduced-motion: reduce/);
+  assert.match(styles, /@keyframes book-turn-forward/);
+  assert.match(styles, /@keyframes book-turn-backward/);
+  assert.match(styles, /\.direction-forward \.book-turn-sheet/);
+  assert.match(styles, /\.direction-backward \.book-turn-sheet/);
 });
 
 test("P1·P3·P5: 개념학습은 첫 답 뒤 오답에만 단서를 주고 정답을 찾으면 하루 학습을 완료한다", () => {

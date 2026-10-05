@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { LoginForm } from "@/components/login-form";
 
 const storySteps = [
   {
@@ -97,8 +98,9 @@ export function BookJourney() {
               <h1 id={index === 0 ? "home-title" : undefined}>{step.title.split("\n").map((line) => <span key={line}>{line}</span>)}</h1>
               <p>{step.copy}</p>
               {index === 4 && (
-                <div className="v3-final-actions">
-                  <Link className="v3-start-button" href="/login">학습 시작하기</Link>
+                <div className="v3-inline-login">
+                  <span>학교 계정으로 학습 이어가기</span>
+                  <LoginForm />
                   <Link className="v3-privacy-link" href="/privacy">개인정보 안내</Link>
                 </div>
               )}
@@ -150,7 +152,10 @@ export function BookJourney() {
           <span>문득문득 ver.3</span>
           <h1>질문으로 얻고,<br />문장으로 깨닫다</h1>
           <p>문득문득은 답을 대신 써주지 않습니다. 단계별 질문으로 생각의 문을 열고, 스스로 올바른 문장을 쓰도록 돕습니다.</p>
-          <Link className="v3-start-button" href="/login">학습 시작하기</Link>
+          <div className="v3-inline-login">
+            <span>학교 계정으로 학습 이어가기</span>
+            <LoginForm />
+          </div>
         </div>
       </div>
     </section>
