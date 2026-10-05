@@ -37,6 +37,8 @@ test("ver.3 첫 화면은 스크롤 진행도에 따라 표지가 열리고 책 
   assert.match(styles, /rotateY\(calc\(var\(--book-open\) \* -172deg\)\)/);
   assert.match(styles, /\.v3-book-viewport \{[^}]*width: 100vw/s);
   assert.match(styles, /\.v3-page-spread \{[^}]*grid-template-columns: 1fr 18px 1fr/s);
+  assert.match(styles, /\.v3-page-left > \* \{ opacity: 0; \}/);
+  assert.match(styles, /\.v3-turning-page span \{ opacity: 0; \}/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
