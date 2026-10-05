@@ -15,7 +15,7 @@ test("첫 화면은 문득문득을 먼저 보여 주고 학습 시작을 로그
   assert.match(bookJourney, /단계별 질문으로 생각의 문을 열고, 스스로 올바른 문장을 쓰도록 돕습니다/);
   assert.match(bookJourney, /<LoginForm \/>/);
   assert.match(bookJourney, /학교 계정으로 학습 이어가기/);
-  assert.doesNotMatch(bookJourney, /학교 계정으로 로그인/);
+  assert.doesNotMatch(bookJourney, /title: "학교 계정으로\\n이어갑니다"/);
 });
 
 test("첫 화면에서 학습 원리와 수업 흐름 소개 영역을 제거한다", () => {
@@ -28,12 +28,15 @@ test("첫 화면에서 학습 원리와 수업 흐름 소개 영역을 제거한
 test("ver.3 첫 화면은 종이 앞뒤와 그림자가 보이는 책장 넘김으로 전환된다", () => {
   assert.match(bookJourney, /requestAnimationFrame/);
   assert.match(bookJourney, /const open = clamp\(progress \/ 0\.14\)/);
-  assert.match(bookJourney, /progress < 0\.14 \? 0/);
+  assert.match(bookJourney, /progress < 0\.074 \? 0/);
+  assert.match(bookJourney, /storyStep > 1/);
   assert.match(bookJourney, /--book-open/);
   assert.match(bookJourney, /--book-explore/);
   assert.match(bookJourney, /--page-write/);
   assert.match(bookJourney, /v3-page-spread/);
   assert.match(bookJourney, /v3-book-cover/);
+  assert.match(bookJourney, /title: "오늘의 문법책에\\n내 문장을 남겨 보세요\."/);
+  assert.match(bookJourney, /학교 계정으로 로그인하면 학습 기록이 이어집니다/);
   assert.match(bookJourney, /StageIllustration/);
   assert.match(bookJourney, /v3-visual-stack/);
   assert.match(bookJourney, /v3-scroll-sheet-front/);
@@ -50,6 +53,10 @@ test("ver.3 첫 화면은 종이 앞뒤와 그림자가 보이는 책장 넘김�
   assert.match(styles, /\.story-step-0 \.v3-story-copy \{ opacity: 0; \}/);
   assert.match(styles, /\.v3-visual-stack figure:first-child \{ visibility: hidden; \}/);
   assert.match(styles, /\.story-step-0 \.v3-visual-stack figure:first-child \{[^}]*display: none/s);
+  assert.match(styles, /\.story-step-0 \.v3-page-spread \{ visibility: visible; \}/);
+  assert.match(styles, /\.v3-book-stage > \.v3-book-cover \{[^}]*z-index: 18/s);
+  assert.match(styles, /\.story-step-0 \.v3-story-panel\.panel-1 \{[^}]*visibility: visible/s);
+  assert.match(styles, /\.story-step-0 \.v3-visual-stack figure:nth-child\(2\) \{[^}]*visibility: visible/s);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
 

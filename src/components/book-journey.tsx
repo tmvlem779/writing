@@ -31,8 +31,8 @@ const storySteps = [
   },
   {
     eyebrow: "04 · 시작",
-    title: "학교 계정으로\n이어갑니다",
-    copy: "오늘의 문법책에 내 문장을 남겨 보세요.",
+    title: "오늘의 문법책에\n내 문장을 남겨 보세요.",
+    copy: "학교 계정으로 로그인하면 학습 기록이 이어집니다.",
     visualLabel: "나의 학습 기록이 쌓이는 책장"
   }
 ] as const;
@@ -74,8 +74,8 @@ export function BookJourney() {
       const rect = journey.getBoundingClientRect();
       const travel = Math.max(1, rect.height - window.innerHeight);
       const progress = clamp(-rect.top / travel);
-      // 표지가 완전히 열린 뒤에만 첫 학습 장면을 보여 주어
-      // 천천히 스크롤해도 표지와 본문 삽화가 겹치지 않게 한다.
+      // 표지가 90도를 넘어 시야에서 사라지는 즉시 첫 학습 장면을 보여 주어
+      // 천천히 스크롤해도 겹침이나 빈 장이 생기지 않게 한다.
       const open = clamp(progress / 0.14);
       const explore = clamp((progress - 0.36) / 0.34);
       const write = clamp((progress - 0.62) / 0.2);
@@ -87,7 +87,7 @@ export function BookJourney() {
       journey.style.setProperty("--page-write", write.toFixed(4));
       journey.style.setProperty("--journey-finish", finish.toFixed(4));
 
-      const nextStep = progress < 0.14 ? 0 : progress < 0.38 ? 1 : progress < 0.63 ? 2 : progress < 0.84 ? 3 : 4;
+      const nextStep = progress < 0.074 ? 0 : progress < 0.38 ? 1 : progress < 0.63 ? 2 : progress < 0.84 ? 3 : 4;
       if (nextStep !== lastStepRef.current) {
         setTurnDirection(nextStep > lastStepRef.current ? "forward" : "backward");
         lastStepRef.current = nextStep;
@@ -154,17 +154,18 @@ export function BookJourney() {
               <section className="v3-page v3-page-right" />
             </div>
 
-            <div className="v3-book-cover">
-              <div className="v3-cover-grain" />
-              <div className="v3-cover-visual"><StageIllustration step={0} /></div>
-              <div className="v3-cover-title"><i>문</i><h2>문득문득</h2><p>질문으로 얻고,<br />문장으로 깨닫다</p></div>
-              <div className="v3-cover-rule" />
-              <span className="v3-cover-foot">나의 문장을 발견하는 문법 학습</span>
-            </div>
           </div>
         </div>
 
-        {storyStep > 0 && (
+        <div className="v3-book-cover" aria-hidden="true">
+          <div className="v3-cover-grain" />
+          <div className="v3-cover-visual"><StageIllustration step={0} /></div>
+          <div className="v3-cover-title"><i>문</i><h2>문득문득</h2><p>질문으로 얻고,<br />문장으로 깨닫다</p></div>
+          <div className="v3-cover-rule" />
+          <span className="v3-cover-foot">나의 문장을 발견하는 문법 학습</span>
+        </div>
+
+        {storyStep > 1 && (
           <div className={`v3-scroll-page-turn ${turnDirection}`} key={`${storyStep}-${turnDirection}`} aria-hidden="true">
             <div className="v3-scroll-sheet-face v3-scroll-sheet-front"><i /><span>문득문득</span></div>
             <div className="v3-scroll-sheet-face v3-scroll-sheet-back"><i /><span>문득문득</span></div>

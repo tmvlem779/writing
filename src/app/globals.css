@@ -1224,3 +1224,27 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
 @media (prefers-reduced-motion: reduce) {
   .v3-scroll-page-turn { display: none; }
 }
+
+/* 표지 뒤에 첫 학습 장면을 미리 배치해 전환 중 빈 종이가 보이지 않게 한다. */
+.story-step-0 .v3-book-viewport {
+  z-index: 2;
+  background: #fffaf0;
+}
+.story-step-0 .v3-page-spread { visibility: visible; }
+.v3-book-stage > .v3-book-cover {
+  z-index: 18;
+  transform: perspective(2600px) rotateY(calc(var(--book-open) * -172deg));
+}
+.story-step-0 .v3-story-copy { opacity: 1; }
+.story-step-0 .v3-story-panel.panel-0 {
+  visibility: hidden;
+  opacity: 0;
+}
+.story-step-0 .v3-story-panel.panel-1 {
+  visibility: visible;
+  opacity: 1;
+}
+.story-step-0 .v3-visual-stack figure:nth-child(2) {
+  visibility: visible;
+  opacity: 1;
+}
