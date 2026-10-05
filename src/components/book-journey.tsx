@@ -74,7 +74,9 @@ export function BookJourney() {
       const rect = journey.getBoundingClientRect();
       const travel = Math.max(1, rect.height - window.innerHeight);
       const progress = clamp(-rect.top / travel);
-      const open = clamp((progress - 0.11) / 0.25);
+      // 표지가 완전히 열린 뒤에만 첫 학습 장면을 보여 주어
+      // 천천히 스크롤해도 표지와 본문 삽화가 겹치지 않게 한다.
+      const open = clamp(progress / 0.14);
       const explore = clamp((progress - 0.36) / 0.34);
       const write = clamp((progress - 0.62) / 0.2);
       const finish = clamp((progress - 0.84) / 0.13);
@@ -85,7 +87,7 @@ export function BookJourney() {
       journey.style.setProperty("--page-write", write.toFixed(4));
       journey.style.setProperty("--journey-finish", finish.toFixed(4));
 
-      const nextStep = progress < 0.17 ? 0 : progress < 0.38 ? 1 : progress < 0.63 ? 2 : progress < 0.84 ? 3 : 4;
+      const nextStep = progress < 0.19 ? 0 : progress < 0.4 ? 1 : progress < 0.64 ? 2 : progress < 0.84 ? 3 : 4;
       if (nextStep !== lastStepRef.current) {
         setTurnDirection(nextStep > lastStepRef.current ? "forward" : "backward");
         lastStepRef.current = nextStep;
