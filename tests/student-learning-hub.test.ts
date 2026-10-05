@@ -13,6 +13,7 @@ const selfStudyPage = read("src/app/learn/self-study/page.tsx");
 const selfStudyWorkspace = read("src/components/self-study-workspace.tsx");
 const todayPracticePage = read("src/app/learn/self-study/today/page.tsx");
 const dailyPracticeToday = read("src/components/daily-practice-today.tsx");
+const conceptLearningActivity = read("src/components/concept-learning-activity.tsx");
 const situationWritingActivity = read("src/components/situation-writing-activity.tsx");
 const realLifeChapter = read("src/components/real-life-chapter.tsx");
 const wrongNotesPage = read("src/app/learn/wrong-notes/page.tsx");
@@ -67,11 +68,23 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 매�
   assert.doesNotMatch(selfStudyWorkspace, /SituationWritingActivity/);
   assert.match(todayPracticePage, /DailyPracticeToday/);
   assert.match(dailyPracticeToday, /SituationWritingActivity/);
+  assert.match(dailyPracticeToday, /ConceptLearningActivity/);
+  assert.match(dailyPracticeToday, /todayPlan\.type === "concept-learning"/);
   assert.match(dailyPracticeToday, /todayPlan\.type === "sentence-making"/);
   assert.match(dailyPracticeToday, /onDailyComplete=\{completeToday\}/);
   assert.match(dailyPracticeToday, /showOverview=\{false\}/);
   assert.match(dailyPracticeToday, /일 연속 학습/);
   assert.match(selfStudyPage, /하루 한 걸음, 문법 감각을 이어 가요/);
+});
+
+test("P1·P3·P5: 개념학습은 첫 답 뒤 오답에만 단서를 주고 정답을 찾으면 하루 학습을 완료한다", () => {
+  assert.match(conceptLearningActivity, /getDiagnosticQuestion/);
+  assert.match(conceptLearningActivity, /question\.retryHint/);
+  assert.match(conceptLearningActivity, /if \(!correct\)/);
+  assert.match(conceptLearningActivity, /먼저 내 힘으로 판단해 보세요\. 틀린 뒤에만 단서가 열립니다/);
+  assert.match(conceptLearningActivity, /sourceLabel: "스스로 유형 학습 · 개념학습"/);
+  assert.match(conceptLearningActivity, /onDailyComplete\?\.\(sessionId\)/);
+  assert.doesNotMatch(conceptLearningActivity, /AI 진단평가/);
 });
 
 test("P2·P3·P4: 그림 상황에서는 학생이 먼저 문장을 만들고 그 문장으로 질문을 이어 간다", () => {

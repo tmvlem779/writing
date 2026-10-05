@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { grammarDiagnosticQuestions } from "../src/lib/diagnosis/grammar-diagnostic.ts";
 import {
+  addCalendarDays,
   buildDailyRoadmap,
   calculateDailyStreak,
   getDailyPracticePlan,
@@ -10,12 +12,20 @@ import {
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("P3·P6: 문학·실생활·문장 만들기가 날짜마다 차례로 순환한다", () => {
-  assert.equal(getDailyPracticePlan("2026-10-01").type, "literature");
-  assert.equal(getDailyPracticePlan("2026-10-02").type, "authentic");
-  assert.equal(getDailyPracticePlan("2026-10-03").type, "sentence-making");
-  assert.equal(getDailyPracticePlan("2026-10-04").type, "literature");
-  assert.notEqual(getDailyPracticePlan("2026-10-01").materialId, getDailyPracticePlan("2026-10-04").materialId);
+test("P1·P3·P6: 네 유형은 4일마다 모두 나오되 날짜 기반 복불복 순서로 안정적으로 섞인다", () => {
+  const firstBlock = ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"].map((date) => getDailyPracticePlan(date).type);
+  const secondBlock = ["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08"].map((date) => getDailyPracticePlan(date).type);
+  const expectedTypes = ["authentic", "concept-learning", "literature", "sentence-making"];
+  assert.deepEqual([...firstBlock].sort(), expectedTypes);
+  assert.deepEqual([...secondBlock].sort(), expectedTypes);
+  assert.notDeepEqual(firstBlock, secondBlock);
+  assert.deepEqual(firstBlock, ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"].map((date) => getDailyPracticePlan(date).type));
+
+  const conceptIds = Array.from({ length: 32 }, (_, index) => getDailyPracticePlan(addCalendarDays("2026-10-01", index)))
+    .filter((plan) => plan.type === "concept-learning")
+    .map((plan) => plan.materialId)
+    .sort();
+  assert.deepEqual(conceptIds, grammarDiagnosticQuestions.map((question) => question.id).sort());
 });
 
 test("P2·P4: 로드맵은 오늘만 열고 완료·지난 날·미래 날을 구분한다", () => {

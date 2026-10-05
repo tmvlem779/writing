@@ -1,8 +1,8 @@
 import type { RealLifeMaterialKind } from "@/lib/curriculum/real-life-materials";
 import type { SituationSceneId } from "@/lib/curriculum/situation-writing";
 
-export type DailyPracticeType = "literature" | "authentic" | "sentence-making";
-export type DailyPracticeMaterialId = RealLifeMaterialKind | SituationSceneId;
+export type DailyPracticeType = "literature" | "authentic" | "sentence-making" | "concept-learning";
+export type DailyPracticeMaterialId = RealLifeMaterialKind | SituationSceneId | string;
 
 export type DailyPracticePlan = {
   date: string;
@@ -11,7 +11,7 @@ export type DailyPracticePlan = {
   materialId: DailyPracticeMaterialId;
   title: string;
   description: string;
-  icon: "book" | "news" | "pencil";
+  icon: "book" | "news" | "pencil" | "concept";
 };
 
 export type DailyRoadmapDay = DailyPracticePlan & {
@@ -44,6 +44,19 @@ const sentenceItems = [
   { id: "group-presentation", title: "모둠 발표 문장 만들기", description: "여러 행동을 알맞은 의미 관계로 연결해요." }
 ] satisfies Array<{ id: SituationSceneId; title: string; description: string }>;
 
+const conceptItems = [
+  { id: "subject-predicate", title: "주어와 서술어 찾기", description: "누가 무엇을 하는지 살피며 문장의 기본 구조를 확인해요." },
+  { id: "clause-count", title: "홑문장과 겹문장 구별하기", description: "주어·서술어 관계의 수를 근거로 문장 구조를 판단해요." },
+  { id: "connected-meaning", title: "이어진문장의 의미 관계", description: "앞절과 뒤 절이 어떤 의미로 이어지는지 살펴봐요." },
+  { id: "embedded-role", title: "안긴문장의 역할 찾기", description: "안긴문장이 다른 말을 어떻게 꾸미거나 대신하는지 확인해요." },
+  { id: "honorific-time", title: "높임과 시간 표현 살펴보기", description: "높이는 대상과 사건이 일어난 시간을 나누어 판단해요." },
+  { id: "voice-causative", title: "피동·사동 표현 구별하기", description: "행동의 주체와 행동을 하게 한 사람의 관계를 살펴봐요." },
+  { id: "negation-meaning", title: "부정 표현의 의미 구별하기", description: "의지와 능력·상황에 따른 부정의 차이를 판단해요." },
+  { id: "quotation-context", title: "인용 표현을 맥락에 맞게 바꾸기", description: "말한 사람과 시점에 맞게 인칭과 시간 표현을 바꿔요." }
+] as const;
+
+const practiceTypes = ["literature", "authentic", "sentence-making", "concept-learning"] as const;
+
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 function parseCalendarDate(date: string) {
@@ -53,6 +66,17 @@ function parseCalendarDate(date: string) {
 
 function positiveModulo(value: number, divisor: number) {
   return ((value % divisor) + divisor) % divisor;
+}
+
+function shuffledPracticeTypes(blockIndex: number): DailyPracticeType[] {
+  const shuffled = [...practiceTypes];
+  let state = (Math.imul(blockIndex, 2654435761) ^ 0x85ebca6b) >>> 0;
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    const target = state % (index + 1);
+    [shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]];
+  }
+  return shuffled;
 }
 
 export function getKoreanDate(date = new Date()) {
@@ -78,20 +102,25 @@ export function calendarDayDistance(from: string, to: string) {
 
 export function getDailyPracticePlan(date: string): DailyPracticePlan {
   const dayIndex = calendarDayDistance(DAILY_EPOCH, date);
-  const typeIndex = positiveModulo(dayIndex, 3);
-  const cycleIndex = Math.floor(dayIndex / 3);
+  const blockIndex = Math.floor(dayIndex / practiceTypes.length);
+  const typeIndex = positiveModulo(dayIndex, practiceTypes.length);
+  const type = shuffledPracticeTypes(blockIndex)[typeIndex];
 
-  if (typeIndex === 0) {
-    const item = literatureItems[positiveModulo(cycleIndex, literatureItems.length)];
+  if (type === "literature") {
+    const item = literatureItems[positiveModulo(blockIndex, literatureItems.length)];
     return { date, type: "literature", typeLabel: "문학 작품", materialId: item.id, title: item.title, description: item.description, icon: "book" };
   }
-  if (typeIndex === 1) {
-    const item = authenticItems[positiveModulo(cycleIndex, authenticItems.length)];
+  if (type === "authentic") {
+    const item = authenticItems[positiveModulo(blockIndex, authenticItems.length)];
     return { date, type: "authentic", typeLabel: "실생활 자료", materialId: item.id, title: item.title, description: item.description, icon: "news" };
   }
+  if (type === "sentence-making") {
+    const item = sentenceItems[positiveModulo(blockIndex, sentenceItems.length)];
+    return { date, type: "sentence-making", typeLabel: "문장 만들기", materialId: item.id, title: item.title, description: item.description, icon: "pencil" };
+  }
 
-  const item = sentenceItems[positiveModulo(cycleIndex, sentenceItems.length)];
-  return { date, type: "sentence-making", typeLabel: "문장 만들기", materialId: item.id, title: item.title, description: item.description, icon: "pencil" };
+  const item = conceptItems[positiveModulo(blockIndex, conceptItems.length)];
+  return { date, type: "concept-learning", typeLabel: "개념학습", materialId: item.id, title: item.title, description: item.description, icon: "concept" };
 }
 
 function formatRoadmapDate(date: string) {

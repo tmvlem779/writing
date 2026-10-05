@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ConceptLearningActivity } from "@/components/concept-learning-activity";
 import { MondeukLoading } from "@/components/mondeuk-loading";
 import { RealLifeChapter } from "@/components/real-life-chapter";
 import { SituationWritingActivity } from "@/components/situation-writing-activity";
@@ -91,7 +92,13 @@ export function DailyPracticeToday() {
           <strong className={todayCompleted ? "complete" : "active"}>{todayCompleted ? "오늘 완료 ✓" : "오늘의 한 걸음"}</strong>
         </header>
         {progressError && <div className="error-panel daily-progress-error" role="alert">{progressError}</div>}
-        {todayPlan.type === "sentence-making" ? (
+        {todayPlan.type === "concept-learning" ? (
+          <ConceptLearningActivity
+            key={todayPlan.date}
+            onDailyComplete={completeToday}
+            questionId={todayPlan.materialId}
+          />
+        ) : todayPlan.type === "sentence-making" ? (
           <SituationWritingActivity
             dailyMode
             initialSceneId={todayPlan.materialId as SituationSceneId}

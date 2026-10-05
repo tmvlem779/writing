@@ -123,6 +123,25 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .daily-activity-heading > strong.complete { background: var(--green-soft); color: var(--green-dark); }
 .daily-progress-error { width: min(900px, calc(100% - 40px)); margin: 18px auto; }
 
+.daily-concept-shell { width: min(960px, calc(100% - 40px)); margin: 0 auto; padding: 42px 0 72px; }
+.daily-concept-shell > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
+.daily-concept-shell > header span { color: var(--orange); font-size: 11px; font-weight: 850; letter-spacing: .08em; }
+.daily-concept-shell > header h2 { margin: 4px 0 0; font-size: clamp(26px, 4vw, 40px); line-height: 1.25; }
+.daily-concept-shell > header > strong { padding: 8px 12px; border-radius: 999px; background: var(--green-soft); color: var(--green-dark); font-size: 12px; white-space: nowrap; }
+.daily-concept-card { padding: clamp(24px, 5vw, 46px); border: 1px solid var(--line); border-radius: 26px; background: var(--surface); box-shadow: var(--shadow); }
+.daily-concept-card > span { color: var(--orange); font-size: 12px; font-weight: 850; }
+.daily-concept-card h3 { margin: 10px 0 26px; font-size: clamp(21px, 3vw, 30px); line-height: 1.55; letter-spacing: -.025em; }
+.daily-concept-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.daily-concept-options button { min-height: 72px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 15px; background: #fff; color: var(--ink); cursor: pointer; text-align: left; }
+.daily-concept-options button:hover:not(:disabled), .daily-concept-options button.selected { border-color: var(--green); background: var(--green-soft); }
+.daily-concept-options button i { min-width: 32px; height: 32px; display: grid; place-items: center; border-radius: 9px; background: var(--paper); color: var(--green); font-style: normal; font-weight: 850; }
+.daily-concept-feedback { margin-top: 18px; padding: 16px 18px; border-radius: 14px; }
+.daily-concept-feedback.retry { background: #fff1dd; }
+.daily-concept-feedback.correct { background: #e4f1e8; }
+.daily-concept-feedback p { margin: 4px 0 0; color: var(--muted); }
+.daily-concept-card footer { margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.daily-concept-card footer > span { color: var(--muted); font-size: 12px; }
+
 .streak-celebration-backdrop { position: fixed; inset: 0; z-index: 1100; display: grid; place-items: center; padding: 20px; background: rgba(20,31,25,.7); backdrop-filter: blur(8px); }
 .streak-celebration { width: min(510px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; padding: 35px 34px 30px; border-radius: 34px; background: linear-gradient(160deg, #f39a38, #e87536 72%); color: white; text-align: center; box-shadow: 0 30px 90px rgba(35,17,8,.35); }
 .streak-flame { width: 112px; height: 126px; filter: drop-shadow(0 12px 18px rgba(120,45,8,.22)); }
@@ -157,6 +176,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .daily-roadmap-summary dl div { display: flex; align-items: center; justify-content: space-between; }
   .daily-activity-heading { align-items: flex-start; padding: 20px 18px; }
   .daily-activity-heading > strong { display: none; }
+  .daily-concept-shell { width: calc(100% - 32px); padding: 28px 0 52px; }
+  .daily-concept-shell > header { display: grid; }
+  .daily-concept-shell > header > strong { width: fit-content; }
+  .daily-concept-card { padding: 22px; }
+  .daily-concept-options { grid-template-columns: 1fr; }
+  .daily-concept-card footer { align-items: stretch; display: grid; }
+  .daily-concept-card footer .primary-button { width: 100%; }
   .streak-celebration { padding: 28px 18px 24px; border-radius: 25px; }
   .streak-week { gap: 3px; }
   .streak-week i { width: 32px; height: 32px; }

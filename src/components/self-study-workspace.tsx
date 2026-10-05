@@ -13,12 +13,15 @@ type ProgressResponse = {
 
 const pathOffsets = [0, 1, 2, 1, 0, 1, 2];
 
-function RoadmapIcon({ icon }: { icon: "book" | "news" | "pencil" }) {
+function RoadmapIcon({ icon }: { icon: "book" | "news" | "pencil" | "concept" }) {
   if (icon === "book") {
     return <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 10c7-2 12 0 16 4v25c-4-4-9-6-16-4V10Zm32 0c-7-2-12 0-16 4v25c4-4 9-6 16-4V10Z" /><path d="M24 14v25" /></svg>;
   }
   if (icon === "news") {
     return <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="7" width="32" height="34" rx="5" /><path d="M15 15h10M15 22h18M15 29h18M15 36h12" /></svg>;
+  }
+  if (icon === "concept") {
+    return <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 33h16M18 39h12" /><path d="M15 27c-3-3-5-7-5-11a14 14 0 1 1 28 0c0 4-2 8-5 11-2 2-3 4-3 6H18c0-2-1-4-3-6Z" /><path d="M20 16h8M24 12v8" /></svg>;
   }
   return <svg viewBox="0 0 48 48" aria-hidden="true"><path d="m10 37 4-11L33 7l8 8-19 19-12 3Z" /><path d="m29 11 8 8M14 26l8 8" /></svg>;
 }
@@ -63,7 +66,7 @@ export function SelfStudyWorkspace() {
         <div>
           <span>매일 한 걸음 · 7일 문법 루틴</span>
           <h2 id="daily-roadmap-title">오늘도 문장을 발견하러 가요</h2>
-          <p>문학 작품, 실생활 자료, 문장 만들기를 하루씩 번갈아 연습합니다.</p>
+          <p>문학 작품, 실생활 자료, 문장 만들기, 개념학습을 매일 복불복으로 만납니다.</p>
         </div>
         <dl>
           <div><dt>🔥 연속 학습</dt><dd>{streak}일</dd></div>
