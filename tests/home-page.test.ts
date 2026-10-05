@@ -25,23 +25,26 @@ test("첫 화면에서 학습 원리와 수업 흐름 소개 영역을 제거한
   assert.doesNotMatch(bookJourney, /journey-list/);
 });
 
-test("ver.3 첫 화면은 큰 책 안에서 양쪽 장면이 반대 방향으로 전환된다", () => {
+test("ver.3 첫 화면은 종이 앞뒤와 그림자가 보이는 책장 넘김으로 전환된다", () => {
   assert.match(bookJourney, /requestAnimationFrame/);
   assert.match(bookJourney, /--book-open/);
   assert.match(bookJourney, /--book-explore/);
   assert.match(bookJourney, /--page-write/);
   assert.match(bookJourney, /v3-page-spread/);
+  assert.match(bookJourney, /v3-book-cover/);
   assert.match(bookJourney, /StageIllustration/);
   assert.match(bookJourney, /v3-visual-stack/);
+  assert.match(bookJourney, /v3-scroll-sheet-front/);
+  assert.match(bookJourney, /v3-scroll-sheet-back/);
   assert.match(bookJourney, /turnDirection/);
   assert.match(styles, /\.v3-book-stage \{[^}]*position: sticky/s);
   assert.match(styles, /\.v3-page-spread \{[^}]*grid-template-columns: 1fr 18px 1fr/s);
   assert.match(styles, /\.v3-book-journey\.story-step-1 \{ --stage-left:/);
   assert.match(styles, /\.v3-book-journey\.story-step-4 \{ --stage-left:/);
-  assert.match(styles, /@keyframes v3-left-slide-down/);
-  assert.match(styles, /@keyframes v3-right-slide-up/);
-  assert.match(styles, /\.v3-book-viewport \{[^}]*inset: var\(--v3-book-y\) var\(--v3-book-x\)/s);
-  assert.match(styles, /--v3-book-x: clamp\(24px, 4vw, 66px\)/);
+  assert.match(styles, /@keyframes v3-page-turn-forward-clear/);
+  assert.match(styles, /@keyframes v3-page-turn-backward-clear/);
+  assert.match(styles, /\.v3-scroll-sheet-face \{[^}]*backface-visibility: hidden/s);
+  assert.match(styles, /\.v3-book-viewport \{[^}]*width: 100vw/s);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
 

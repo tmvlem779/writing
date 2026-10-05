@@ -152,8 +152,22 @@ export function BookJourney() {
               <section className="v3-page v3-page-right" />
             </div>
 
+            <div className="v3-book-cover">
+              <div className="v3-cover-grain" />
+              <div className="v3-cover-visual"><StageIllustration step={0} /></div>
+              <div className="v3-cover-title"><i>문</i><h2>문득문득</h2><p>질문으로 얻고,<br />문장으로 깨닫다</p></div>
+              <div className="v3-cover-rule" />
+              <span className="v3-cover-foot">나의 문장을 발견하는 문법 학습</span>
+            </div>
           </div>
         </div>
+
+        {storyStep > 0 && (
+          <div className={`v3-scroll-page-turn ${turnDirection}`} key={`${storyStep}-${turnDirection}`} aria-hidden="true">
+            <div className="v3-scroll-sheet-face v3-scroll-sheet-front"><i /><span>문득문득</span></div>
+            <div className="v3-scroll-sheet-face v3-scroll-sheet-back"><i /><span>문득문득</span></div>
+          </div>
+        )}
 
         <nav className="v3-progress" aria-label="책 속으로 들어가는 과정">
           {storySteps.map((step, index) => <span className={storyStep === index ? "active" : storyStep > index ? "passed" : ""} key={step.eyebrow}><i />{index + 1}</span>)}
