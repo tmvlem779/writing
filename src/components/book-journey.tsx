@@ -7,8 +7,8 @@ import { LoginForm } from "@/components/login-form";
 const storySteps = [
   {
     eyebrow: "문득문득 ver.3",
-    title: "질문으로\n문장을 펼치다",
-    copy: "천천히 스크롤해 첫 장을 열어 보세요.",
+    title: "질문으로 얻고,\n문장으로 깨닫다",
+    copy: "스크롤하며 문장 속 질문을 한 장씩 만나 보세요.",
     visualLabel: "질문이 숨어 있는 문법책"
   },
   {
@@ -109,7 +109,7 @@ export function BookJourney() {
   }, []);
 
   return (
-    <section className={`v3-home v3-book-journey story-step-${storyStep}`} ref={journeyRef} aria-labelledby="home-title">
+    <section className={`v3-home v3-book-journey story-step-${storyStep} scroll-${turnDirection}`} ref={journeyRef} aria-labelledby="home-title">
       <div className="v3-book-stage">
         <header className="v3-journey-header">
           <Link aria-label="문득문득 처음으로" className="v3-wordmark" href="/"><i aria-hidden="true">문</i><strong>문득문득</strong></Link>
@@ -152,17 +152,8 @@ export function BookJourney() {
               <section className="v3-page v3-page-right" />
             </div>
 
-            <div className="v3-book-cover">
-              <div className="v3-cover-grain" />
-              <div className="v3-cover-visual"><StageIllustration step={0} /></div>
-              <div className="v3-cover-title"><i>문</i><h2>문득문득</h2><p>질문으로 얻고,<br />문장으로 깨닫다</p></div>
-              <div className="v3-cover-rule" />
-              <span className="v3-cover-foot">나의 문장을 발견하는 문법 학습</span>
-            </div>
           </div>
         </div>
-
-        {storyStep > 0 && <div className={`v3-scroll-page-turn ${turnDirection}`} key={`${storyStep}-${turnDirection}`} aria-hidden="true" />}
 
         <nav className="v3-progress" aria-label="책 속으로 들어가는 과정">
           {storySteps.map((step, index) => <span className={storyStep === index ? "active" : storyStep > index ? "passed" : ""} key={step.eyebrow}><i />{index + 1}</span>)}
