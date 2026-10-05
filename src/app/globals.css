@@ -73,6 +73,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 /* 스스로 유형 학습: 매일 한 걸음 로드맵 */
 .daily-roadmap-loading { min-height: 55vh; display: grid; place-items: center; }
+.daily-roadmap-loading .mondeuk-loading { margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
 .daily-roadmap-shell { padding: 34px clamp(20px, 6vw, 90px) 64px; overflow: hidden; background: linear-gradient(180deg, #f5f7f1 0%, #eef2e9 100%); }
 .daily-roadmap-summary { width: min(1120px, 100%); margin: 0 auto 36px; padding: 28px 30px; display: flex; align-items: center; justify-content: space-between; gap: 30px; border: 1px solid #cfdaca; border-radius: 26px; background: rgba(255,254,249,.92); box-shadow: 0 14px 34px rgba(33,73,52,.08); }
 .daily-roadmap-summary > div > span, .daily-activity-heading span { color: var(--orange); font-size: 12px; font-weight: 850; letter-spacing: .06em; }
@@ -105,6 +106,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .daily-path-copy small { color: var(--muted); line-height: 1.45; }
 .daily-path-step.status-completed .daily-path-node { background: #74a77f; color: white; box-shadow: 0 9px 0 #4d7b5a, 0 12px 24px rgba(34,91,58,.2); }
 .daily-path-step.status-today .daily-path-node { width: 110px; height: 94px; background: linear-gradient(145deg, #f59a61, #df7449); color: white; box-shadow: 0 10px 0 #b95434, 0 0 0 9px rgba(223,116,73,.14), 0 15px 30px rgba(139,66,39,.2); cursor: pointer; animation: daily-node-breathe 2.2s ease-in-out infinite; }
+.daily-path-step.is-today .daily-path-node { cursor: pointer; }
 .daily-path-step.status-today .daily-path-copy strong { color: #b95434; }
 .daily-path-step.status-missed { opacity: .66; }
 .daily-check, .daily-lock { width: 26px; height: 26px; display: grid; place-items: center; position: absolute; right: -4px; top: -5px; border: 3px solid #eef2e9; border-radius: 50%; background: #245b43; color: white; font-size: 13px; font-weight: 900; }
@@ -112,8 +114,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @keyframes daily-node-breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
 .daily-activity-anchor { scroll-margin-top: 96px; border-top: 1px solid var(--line); background: #f0f1eb; }
+.daily-activity-page { min-height: calc(100vh - 96px); background: #f0f1eb; }
 .daily-activity-heading { min-height: 118px; padding: 24px clamp(24px, 6vw, 90px); display: flex; align-items: center; justify-content: space-between; gap: 24px; background: var(--surface); }
-.daily-activity-heading h2 { margin: 3px 0 1px; font-size: clamp(24px, 3vw, 34px); letter-spacing: -.04em; }
+.daily-activity-heading h1, .daily-activity-heading h2 { margin: 3px 0 1px; font-size: clamp(24px, 3vw, 34px); letter-spacing: -.04em; }
 .daily-activity-heading p { margin: 0; color: var(--muted); }
 .daily-activity-heading > strong { padding: 8px 13px; border-radius: 999px; font-size: 12px; white-space: nowrap; }
 .daily-activity-heading > strong.active { background: #fff0e5; color: #b95434; }

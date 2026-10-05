@@ -34,6 +34,7 @@ test("로딩 애니메이션은 움직임 축소 설정을 존중한다", () => 
   assert.match(css, /@keyframes mondeuk-pulse/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /\.mondeuk-loading-overlay \.mondeuk-loading \{[^}]*background: transparent;[^}]*box-shadow: none;/s);
+  assert.match(css, /\.daily-roadmap-loading \.mondeuk-loading \{[^}]*border: 0;[^}]*background: transparent;[^}]*box-shadow: none;/s);
   assert.match(css, /\.mondeuk-loading-syllables i \{[^}]*background: transparent;[^}]*font-size: 40px;/s);
   for (const index of [1, 2, 3, 4]) assert.match(css, new RegExp(`\\.mondeuk-loading-syllables i:nth-child\\(${index}\\) \\{ color:`));
   for (const color of ["#245b43", "#d66a3f", "#789321", "#667b8c"]) assert.match(css, new RegExp(color));
