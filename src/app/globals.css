@@ -620,6 +620,91 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
   .teacher-header { gap: 10px; }.teacher-header h1 { font-size: 44px; }.invite-form { grid-template-columns: 1fr; }
 }
 
+/* 문득문득 ver.3.2: 삽화와 짧은 문장이 교차하는 분할형 책 */
+.v3-book-journey { --stage-left: #d8e4d3; --stage-right: #fff9ea; --stage-accent: #df7449; }
+.v3-book-journey.story-step-1 { --stage-left: #efd7bd; --stage-right: #fff8ec; --stage-accent: #d96842; }
+.v3-book-journey.story-step-2 { --stage-left: #d8e4cf; --stage-right: #f8faed; --stage-accent: #78933c; }
+.v3-book-journey.story-step-3 { --stage-left: #d8e3ea; --stage-right: #f8f7ef; --stage-accent: #4d7890; }
+.v3-book-journey.story-step-4 { --stage-left: #eadcb3; --stage-right: #fffaf0; --stage-accent: #c96945; }
+.v3-page-spread { background: var(--stage-right); transition: background .55s ease; }
+.v3-page { transition: background .55s ease; }
+.v3-page-left { display: block; background: linear-gradient(135deg, color-mix(in srgb, var(--stage-left), white 10%), var(--stage-left)); }
+.v3-page-right { display: block; background: repeating-linear-gradient(0deg, transparent 0 31px, rgba(55,72,62,.045) 32px), var(--stage-right); }
+.v3-story-copy { width: min(530px, 38vw); min-height: 400px; left: auto; right: clamp(34px, 6.5vw, 104px); top: 50%; z-index: 10; transform: translateY(-42%); }
+.v3-story-panel { align-items: flex-start; transition: opacity .24s ease, transform .48s cubic-bezier(.2,.8,.2,1); }
+.v3-story-panel h1 { max-width: 520px; margin: 13px 0 17px; font-size: clamp(42px, 4.6vw, 70px); line-height: 1.04; }
+.v3-story-panel p { max-width: 430px; font-size: clamp(15px, 1.25vw, 18px); line-height: 1.7; }
+.story-step-0 .v3-story-copy { opacity: 0; }
+.story-step-1 .v3-story-panel > span, .story-step-2 .v3-story-panel > span, .story-step-3 .v3-story-panel > span, .story-step-4 .v3-story-panel > span { color: var(--stage-accent); }
+.v3-visual-stack { width: calc(50% - 18px); height: calc(100% - 84px); position: absolute; left: 0; top: 84px; z-index: 8; overflow: hidden; }
+.v3-visual-stack figure { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; opacity: 0; transform: scale(.92) translateY(22px); transition: opacity .42s ease, transform .68s cubic-bezier(.2,.8,.2,1); }
+.v3-visual-stack figure.active { opacity: 1; transform: scale(1) translateY(0); }
+.v3-visual-stack figure:first-child { visibility: hidden; }
+.v3-stage-svg { width: min(82%, 590px); max-height: 70%; overflow: visible; filter: drop-shadow(0 24px 30px rgba(38,54,43,.11)); }
+.v3-stage-svg path, .v3-stage-svg rect, .v3-stage-svg circle { vector-effect: non-scaling-stroke; }
+.v3-stage-svg text { fill: #1b4735; font: 400 29px/1 var(--font-brand), sans-serif; text-anchor: middle; dominant-baseline: middle; }
+.v3-stage-svg .light-text { fill: #fffdf2; }
+.fill-paper { fill: #fffdf2; }.fill-green { fill: #245b43; }.fill-lime { fill: #d9e78a; }.fill-lime-soft { fill: #e6edbd; }.fill-orange { fill: #df7449; }.fill-orange-soft { fill: #efc1a9; }
+.stroke-light { fill: none; stroke: rgba(255,253,242,.72); stroke-width: 8; stroke-linecap: round; }.stroke-soft { fill: none; stroke: #c9c5b5; stroke-width: 8; stroke-linecap: round; }.stroke-green { fill: none; stroke: #245b43; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }.stroke-green-heavy { fill: none; stroke: #245b43; stroke-width: 24; stroke-linecap: round; }.stroke-ink { fill: none; stroke: #1b4735; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+.v3-visual-stack figcaption { position: absolute; bottom: 13%; color: rgba(27,71,53,.62); font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+.v3-cover-visual { width: 50%; position: absolute; inset: 84px auto 0 0; display: grid; place-items: center; background: rgba(6,35,24,.16); }
+.v3-cover-visual .v3-stage-svg { width: min(78%, 600px); max-height: 78%; }
+.v3-cover-title { width: 35%; left: auto; right: 9%; top: 50%; transform: translateY(-50%); }
+.v3-cover-title h2 { font-size: clamp(58px, 7vw, 104px); }
+.v3-cover-title p { font-size: clamp(17px, 1.7vw, 23px); }
+.v3-cover-rule { width: 27%; bottom: 19%; }
+.v3-cover-foot { left: auto; right: 9%; bottom: 10%; }
+.v3-scroll-page-turn { width: calc(50% + 9px); height: 100%; position: absolute; top: 0; z-index: 19; pointer-events: none; backface-visibility: hidden; transform-style: preserve-3d; background: repeating-linear-gradient(0deg, transparent 0 31px, rgba(55,72,62,.045) 32px), var(--stage-right); box-shadow: 0 0 70px rgba(45,45,32,.2); }
+.v3-scroll-page-turn.forward { right: 0; transform-origin: left center; animation: v3-stage-turn-forward .72s cubic-bezier(.65,.02,.25,1) both; }
+.v3-scroll-page-turn.backward { left: 0; transform-origin: right center; animation: v3-stage-turn-backward .72s cubic-bezier(.65,.02,.25,1) both; }
+@keyframes v3-stage-turn-forward { 0% { transform: rotateY(0deg); opacity: 1; } 49% { opacity: 1; } 50%, 100% { transform: rotateY(-180deg); opacity: 0; } }
+@keyframes v3-stage-turn-backward { 0% { transform: rotateY(0deg); opacity: 1; } 49% { opacity: 1; } 50%, 100% { transform: rotateY(180deg); opacity: 0; } }
+.story-step-4 .v3-story-copy { width: min(500px, 39vw); min-height: calc(100svh - 140px); left: auto; right: clamp(30px, 5.5vw, 88px); top: 88px; transform: none; }
+.story-step-4 .v3-story-panel { padding-top: clamp(8px, 1.5vh, 22px); }
+.story-step-4 .v3-story-panel h1 { font-size: clamp(31px, 3.4vw, 50px); }
+.story-step-4 .v3-inline-login { margin-top: 13px; }
+
+@media (max-width: 900px) {
+  .v3-story-copy { width: calc(50% - 48px); left: auto; right: 28px; top: 50%; }
+  .v3-story-panel h1 { font-size: clamp(32px, 5.2vw, 48px); }
+  .v3-visual-stack { width: calc(50% - 9px); }
+  .v3-stage-svg { width: 90%; }
+  .v3-cover-title { width: 40%; right: 6%; }
+  .v3-cover-title h2 { font-size: clamp(48px, 8vw, 74px); }
+  .story-step-4 .v3-story-copy { width: calc(50% - 38px); left: auto; right: 22px; top: 78px; }
+}
+
+@media (max-width: 620px) {
+  .v3-page-spread { display: block; }
+  .v3-page-left { height: 45%; display: block; }
+  .v3-page-right { height: 55%; display: block; }
+  .v3-book-gutter { display: none; }
+  .v3-visual-stack { width: 100%; height: 39%; left: 0; top: 68px; }
+  .v3-stage-svg { width: min(74%, 390px); max-height: 79%; }
+  .v3-visual-stack figcaption { bottom: 3%; }
+  .v3-story-copy { width: calc(100% - 38px); min-height: 43%; left: 19px; right: auto; top: 51%; transform: none; }
+  .v3-story-panel { justify-content: flex-start; padding: 17px 4px 0; background: transparent; backdrop-filter: none; }
+  .v3-story-panel h1 { margin: 8px 0 10px; font-size: clamp(30px, 9vw, 43px); }
+  .v3-story-panel p { font-size: 14px; }
+  .v3-cover-visual { width: 100%; height: 53%; inset: 68px 0 auto; }
+  .v3-cover-title { width: calc(100% - 44px); left: 22px; right: auto; top: 71%; transform: translateY(-50%); display: block; }
+  .v3-cover-title > i { display: none; }
+  .v3-cover-title h2 { margin: 0 0 8px; font-size: 48px; }
+  .v3-cover-title p { font-size: 15px; }
+  .v3-cover-rule { width: 34%; bottom: 9%; }
+  .v3-cover-foot { display: none; }
+  .v3-scroll-page-turn { width: 100%; height: 55%; top: 45%; }
+  .story-step-4 .v3-visual-stack { display: none; }
+  .story-step-4 .v3-page-left { display: none; }
+  .story-step-4 .v3-page-right { height: 100%; }
+  .story-step-4 .v3-story-copy { width: calc(100% - 32px); min-height: calc(100svh - 72px); left: 16px; right: auto; top: 68px; }
+  .story-step-4 .v3-story-panel { padding-top: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v3-visual-stack, .v3-scroll-page-turn { display: none; }
+}
+
 /* 문득문득 ver.3.1: 화면 전체가 책이 되는 표지·로그인 장면 */
 .v3-book-viewport { width: 100vw; height: 100svh; aspect-ratio: auto; inset: 0; right: auto; top: auto; perspective: 2600px; transform: none; transform-origin: left center; opacity: 1; filter: none; }
 .v3-book-shadow { display: none; }

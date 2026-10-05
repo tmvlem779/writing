@@ -6,31 +6,52 @@ import { LoginForm } from "@/components/login-form";
 
 const storySteps = [
   {
-    eyebrow: "표지에서 시작하는 질문",
-    title: "질문으로 얻고,\n문장으로 깨닫다",
-    copy: "문득문득은 답을 대신 써주지 않습니다. 천천히 스크롤하며 문장 속으로 들어가 보세요."
+    eyebrow: "문득문득 ver.3",
+    title: "질문으로\n문장을 펼치다",
+    copy: "천천히 스크롤해 첫 장을 열어 보세요.",
+    visualLabel: "질문이 숨어 있는 문법책"
   },
   {
-    eyebrow: "01 · 질문",
-    title: "질문이\n표지를 엽니다",
-    copy: "정답을 보기 전에, 문장에서 먼저 발견한 것을 말해 봅니다."
+    eyebrow: "01 · 발견",
+    title: "먼저,\n발견합니다",
+    copy: "정답보다 먼저 문장에 보이는 단서를 찾습니다.",
+    visualLabel: "문장을 비추는 관찰 돋보기"
   },
   {
     eyebrow: "02 · 탐구",
-    title: "문장의 결을 따라\n책 속으로 들어갑니다",
-    copy: "주어와 서술어, 절의 경계와 표현의 효과를 직접 표시하며 살펴봅니다."
+    title: "표시하며\n구조를 봅니다",
+    copy: "주어·서술어와 절의 경계를 직접 표시합니다.",
+    visualLabel: "이어지고 확장되는 문장 조각"
   },
   {
-    eyebrow: "03 · 나의 문장",
-    title: "표시하고, 설명하고,\n다시 씁니다",
-    copy: "AI는 한 단계씩 단서를 건네고, 마지막 문장은 학생이 완성합니다."
+    eyebrow: "03 · 설명",
+    title: "내 말로\n설명합니다",
+    copy: "질문과 단서를 따라 마지막 문장은 내가 완성합니다.",
+    visualLabel: "생각을 문장으로 옮기는 연필"
   },
   {
-    eyebrow: "문득문득 ver.3",
-    title: "이제, 나의 문장을\n펼칠 차례입니다",
-    copy: "매일 한 장씩 넘기며 문법을 발견하고 내 문장을 남겨 보세요."
+    eyebrow: "04 · 시작",
+    title: "학교 계정으로\n이어갑니다",
+    copy: "오늘의 문법책에 내 문장을 남겨 보세요.",
+    visualLabel: "나의 학습 기록이 쌓이는 책장"
   }
 ] as const;
+
+function StageIllustration({ step }: { step: number }) {
+  if (step === 0) {
+    return <svg className="v3-stage-svg" viewBox="0 0 640 520"><path className="fill-paper" d="M142 86h330c30 0 54 24 54 54v292H196c-30 0-54-24-54-54z"/><path className="fill-green" d="M112 64h330c30 0 54 24 54 54v292H166c-30 0-54-24-54-54z"/><path className="stroke-light" d="M160 119h286M160 156h214M160 313h270"/><circle className="fill-lime" cx="374" cy="238" r="58"/><path className="stroke-ink" d="M356 219c0-22 37-29 42-6 6 27-25 28-25 50M374 286v2"/><path className="fill-orange" d="M414 410h60v78l-30-20-30 20z"/></svg>;
+  }
+  if (step === 1) {
+    return <svg className="v3-stage-svg" viewBox="0 0 640 520"><rect className="fill-paper" x="78" y="94" width="402" height="294" rx="30"/><path className="stroke-soft" d="M128 157h244M128 211h300M128 265h202M128 319h278"/><circle className="fill-lime-soft" cx="385" cy="226" r="91"/><circle className="stroke-green" cx="385" cy="226" r="68"/><path className="stroke-green-heavy" d="m434 277 83 83"/><path className="fill-orange" d="M162 142h126v25H162zM231 250h129v25H231z"/><circle className="fill-green" cx="518" cy="104" r="18"/></svg>;
+  }
+  if (step === 2) {
+    return <svg className="v3-stage-svg" viewBox="0 0 640 520"><path className="stroke-green" d="M126 258h388"/><rect className="fill-orange-soft" x="86" y="132" width="168" height="96" rx="22"/><rect className="fill-lime-soft" x="280" y="132" width="168" height="96" rx="22"/><rect className="fill-paper" x="182" y="290" width="168" height="96" rx="22"/><rect className="fill-green" x="376" y="290" width="168" height="96" rx="22"/><path className="stroke-green" d="M170 228v30h194v-30M266 258v32M460 258v32"/><text x="170" y="192">주어</text><text x="364" y="192">서술어</text><text x="266" y="350">절</text><text className="light-text" x="460" y="350">문장</text></svg>;
+  }
+  if (step === 3) {
+    return <svg className="v3-stage-svg" viewBox="0 0 640 520"><path className="fill-paper" d="M106 88h392v328H106z"/><path className="stroke-soft" d="M158 158h274M158 212h231M158 266h286M158 320h186"/><path className="fill-orange" d="m170 340 226-226 58 58-226 226-82 23z"/><path className="fill-lime" d="m396 114 28-28 58 58-28 28z"/><path className="stroke-ink" d="m146 421 82-23"/><circle className="fill-green" cx="500" cy="382" r="50"/><path className="stroke-light" d="M478 382h44M500 360v44"/></svg>;
+  }
+  return <svg className="v3-stage-svg" viewBox="0 0 640 520"><path className="fill-green" d="M94 116c0-24 20-44 44-44h154c24 0 44 20 44 44v296H138c-24 0-44-20-44-44z"/><path className="fill-paper" d="M304 116c0-24 20-44 44-44h154c24 0 44 20 44 44v252c0 24-20 44-44 44H304z"/><path className="stroke-soft" d="M350 150h132M350 204h132M350 258h98"/><path className="stroke-light" d="M140 146h150M140 202h112M140 258h150"/><circle className="fill-lime" cx="426" cy="342" r="38"/><path className="stroke-ink" d="m408 342 13 13 25-29"/><path className="fill-orange" d="M226 72h52v84l-26-18-26 18z"/></svg>;
+}
 
 function clamp(value: number) {
   return Math.min(1, Math.max(0, value));
@@ -39,6 +60,8 @@ function clamp(value: number) {
 export function BookJourney() {
   const journeyRef = useRef<HTMLElement>(null);
   const [storyStep, setStoryStep] = useState(0);
+  const [turnDirection, setTurnDirection] = useState<"forward" | "backward">("forward");
+  const lastStepRef = useRef(0);
 
   useEffect(() => {
     const journey = journeyRef.current;
@@ -63,7 +86,11 @@ export function BookJourney() {
       journey.style.setProperty("--journey-finish", finish.toFixed(4));
 
       const nextStep = progress < 0.17 ? 0 : progress < 0.38 ? 1 : progress < 0.63 ? 2 : progress < 0.84 ? 3 : 4;
-      setStoryStep((current) => current === nextStep ? current : nextStep);
+      if (nextStep !== lastStepRef.current) {
+        setTurnDirection(nextStep > lastStepRef.current ? "forward" : "backward");
+        lastStepRef.current = nextStep;
+        setStoryStep(nextStep);
+      }
     }
 
     function requestUpdate() {
@@ -108,38 +135,34 @@ export function BookJourney() {
           ))}
         </div>
 
+        <div className="v3-visual-stack" aria-hidden="true">
+          {storySteps.map((step, index) => (
+            <figure className={storyStep === index ? "active" : ""} key={step.visualLabel}>
+              <StageIllustration step={index} />
+              <figcaption>{step.visualLabel}</figcaption>
+            </figure>
+          ))}
+        </div>
+
         <div className="v3-book-viewport" aria-hidden="true">
-          <div className="v3-book-shadow" />
           <div className="v3-book">
             <div className="v3-page-spread">
-              <section className="v3-page v3-page-left">
-                <span className="v3-page-label">질문 01</span>
-                <h2>문장에서<br />누가 움직이나요?</h2>
-                <p className="v3-pencil-note">먼저 내가 찾은 부분에 표시해 보기</p>
-                <div className="v3-question-lines"><i /><i /><i /></div>
-                <small>14</small>
-              </section>
+              <section className="v3-page v3-page-left" />
               <div className="v3-book-gutter" />
-              <section className="v3-page v3-page-right">
-                <span className="v3-page-label">문장 탐구</span>
-                <h2>문장을 자세히<br />읽어 봐요.</h2>
-                <p className="v3-sentence-line"><mark>학생들이</mark> 운동장에서 공을 <em>찬다.</em></p>
-                <div className="v3-page-question"><span>관찰 질문</span><strong>‘누가/무엇이?’와 ‘어찌하다?’에 답하는 말은 무엇인가요?</strong></div>
-                <div className="v3-answer-line"><i /> 나의 설명을 적는 자리</div>
-                <small>15</small>
-              </section>
-              <div className="v3-turning-page"><span>생각을 한 문장으로<br />설명해 보세요.</span></div>
+              <section className="v3-page v3-page-right" />
             </div>
 
             <div className="v3-book-cover">
               <div className="v3-cover-grain" />
-              <span className="v3-cover-edition">KOREAN GRAMMAR · 2026</span>
+              <div className="v3-cover-visual"><StageIllustration step={0} /></div>
               <div className="v3-cover-title"><i>문</i><h2>문득문득</h2><p>질문으로 얻고,<br />문장으로 깨닫다</p></div>
               <div className="v3-cover-rule" />
               <span className="v3-cover-foot">나의 문장을 발견하는 문법 학습</span>
             </div>
           </div>
         </div>
+
+        {storyStep > 0 && <div className={`v3-scroll-page-turn ${turnDirection}`} key={`${storyStep}-${turnDirection}`} aria-hidden="true" />}
 
         <nav className="v3-progress" aria-label="책 속으로 들어가는 과정">
           {storySteps.map((step, index) => <span className={storyStep === index ? "active" : storyStep > index ? "passed" : ""} key={step.eyebrow}><i />{index + 1}</span>)}

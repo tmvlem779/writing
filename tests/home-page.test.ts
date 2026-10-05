@@ -11,8 +11,8 @@ const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), 
 test("첫 화면은 문득문득을 먼저 보여 주고 학습 시작을 로그인으로 연결한다", () => {
   assert.match(page, /BookJourney/);
   assert.match(bookJourney, /<strong>문득문득<\/strong>/);
-  assert.match(bookJourney, /title: "질문으로 얻고,\\n문장으로 깨닫다"/);
-  assert.match(bookJourney, /문득문득은 답을 대신 써주지 않습니다/);
+  assert.match(bookJourney, /질문으로 얻고,<br \/>문장으로 깨닫다/);
+  assert.match(bookJourney, /title: "질문으로\\n문장을 펼치다"/);
   assert.match(bookJourney, /단계별 질문으로 생각의 문을 열고, 스스로 올바른 문장을 쓰도록 돕습니다/);
   assert.match(bookJourney, /<LoginForm \/>/);
   assert.match(bookJourney, /학교 계정으로 학습 이어가기/);
@@ -33,12 +33,18 @@ test("ver.3 첫 화면은 스크롤 진행도에 따라 표지가 열리고 책 
   assert.match(bookJourney, /--page-write/);
   assert.match(bookJourney, /v3-book-cover/);
   assert.match(bookJourney, /v3-page-spread/);
+  assert.match(bookJourney, /StageIllustration/);
+  assert.match(bookJourney, /v3-visual-stack/);
+  assert.match(bookJourney, /v3-scroll-page-turn/);
+  assert.match(bookJourney, /turnDirection/);
   assert.match(styles, /\.v3-book-stage \{[^}]*position: sticky/s);
   assert.match(styles, /rotateY\(calc\(var\(--book-open\) \* -172deg\)\)/);
   assert.match(styles, /\.v3-book-viewport \{[^}]*width: 100vw/s);
   assert.match(styles, /\.v3-page-spread \{[^}]*grid-template-columns: 1fr 18px 1fr/s);
-  assert.match(styles, /\.v3-page-left > \* \{ opacity: 0; \}/);
-  assert.match(styles, /\.v3-turning-page span \{ opacity: 0; \}/);
+  assert.match(styles, /\.v3-book-journey\.story-step-1 \{ --stage-left:/);
+  assert.match(styles, /\.v3-book-journey\.story-step-4 \{ --stage-left:/);
+  assert.match(styles, /@keyframes v3-stage-turn-forward/);
+  assert.match(styles, /@keyframes v3-stage-turn-backward/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
