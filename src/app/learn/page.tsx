@@ -87,9 +87,10 @@ export default async function LearnPage() {
       </div>
 
       <div className="student-dashboard-cards">
-        {dashboardCards.map((card) => (
-          <Link className={`student-dashboard-card ${card.accent}`} href={card.href} key={card.href}>
+        {dashboardCards.map((card, index) => (
+          <Link className={`student-dashboard-card ${card.accent} dashboard-card-${index + 1}`} href={card.href} key={card.href}>
             <div className="dashboard-card-topline"><span>{card.kicker}</span><span className="dashboard-card-mark"><LearningMark name={card.icon} /></span></div>
+            <span className="dashboard-card-index" aria-hidden="true">0{index + 1}</span>
             <h2>{card.title}</h2>
             <p>{card.description}</p>
             <strong>시작하기 <i aria-hidden="true">→</i></strong>

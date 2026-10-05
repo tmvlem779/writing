@@ -24,6 +24,7 @@ const layout = read("src/app/layout.tsx");
 const styles = read("src/app/globals.css");
 const learnLayout = read("src/app/learn/layout.tsx");
 const learningBookShell = read("src/components/learning-book-shell.tsx");
+const writingStudio = read("src/components/writing-studio.tsx");
 
 test("ver.2 학생 학습 홈과 공통 탭에서는 AI 진단평가를 제외한다", () => {
   for (const [label, href] of [
@@ -167,6 +168,21 @@ test("학생 홈은 한국어 명조 브랜드 글꼴과 실제 데이터 기반
   assert.match(dashboard, /추천 다음 활동/);
   assert.match(dashboard, /scaffoldLabel/);
   assert.match(styles, /learning-status-list/);
+});
+
+test("학생 학습 정보 구조는 비대칭 홈과 번호형 상단 탭, 편집형 차시 목차를 사용한다", () => {
+  assert.match(dashboard, /dashboard-card-\$\{index \+ 1\}/);
+  assert.match(dashboard, /dashboard-card-index/);
+  assert.match(nav, /student-learning-tabs/);
+  assert.match(nav, /student-learning-index/);
+  assert.match(nav, /note: "배우기"/);
+  assert.match(writingStudio, /course-map-feature/);
+  assert.match(writingStudio, /course-feature-art/);
+  assert.match(writingStudio, /course-map-index/);
+  assert.match(styles, /--blue: #405965/);
+  assert.match(styles, /--plum: #6f5664/);
+  assert.match(styles, /\.student-dashboard-cards \{[^}]*grid-template-columns: minmax\(0, 1\.4fr\) minmax\(320px, \.75fr\)/s);
+  assert.match(styles, /\.course-map-feature \{[^}]*grid-template-columns: minmax\(330px, \.78fr\) minmax\(540px, 1\.22fr\)/s);
 });
 
 test("PRIVACY: 오답은 학생별 RLS로 격리되고 오답노트는 로그인한 학생 행만 조회한다", () => {

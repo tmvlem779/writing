@@ -46,35 +46,43 @@ export function WritingStudio() {
   return (
     <div className="learning-studio">
       <section className="course-map" aria-labelledby="course-map-title">
-        <header>
-          <div>
-            <span>{track.optionLabel} · {track.title} · 총 {courseLessons.length}차시</span>
-            <h1 id="course-map-title">{track.title} 수업안</h1>
+        <div className="course-map-feature">
+          <header>
+            <span>{track.optionLabel} · 총 {courseLessons.length}차시</span>
+            <h1 id="course-map-title">{track.title}<br />수업안</h1>
+            <p>문장의 구조를 읽고, 표시하고, 직접 쓰는 여섯 번의 탐구</p>
+          </header>
+          <div className="course-feature-art" aria-hidden="true">
+            <span>{String(lessonNumber).padStart(2, "0")}</span>
+            <strong>문장</strong>
+            <i>語</i>
           </div>
-          <p>
+          <p className="course-key-question">
             <strong>{lessonNumber}차시 핵심 질문</strong>
             {lesson.keyQuestion}
           </p>
-        </header>
-        <div className="lesson-switcher six-lessons" role="group" aria-label="수업 차시 선택">
-          {courseLessons.map((item) => (
-            <button
-              aria-pressed={lessonNumber === item.number}
-              className={lessonNumber === item.number ? "lesson-tab active" : "lesson-tab"}
-              key={item.number}
-              onClick={() => selectLesson(item.number)}
-              type="button"
-            >
-              <span>{item.number}차시</span>
-              <strong>{item.title}</strong>
-            </button>
-          ))}
         </div>
-        <div className="lesson-activity-summary" aria-label={`${lessonNumber}차시 주요 활동`}>
-          <span>주요 활동</span>
-          <ol>
-            {lesson.activities.map((activity) => <li key={activity}>{activity}</li>)}
-          </ol>
+        <div className="course-map-index">
+          <div className="lesson-switcher six-lessons" role="group" aria-label="수업 차시 선택">
+            {courseLessons.map((item) => (
+              <button
+                aria-pressed={lessonNumber === item.number}
+                className={lessonNumber === item.number ? "lesson-tab active" : "lesson-tab"}
+                key={item.number}
+                onClick={() => selectLesson(item.number)}
+                type="button"
+              >
+                <span>{String(item.number).padStart(2, "0")}</span>
+                <strong>{item.title}</strong>
+              </button>
+            ))}
+          </div>
+          <div className="lesson-activity-summary" aria-label={`${lessonNumber}차시 주요 활동`}>
+            <span>오늘의 흐름</span>
+            <ol>
+              {lesson.activities.map((activity) => <li key={activity}>{activity}</li>)}
+            </ol>
+          </div>
         </div>
       </section>
 

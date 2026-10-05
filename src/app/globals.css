@@ -1660,3 +1660,396 @@ h1, h2, h3,
   .v3-book-stage > .v3-book-cover { background: linear-gradient(180deg, #212a25 0 53%, #f8f3e8 53% 100%); }
   .v3-cover-title h2 { color: #20231e; }
 }
+
+/* 문득문득 ver.3.6: 비대칭 편집 구조와 확장 팔레트 */
+:root {
+  --blue: #405965;
+  --blue-dark: #2d424b;
+  --blue-soft: #dce4e5;
+  --plum: #6f5664;
+  --plum-soft: #e8dfe3;
+  --sand: #b69b6d;
+  --sand-soft: #eee5d4;
+  --slate: #686d6d;
+}
+
+/* 상단 학습 탭을 콘텐츠 위의 독립된 편집형 메뉴로 재배치 */
+.student-learning-nav {
+  min-height: 108px;
+  padding: 0 clamp(26px, 4vw, 68px);
+  display: grid;
+  grid-template-columns: minmax(190px, .7fr) minmax(520px, 1.8fr) minmax(110px, .45fr);
+  align-items: center;
+  gap: 32px;
+  border-top: 4px solid var(--seal);
+  border-bottom: 1px solid #cfc8bc;
+  background: rgba(250,247,239,.98);
+}
+.student-learning-brand { display: flex; align-items: center; gap: 16px; }
+.student-learning-brand > span {
+  padding-left: 16px;
+  border-left: 1px solid #c8c0b3;
+  color: #7a746a;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+.student-learning-nav .student-learning-tabs {
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  overflow: visible;
+}
+.student-learning-nav .student-learning-tabs a {
+  min-width: 0;
+  height: 100%;
+  padding: 23px 22px 18px;
+  display: grid;
+  grid-template-columns: 27px 1fr;
+  grid-template-rows: 1fr 1fr;
+  column-gap: 10px;
+  align-content: center;
+  border: 0;
+  border-left: 1px solid #ddd6ca;
+  border-bottom: 4px solid transparent;
+  color: #777268;
+  text-align: left;
+}
+.student-learning-nav .student-learning-tabs a:last-child { border-right: 1px solid #ddd6ca; }
+.student-learning-nav .student-learning-tabs a small {
+  grid-row: 1 / 3;
+  align-self: center;
+  color: #a39b8e;
+  font: 700 11px/1 var(--font-brand), serif;
+}
+.student-learning-nav .student-learning-tabs a strong { align-self: end; color: #393a35; font-size: 13px; }
+.student-learning-nav .student-learning-tabs a span { align-self: start; color: #948d82; font-size: 9px; letter-spacing: .12em; }
+.student-learning-nav .student-learning-tabs a.active {
+  border-bottom-color: var(--tab-color, var(--blue));
+  background: transparent;
+  color: var(--tab-color, var(--blue));
+  transform: none;
+}
+.student-learning-nav .student-learning-tabs a:nth-child(1) { --tab-color: var(--blue); }
+.student-learning-nav .student-learning-tabs a:nth-child(2) { --tab-color: var(--plum); }
+.student-learning-nav .student-learning-tabs a:nth-child(3) { --tab-color: #8b6d41; }
+.student-learning-nav .student-learning-tabs a.active small,
+.student-learning-nav .student-learning-tabs a.active strong,
+.student-learning-nav .student-learning-tabs a.active span { color: var(--tab-color); }
+.student-learning-index {
+  justify-self: end;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #777168;
+  color: #55564f;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* 학생 홈: 동일 카드 3개 대신 대표 활동 1개 + 보조 활동 2개 */
+.student-dashboard { --dashboard-max: 1240px; padding-inline: max(28px, calc((100vw - var(--dashboard-max)) / 2)); }
+.student-dashboard-header,
+.student-dashboard-intro,
+.student-dashboard-cards,
+.dashboard-progress { width: min(var(--dashboard-max), 100%); margin-inline: auto; }
+.student-dashboard-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, .42fr); align-items: end; column-gap: 70px; }
+.student-dashboard-intro > span,
+.student-dashboard-intro > h1 { grid-column: 1; }
+.student-dashboard-intro > p { grid-column: 2; grid-row: 1 / 3; padding: 18px 0 4px 24px; border-left: 1px solid #bdb5a8; }
+.student-dashboard-cards {
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, .75fr);
+  grid-template-rows: repeat(2, minmax(188px, auto));
+  gap: 18px;
+}
+.student-dashboard-card { min-height: 0; border: 0; box-shadow: none; }
+.student-dashboard-card.dashboard-card-1 {
+  grid-row: 1 / 3;
+  min-height: 394px;
+  padding: 42px;
+  background:
+    radial-gradient(circle at 88% 20%, rgba(255,255,255,.13) 0 11%, transparent 11.4%),
+    linear-gradient(145deg, #405965, #314852);
+  color: #f9f4e9;
+}
+.student-dashboard-card.dashboard-card-2 {
+  background: linear-gradient(135deg, #ede3e7, #e2d6dc);
+  color: #684f5d;
+}
+.student-dashboard-card.dashboard-card-3 {
+  background: linear-gradient(135deg, #ebe2d0, #ded2bb);
+  color: #735d38;
+}
+.student-dashboard-card.dashboard-card-1::before {
+  content: "문\A장";
+  white-space: pre;
+  position: absolute;
+  right: 8%;
+  bottom: 8%;
+  color: rgba(255,255,255,.08);
+  font: 900 118px/.82 var(--font-brand), serif;
+  writing-mode: vertical-rl;
+}
+.student-dashboard-card::after { top: 75px; }
+.dashboard-card-index {
+  position: absolute;
+  right: 28px;
+  bottom: 21px;
+  color: currentColor;
+  font: 700 42px/1 var(--font-brand), serif;
+  opacity: .16;
+}
+.dashboard-card-1 .dashboard-card-index { right: 38px; bottom: 31px; font-size: 68px; color: white; }
+.student-dashboard-card.dashboard-card-1 h2,
+.student-dashboard-card.dashboard-card-1 p,
+.student-dashboard-card.dashboard-card-1 > strong,
+.student-dashboard-card.dashboard-card-1 .dashboard-card-topline > span:first-child { color: #fffaf0; }
+.student-dashboard-card.dashboard-card-1 h2 { max-width: 410px; margin-top: 64px; font-size: clamp(35px, 4vw, 54px); }
+.student-dashboard-card.dashboard-card-1 p { max-width: 480px; opacity: .72; }
+.student-dashboard-card.dashboard-card-2 h2,
+.student-dashboard-card.dashboard-card-3 h2 { margin-top: 18px; }
+.student-dashboard-card.dashboard-card-2 .dashboard-card-mark { background: rgba(111,86,100,.1); color: var(--plum); }
+.student-dashboard-card.dashboard-card-3 .dashboard-card-mark { background: rgba(126,94,45,.11); color: #806237; }
+
+.dashboard-progress { margin-top: 28px; }
+.learning-status-item:nth-child(1) > .learning-mark { background: var(--blue-soft); color: var(--blue); }
+.learning-status-item:nth-child(2) > .learning-mark { background: var(--plum-soft); color: var(--plum); }
+.learning-status-item:nth-child(3) > .learning-mark { background: var(--sand-soft); color: #806846; }
+.learning-status-item:nth-child(4) > .learning-mark { background: #e3e3df; color: var(--slate); }
+.status-progress i { background: var(--blue); }
+.status-support .status-tags span { background: var(--plum-soft); color: var(--plum); }
+.status-scaffold .status-tags span { background: var(--sand-soft); color: #725b39; }
+
+/* 오늘의 챌린지: 차시 표지를 큰 분할 장면으로, 차시는 텍스트 목차로 */
+.course-map {
+  padding: 0;
+  border: 0;
+  background: #f5f1e8;
+  color: #22241f;
+}
+.course-map-feature {
+  min-height: 390px;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(330px, .78fr) minmax(540px, 1.22fr);
+  overflow: hidden;
+  border-bottom: 1px solid #cfc7b9;
+}
+.course-map-feature > header {
+  padding: 62px clamp(38px, 6vw, 92px);
+  position: relative;
+  z-index: 2;
+  background: #f8f4eb;
+}
+.course-map-feature > header::after {
+  content: "";
+  width: 78px;
+  height: 4px;
+  position: absolute;
+  left: clamp(38px, 6vw, 92px);
+  bottom: 58px;
+  background: var(--seal);
+}
+.course-map-feature > header > span { color: var(--plum); font-size: 11px; font-weight: 850; letter-spacing: .14em; }
+.course-map-feature h1 { margin: 18px 0 18px; font-size: clamp(45px, 5.2vw, 76px); line-height: 1.05; letter-spacing: -.06em; }
+.course-map-feature > header > p { max-width: 360px; margin: 0; color: #777167; font-size: 13px; }
+.course-feature-art {
+  min-height: 390px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.08), transparent 45%),
+    var(--blue);
+  color: #f7f1e5;
+}
+.course-feature-art::before,
+.course-feature-art::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(255,255,255,.17);
+  border-radius: 50%;
+}
+.course-feature-art::before { width: 390px; height: 390px; right: -90px; top: -125px; }
+.course-feature-art::after { width: 250px; height: 250px; left: -58px; bottom: -115px; }
+.course-feature-art > span {
+  position: absolute;
+  right: 7%;
+  top: -9%;
+  color: rgba(255,255,255,.1);
+  font: 900 clamp(170px, 22vw, 320px)/1 var(--font-brand), serif;
+}
+.course-feature-art > strong { font: 700 clamp(52px, 8vw, 112px)/1 var(--font-brand), serif; letter-spacing: .13em; }
+.course-feature-art > i {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  left: 9%;
+  top: 12%;
+  border: 1px solid rgba(255,255,255,.64);
+  color: #f0d8c8;
+  font: 700 24px/1 var(--font-brand), serif;
+  font-style: normal;
+}
+.course-key-question {
+  width: min(520px, 70%);
+  margin: 0;
+  padding: 18px 22px;
+  position: absolute;
+  right: 4%;
+  bottom: 28px;
+  z-index: 2;
+  border-left: 3px solid #d0ac81;
+  background: rgba(31,45,51,.82);
+  color: rgba(255,255,255,.83);
+  backdrop-filter: blur(8px);
+  font-size: 14px;
+}
+.course-key-question strong { display: block; margin-bottom: 4px; color: #e9c39f; font-size: 10px; letter-spacing: .12em; }
+.course-map-index {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(300px, .8fr);
+  border-bottom: 1px solid #cac2b5;
+  background: #fbf8f1;
+}
+.course-map .lesson-switcher,
+.course-map .lesson-switcher.six-lessons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+}
+.course-map .lesson-tab {
+  min-height: 92px;
+  padding: 17px 20px;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-content: center;
+  column-gap: 10px;
+  border: 0;
+  border-right: 1px solid #d8d1c5;
+  border-bottom: 1px solid #d8d1c5;
+  border-radius: 0;
+  background: transparent;
+  color: #6e6a62;
+}
+.course-map .lesson-tab:nth-child(n + 4) { border-bottom: 0; }
+.course-map .lesson-tab span { color: #9b9386; font: 700 11px/1.45 var(--font-brand), serif; }
+.course-map .lesson-tab strong { color: #4b4c46; font-size: 12px; }
+.course-map .lesson-tab.active {
+  border-color: var(--blue-dark);
+  background: var(--blue-dark);
+  color: white;
+  box-shadow: none;
+}
+.course-map .lesson-tab.active span { color: #d9c0a6; }
+.course-map .lesson-tab.active strong { color: white; }
+.course-map .lesson-activity-summary {
+  margin: 0;
+  padding: 24px 28px;
+  display: block;
+  background: var(--plum);
+  color: white;
+}
+.course-map .lesson-activity-summary > span { color: #ead6df; letter-spacing: .12em; }
+.course-map .lesson-activity-summary ol { display: grid; gap: 7px; margin-top: 12px; }
+.course-map .lesson-activity-summary li { min-width: 0; padding: 0; background: transparent; color: rgba(255,255,255,.8); }
+.course-map .lesson-activity-summary li::before { color: #dac4a5; }
+
+/* 챕터는 큰 카드 대신 얇은 텍스트 인덱스로 */
+.chapter-switcher,
+.chapter-switcher.two-chapters {
+  top: 108px;
+  display: flex;
+  justify-content: center;
+  gap: clamp(22px, 6vw, 86px);
+  padding: 21px 30px 18px;
+  border-bottom: 1px solid #cfc8bc;
+  background: rgba(245,241,232,.96);
+}
+.chapter-tab {
+  width: auto;
+  min-width: 190px;
+  padding: 2px 0 9px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: #817b71;
+}
+.chapter-tab > span { grid-row: 1 / 3; color: #a49d91; }
+.chapter-tab strong { color: #575851; }
+.chapter-tab small { font-size: 10px; }
+.chapter-tab.active {
+  border-color: var(--plum);
+  background: transparent;
+  color: #6a5c63;
+  box-shadow: none;
+}
+.chapter-tab.active strong, .chapter-tab.active > span { color: var(--plum); }
+.chapter-tab.locked { background: transparent; }
+
+.concept-sidebar, .material-sidebar { background: var(--blue-dark); }
+.concept-progress, .transfer-panel { background: #e7e0d4; }
+.self-study-heading { background: var(--plum); }
+.wrong-notes-page > header > strong { background: var(--sand-soft); color: #745d39; }
+.wrong-note-card { border-left-color: var(--plum); }
+
+@media (max-width: 980px) {
+  .student-learning-nav {
+    grid-template-columns: auto 1fr;
+    gap: 18px;
+  }
+  .student-learning-index { display: none; }
+  .student-learning-brand > span { display: none; }
+  .student-dashboard-intro { display: block; }
+  .student-dashboard-intro > p { max-width: 720px; margin-top: 16px; padding: 0; border: 0; }
+  .course-map-feature { grid-template-columns: minmax(300px, .8fr) minmax(420px, 1.2fr); }
+  .course-map-index { grid-template-columns: 1fr; }
+  .course-map .lesson-activity-summary { min-height: 0; }
+}
+
+@media (max-width: 720px) {
+  .student-learning-nav {
+    min-height: 0;
+    padding: 14px 16px 0;
+    display: block;
+  }
+  .student-learning-brand { margin-bottom: 12px; }
+  .student-learning-nav .student-learning-tabs {
+    height: auto;
+    overflow-x: auto;
+  }
+  .student-learning-nav .student-learning-tabs a {
+    min-width: 152px;
+    min-height: 66px;
+    padding: 12px 14px;
+  }
+  .student-dashboard { padding-inline: 18px; }
+  .student-dashboard-cards { grid-template-columns: 1fr; grid-template-rows: none; }
+  .student-dashboard-card.dashboard-card-1 { grid-row: auto; min-height: 300px; padding: 30px; }
+  .student-dashboard-card.dashboard-card-1 h2 { margin-top: 36px; font-size: 36px; }
+  .course-map-feature { min-height: 0; display: block; }
+  .course-map-feature > header { min-height: 310px; padding: 42px 24px; }
+  .course-map-feature > header::after { left: 24px; bottom: 38px; }
+  .course-feature-art { min-height: 280px; }
+  .course-key-question { width: calc(100% - 40px); right: 20px; bottom: 20px; }
+  .course-map .lesson-switcher,
+  .course-map .lesson-switcher.six-lessons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .course-map .lesson-tab:nth-child(n + 4) { border-bottom: 1px solid #d8d1c5; }
+  .course-map .lesson-tab:nth-child(n + 5) { border-bottom: 0; }
+  .chapter-switcher,
+  .chapter-switcher.two-chapters {
+    top: 0;
+    justify-content: flex-start;
+    gap: 24px;
+    overflow-x: auto;
+    padding-inline: 18px;
+  }
+  .chapter-tab { min-width: 176px; }
+}
