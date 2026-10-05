@@ -62,8 +62,18 @@ function SituationIllustration({ sceneId }: { sceneId: SituationSceneId }) {
   );
 }
 
-export function SituationWritingActivity() {
-  const [sceneId, setSceneId] = useState<SituationSceneId>(situationScenes[0].id);
+type SituationWritingActivityProps = {
+  initialSceneId?: SituationSceneId;
+  dailyMode?: boolean;
+  onDailyComplete?: (sessionId: string) => void | Promise<void>;
+};
+
+export function SituationWritingActivity({
+  initialSceneId = situationScenes[0].id,
+  dailyMode = false,
+  onDailyComplete
+}: SituationWritingActivityProps = {}) {
+  const [sceneId, setSceneId] = useState<SituationSceneId>(initialSceneId);
   const [draft, setDraft] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [response, setResponse] = useState<AgentResponse | null>(null);
@@ -126,6 +136,7 @@ export function SituationWritingActivity() {
         { role: "student", content: draft },
         { role: "assistant", content: `${next.studentMessage} ${next.question}` }
       ]);
+      await onDailyComplete?.(id);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "문제가 생겼습니다.");
     } finally {
@@ -148,7 +159,7 @@ export function SituationWritingActivity() {
     <section className="situation-writing-shell" aria-labelledby="situation-writing-title">
       <aside className="situation-scene-list" aria-label="그림 상황 선택">
         <div><span>그림·상황</span><strong>한 장면, 여러 문장</strong></div>
-        {situationScenes.map((item) => (
+        {(dailyMode ? situationScenes.filter((item) => item.id === initialSceneId) : situationScenes).map((item) => (
           <button
             aria-current={sceneId === item.id ? "step" : undefined}
             className={sceneId === item.id ? "active" : ""}
@@ -160,7 +171,7 @@ export function SituationWritingActivity() {
             <strong>{item.title}</strong>
           </button>
         ))}
-        <p>정답 문장을 따라 쓰지 않고, 그림에서 관찰한 사실로 자신의 문장을 먼저 만듭니다.</p>
+        <p>{dailyMode ? "오늘의 장면을 관찰하고 자신의 문장을 먼저 만든 뒤 질문을 받아요." : "정답 문장을 따라 쓰지 않고, 그림에서 관찰한 사실로 자신의 문장을 먼저 만듭니다."}</p>
       </aside>
 
       <div className="situation-writing-workspace" aria-busy={pending}>

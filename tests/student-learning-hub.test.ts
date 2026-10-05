@@ -53,18 +53,18 @@ test("P1·P3: 진단 오답은 정답을 즉시 공개하지 않고 관찰 단�
   }
 });
 
-test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 문학·실생활·상황 생성을 분리한다", () => {
+test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 매일 다른 유형의 로드맵으로 제공한다", () => {
   assert.match(challengePage, /WritingStudio/);
   assert.match(selfStudyPage, /SelfStudyWorkspace/);
-  assert.match(selfStudyWorkspace, /문학 작품/);
-  assert.match(selfStudyWorkspace, /실생활 자료/);
-  assert.match(selfStudyWorkspace, /그림·상황 문장 만들기/);
+  assert.match(selfStudyWorkspace, /7일 문법 루틴/);
+  assert.match(selfStudyWorkspace, /buildDailyRoadmap/);
+  assert.match(selfStudyWorkspace, /getDailyPracticePlan/);
   assert.match(selfStudyWorkspace, /SituationWritingActivity/);
-  assert.match(selfStudyWorkspace, /activeGroup === "sentence-making"/);
-  assert.match(selfStudyWorkspace, /materialGroup=\{activeGroup\}/);
+  assert.match(selfStudyWorkspace, /todayPlan\.type === "sentence-making"/);
+  assert.match(selfStudyWorkspace, /onDailyComplete=\{completeToday\}/);
   assert.match(selfStudyWorkspace, /showOverview=\{false\}/);
-  assert.match(selfStudyPage, /읽고, 관찰하고, 내 문장으로 표현해요/);
-  assert.match(selfStudyPage, /그림 속 학교생활 상황을 관찰해/);
+  assert.match(selfStudyWorkspace, /일 연속 학습/);
+  assert.match(selfStudyPage, /하루 한 걸음, 문법 감각을 이어 가요/);
 });
 
 test("P2·P3·P4: 그림 상황에서는 학생이 먼저 문장을 만들고 그 문장으로 질문을 이어 간다", () => {

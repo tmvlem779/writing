@@ -29,6 +29,10 @@ pnpm build
 
 `pnpm verify`는 lint, 타입, 단위 테스트, P1~P6 추적, 비밀값·RLS·HTTP 보안 헤더 정적 검사, eval 명세 검사를 실행합니다. 실제 운영 전에는 별도 Supabase 테스트 프로젝트에서 `supabase/tests/rls.sql`도 실행해야 합니다.
 
+## 매일 문법 루틴
+
+`/learn/self-study`는 문학 작품 → 실생활 자료 → 문장 만들기를 날짜별로 순환하는 7일 로드맵을 제공합니다. 학생이 자기 답을 쓰고 첫 AI 질문·피드백까지 받으면 해당 날짜가 완료되며, 기존 `learning_events`의 학생별 RLS 범위 안에 완료 날짜가 저장됩니다. 시 활동은 구절 선택만으로 완료되지 않고, 선택을 바탕으로 제시된 질문에 학생이 직접 답해야 완료됩니다.
+
 ## 배포 상태
 
 Production 공개 배포, Supabase 연결, GitHub 자동 배포 연결은 완료됐습니다. OpenAI 결제 크레딧·프로젝트 한도와 초기 교사 계정은 아직 준비되지 않아 실제 수업 운영 승인 상태는 아닙니다. 최신 완료·보류 항목은 [progress.md](./progress.md)와 [배포 체크리스트](./docs/deployment.md)를 기준으로 확인합니다.

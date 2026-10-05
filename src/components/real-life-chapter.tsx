@@ -11,6 +11,7 @@ import {
   getRealLifeLessonGuide,
   getRealLifeMaterialsForLesson,
   realLifePracticeModes,
+  type RealLifeMaterialKind,
   type RealLifeMaterialGroup,
   type RealLifePracticeMode
 } from "@/lib/curriculum/real-life-materials";
@@ -33,13 +34,28 @@ type RealLifeChapterProps = {
   trackId: CourseTrackId;
   showOverview?: boolean;
   materialGroup?: RealLifeMaterialGroup;
+  initialMaterialId?: RealLifeMaterialKind;
+  dailyMode?: boolean;
+  onDailyComplete?: (sessionId: string) => void | Promise<void>;
 };
 
-export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, materialGroup = "all" }: RealLifeChapterProps) {
+export function RealLifeChapter({
+  lessonNumber,
+  trackId,
+  showOverview = true,
+  materialGroup = "all",
+  initialMaterialId,
+  dailyMode = false,
+  onDailyComplete
+}: RealLifeChapterProps) {
   const courseLesson = getCourseLesson(lessonNumber, trackId);
   const track = getCourseTrack(trackId);
   const lessonGuide = getRealLifeLessonGuide(trackId);
-  const lessonMaterials = getRealLifeMaterialsForLesson(lessonNumber, trackId, materialGroup);
+  const availableMaterials = getRealLifeMaterialsForLesson(lessonNumber, trackId, materialGroup);
+  const selectedDailyMaterials = initialMaterialId
+    ? availableMaterials.filter((item) => item.id === initialMaterialId)
+    : availableMaterials;
+  const lessonMaterials = selectedDailyMaterials.length > 0 ? selectedDailyMaterials : availableMaterials;
   const [materialIndex, setMaterialIndex] = useState(0);
   const [mode, setMode] = useState<RealLifePracticeMode>("structure");
   const [draft, setDraft] = useState("");
@@ -192,6 +208,7 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
         setDraft("");
         requestAnimationFrame(() => draftRef.current?.focus());
       }
+      if (!selectionTurn) await onDailyComplete?.(id);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "문제가 생겼습니다.");
     } finally {
@@ -295,8 +312,8 @@ export function RealLifeChapter({ lessonNumber, trackId, showOverview = true, ma
     <div className="authentic-shell">
       <aside className="material-sidebar" aria-label={materialGroup === "literature" ? "문학 작품 목록" : `${lessonNumber}차시 실생활 자료`}>
         <div className="sidebar-heading">
-          <span>{materialGroup === "literature" ? "시·소설 질문·근거 탐구" : `Chapter 03 · ${lessonNumber}차시`}</span>
-          <strong>{materialGroup === "literature" ? "답의 근거를 직접 찾아요" : courseLesson.title}</strong>
+          <span>{dailyMode ? "오늘의 문법 루틴" : materialGroup === "literature" ? "시·소설 질문·근거 탐구" : `Chapter 03 · ${lessonNumber}차시`}</span>
+          <strong>{dailyMode ? "한 자료에 집중해요" : materialGroup === "literature" ? "답의 근거를 직접 찾아요" : courseLesson.title}</strong>
         </div>
         {lessonMaterials.map((item, index) => (
           <button
