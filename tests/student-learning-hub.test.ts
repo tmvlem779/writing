@@ -62,7 +62,8 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 매�
   assert.match(selfStudyWorkspace, /buildDailyRoadmap/);
   assert.match(selfStudyWorkspace, /getDailyPracticePlan/);
   assert.match(selfStudyWorkspace, /href="\/learn\/self-study\/today"/);
-  assert.match(selfStudyWorkspace, /target="_blank"/);
+  assert.doesNotMatch(selfStudyWorkspace, /target="_blank"/);
+  assert.doesNotMatch(selfStudyWorkspace, /새 탭에서/);
   assert.doesNotMatch(selfStudyWorkspace, /SituationWritingActivity/);
   assert.match(todayPracticePage, /DailyPracticeToday/);
   assert.match(dailyPracticeToday, /SituationWritingActivity/);

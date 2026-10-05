@@ -77,21 +77,19 @@ export function SelfStudyWorkspace() {
       <div className="daily-path" aria-label="7일 문법 학습 로드맵">
         {roadmap.map((day, index) => {
           const isToday = day.date === today;
-          const nodeLabel = `${day.dateLabel} ${day.title} ${isToday ? day.status === "completed" ? "완료한 오늘 학습 다시 열기" : "오늘 학습 새 탭에서 시작" : day.status === "completed" ? "완료" : "잠김"}`;
+          const nodeLabel = `${day.dateLabel} ${day.title} ${isToday ? day.status === "completed" ? "완료한 오늘 학습 다시 열기" : "오늘 학습 시작" : day.status === "completed" ? "완료" : "잠김"}`;
           return (
             <div className={`daily-path-step path-index-${index} offset-${pathOffsets[index]} status-${day.status} ${isToday ? "is-today" : ""}`} key={day.date}>
               <div className="daily-path-copy">
                 <span>{day.dayLabel} · {day.dateLabel}</span>
                 <strong>{day.title}</strong>
-                <small>{day.status === "completed" ? isToday ? "완료했어요 · 다시 학습할 수 있어요" : "완료했어요" : day.status === "today" ? `${day.description} 새 탭에서 시작해요.` : day.status === "missed" ? "지나간 학습" : "차례가 되면 열려요"}</small>
+                <small>{day.status === "completed" ? isToday ? "완료했어요 · 다시 학습할 수 있어요" : "완료했어요" : day.status === "today" ? `${day.description} 눌러서 시작해요.` : day.status === "missed" ? "지나간 학습" : "차례가 되면 열려요"}</small>
               </div>
               {isToday ? (
                 <a
                   aria-label={nodeLabel}
                   className="daily-path-node"
                   href="/learn/self-study/today"
-                  rel="noopener noreferrer"
-                  target="_blank"
                 >
                   <RoadmapIcon icon={day.icon} />
                   {day.status === "completed" && <span className="daily-check">✓</span>}
