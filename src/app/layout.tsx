@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Jua, Noto_Sans_KR } from "next/font/google";
+import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
 import { BrandLogo } from "@/components/brand-logo";
 import { PasswordSetupSessionRedirect } from "@/components/password-setup-session-redirect";
 import "./globals.css";
@@ -11,8 +11,8 @@ const bodyFont = Noto_Sans_KR({
   variable: "--font-body"
 });
 
-const brandFont = Jua({
-  weight: "400",
+const brandFont = Noto_Serif_KR({
+  weight: ["500", "700", "900"],
   subsets: ["latin"],
   display: "swap",
   variable: "--font-brand"

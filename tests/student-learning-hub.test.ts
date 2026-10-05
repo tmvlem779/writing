@@ -158,8 +158,8 @@ test("P3·P4: 시는 문법 요소를 고르고 소설은 모든 문장에 직�
   assert.match(agentTurnApi, /removeTrustedCurriculumPassages/);
 });
 
-test("학생 홈은 둥근 브랜드 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {
-  assert.match(layout, /Jua/);
+test("학생 홈은 한국어 명조 브랜드 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {
+  assert.match(layout, /Noto_Serif_KR/);
   assert.match(layout, /Noto_Sans_KR/);
   assert.match(dashboard, /스스로 해결한 유형/);
   assert.match(dashboard, /도움이 필요한 영역/);

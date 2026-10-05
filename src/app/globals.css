@@ -1248,3 +1248,415 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
   visibility: visible;
   opacity: 1;
 }
+
+/* 문득문득 ver.3.5: 현대적인 한국어 편집 디자인 */
+:root {
+  --ink: #20211d;
+  --muted: #746f65;
+  --paper: #f2eee4;
+  --surface: #fffdf7;
+  --green: #344b40;
+  --green-dark: #202f29;
+  --green-soft: #dfe5dc;
+  --lime: #b8c0a7;
+  --orange: #a5523d;
+  --line: #d9d2c5;
+  --shadow: 0 22px 55px rgba(41, 36, 27, .09);
+  --seal: #a54432;
+}
+
+body {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 13% 24%, rgba(75, 67, 48, .035) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 72% 68%, rgba(75, 67, 48, .025) 0 1px, transparent 1.4px);
+  background-size: 19px 23px, 27px 31px;
+}
+
+h1, h2, h3,
+.student-dashboard-intro h1,
+.student-dashboard-card h2,
+.dashboard-progress h2,
+.self-study-heading h1,
+.course-map h1,
+.material-header h1,
+.concept-header h1,
+.diagnostic-header h1,
+.teacher-header h1,
+.auth-intro h1,
+.auth-card h2 {
+  font-family: var(--font-brand), "Noto Serif KR", serif;
+  word-break: keep-all;
+}
+
+.site-header {
+  height: 82px;
+  border-top: 3px solid var(--seal);
+  border-bottom-color: rgba(55, 49, 39, .18);
+  background: rgba(250, 247, 239, .94);
+}
+.site-header nav { gap: 34px; color: #49483f; font-weight: 700; }
+.site-header nav a { position: relative; }
+.site-header nav a::after {
+  content: "";
+  height: 1px;
+  position: absolute;
+  inset: auto 50% -8px;
+  background: var(--seal);
+  transition: inset .18s ease;
+}
+.site-header nav a:hover::after { inset-inline: 0; }
+
+.brand-logo { gap: 12px; }
+.brand-logo-type {
+  color: #252720;
+  font-weight: 900;
+  letter-spacing: -.055em;
+}
+.brand-logo-mark {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(114, 38, 27, .5);
+  border-radius: 3px;
+  background: var(--seal);
+  color: #fffaf0;
+  box-shadow: 3px 3px 0 rgba(48, 42, 32, .12);
+  transform: rotate(-2deg);
+}
+.brand-logo-mark i { font-family: var(--font-brand), serif; font-size: 19px; font-weight: 900; }
+.brand-logo-mark b {
+  right: -7px;
+  top: -7px;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #f7f1e4;
+  border-radius: 2px;
+  background: #242a25;
+  font: 700 8px/1 var(--font-brand), serif;
+}
+
+.primary-button, .secondary-button, .dashboard-logout {
+  border-radius: 4px;
+  box-shadow: none;
+}
+.primary-button { background: var(--green-dark); }
+.secondary-button { border-color: #6f746c; color: var(--green-dark); }
+.eyebrow, .section-kicker, .panel-kicker,
+.student-dashboard-intro > span, .self-study-heading > span,
+.wrong-notes-page > header > div > span {
+  color: var(--seal);
+  letter-spacing: .14em;
+}
+
+.site-footer {
+  background: #20221e;
+  border-top: 4px solid var(--seal);
+  color: rgba(255,255,255,.62);
+}
+
+/* 로그인: 한지 위 세로 조판과 낙관 */
+.auth-shell {
+  min-height: calc(100vh - 82px);
+  background:
+    linear-gradient(90deg, rgba(32,47,41,.985) 0 50%, rgba(250,247,239,.96) 50%),
+    var(--paper);
+}
+.auth-intro {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.035), transparent 45%),
+    #202f29;
+}
+.auth-intro::before {
+  content: "문\A 장";
+  white-space: pre;
+  position: absolute;
+  right: 7%;
+  top: 9%;
+  color: rgba(244,238,225,.075);
+  font: 900 170px/.78 var(--font-brand), serif;
+  writing-mode: vertical-rl;
+}
+.auth-intro::after {
+  content: "한글로 생각하고, 문장으로 쓰다";
+  position: absolute;
+  left: 8vw;
+  bottom: 55px;
+  padding-left: 14px;
+  border-left: 3px solid var(--seal);
+  color: rgba(255,255,255,.48);
+  font: 500 12px/1.5 var(--font-brand), serif;
+  letter-spacing: .12em;
+}
+.auth-intro h1 { max-width: 520px; font-weight: 700; letter-spacing: -.045em; }
+.auth-intro a { color: #d9caa9; }
+.auth-card {
+  border: 1px solid #d5cdbf;
+  border-radius: 3px 22px 3px 3px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(66,60,47,.035) 32px),
+    var(--surface);
+  box-shadow: 18px 22px 0 #ded7ca, var(--shadow);
+}
+.auth-card::before {
+  content: "학교 수업 기록";
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 5px 9px;
+  border: 1px solid var(--seal);
+  color: var(--seal);
+  font: 700 10px/1 var(--font-brand), serif;
+  letter-spacing: .08em;
+}
+.auth-card h2 { font-weight: 700; }
+.auth-form input, .invite-form input {
+  border-radius: 2px;
+  border-color: #cfc7b8;
+  background: rgba(255,255,255,.82);
+}
+
+/* 학생 홈: 국어 교과서의 목차와 학습 기록을 닮은 편집 화면 */
+.student-dashboard {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(165,82,61,.045) 1px, transparent 1px),
+    linear-gradient(180deg, #f8f5ed 0%, #efebe1 100%);
+  background-size: 100% 100%, auto;
+}
+.student-dashboard::before {
+  content: "문 장";
+  position: absolute;
+  right: -18px;
+  top: 95px;
+  color: rgba(40,45,39,.035);
+  font: 900 clamp(120px, 18vw, 250px)/1 var(--font-brand), serif;
+  writing-mode: vertical-rl;
+  pointer-events: none;
+}
+.student-dashboard-header {
+  position: relative;
+  border-bottom: 1px solid #312f29;
+}
+.student-dashboard-header::after {
+  content: "";
+  width: 72px;
+  height: 4px;
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  background: var(--seal);
+}
+.dashboard-brand { font-family: var(--font-brand), serif; font-weight: 900; }
+.student-dashboard-header > div > span { border-radius: 2px; background: #e2ddd0; }
+.student-dashboard-intro { position: relative; padding: 72px 0 46px; }
+.student-dashboard-intro::before {
+  content: "오늘의 문장";
+  position: absolute;
+  left: -30px;
+  top: 76px;
+  color: rgba(165,82,61,.65);
+  font: 500 10px/1 var(--font-brand), serif;
+  letter-spacing: .18em;
+  writing-mode: vertical-rl;
+}
+.student-dashboard-intro h1 { font-weight: 700; letter-spacing: -.045em; }
+.student-dashboard-intro p { color: #6f6a60; }
+.student-dashboard-cards { gap: 18px; }
+.student-dashboard-card {
+  min-height: 320px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 3px 28px 3px 3px;
+  border-color: #d4ccbd;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.74), transparent 44%),
+    var(--surface);
+  box-shadow: 10px 12px 0 rgba(55,50,40,.06);
+}
+.student-dashboard-card::after {
+  content: "";
+  width: 54px;
+  height: 2px;
+  position: absolute;
+  left: 28px;
+  top: 70px;
+  background: currentColor;
+  opacity: .35;
+}
+.student-dashboard-card.green { border-top-color: #344b40; color: #344b40; }
+.student-dashboard-card.lime { border-top-color: #8b7658; color: #746044; }
+.student-dashboard-card.paper { border-top-color: #777873; color: #595a55; }
+.student-dashboard-card h2 { margin-top: 34px; color: #23251f; font-weight: 700; }
+.student-dashboard-card p { color: #746f65; }
+.student-dashboard-card > strong { color: currentColor; }
+.dashboard-card-mark { border-radius: 50% 50% 50% 4px !important; }
+.student-dashboard-card.green .dashboard-card-mark { background: #e1e8e0; color: #344b40; }
+.student-dashboard-card.lime .dashboard-card-mark { background: #eee5d4; color: #80684a; }
+.student-dashboard-card.paper .dashboard-card-mark { background: #e5e4df; color: #666762; }
+
+.dashboard-progress {
+  border-color: #d2cabd;
+  border-radius: 3px 26px 3px 3px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 35px, rgba(65,59,47,.035) 36px),
+    #fcfaf4;
+  box-shadow: 12px 14px 0 rgba(53,48,39,.055);
+}
+.dashboard-progress > header { border-bottom-color: #d9d2c5; }
+.dashboard-progress > header > a { color: var(--seal); }
+.learning-status-item { border-radius: 2px 14px 2px 2px; border-color: #ddd6ca; box-shadow: none; }
+.learning-status-item > .learning-mark { border-radius: 50% 50% 50% 3px; }
+
+/* 학습 화면: 목차, 원고지, 주석의 인상을 절제해 적용 */
+.student-learning-nav {
+  min-height: 92px;
+  border-bottom: 1px solid #292b26;
+  background: rgba(250,247,239,.96);
+}
+.student-learning-nav > div a {
+  border-radius: 0;
+  border: 0;
+  border-bottom: 3px solid transparent;
+}
+.student-learning-nav > div a.active {
+  border-color: var(--seal);
+  background: transparent;
+  color: #242720;
+}
+.student-activity-page, .learning-studio, .daily-activity-page {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(76,68,50,.025) 0 1px, transparent 1.5px),
+    #f1ede4;
+  background-size: 23px 27px, auto;
+}
+.course-map, .self-study-heading {
+  background:
+    linear-gradient(100deg, rgba(255,255,255,.035), transparent 48%),
+    #25342d;
+}
+.course-map { border-top: 4px solid var(--seal); }
+.course-map h1, .self-study-heading h1 { font-weight: 700; }
+.lesson-tab, .course-track-option { border-radius: 2px 12px 2px 2px; }
+.lesson-tab.active { border-color: #d8c9a8; background: #faf6ec; }
+.chapter-switcher { background: rgba(244,240,230,.96); }
+.chapter-tab { border-radius: 2px 12px 2px 2px; border-color: #d4ccbe; }
+.chapter-tab.active { border-color: #26362f; background: #26362f; }
+.concept-sidebar, .material-sidebar { background: #27372f; }
+.concept-step, .material-button { border-radius: 2px 10px 2px 2px; }
+.inquiry-card, .concept-summary-card, .concept-check,
+.summary-notebook, .real-material-card, .diagnostic-question-card,
+.diagnostic-result, .daily-concept-card, .situation-figure {
+  border-radius: 3px 20px 3px 3px;
+  border-color: #d5cdbf;
+  box-shadow: 9px 11px 0 rgba(53,48,39,.05);
+}
+.lesson-question-card, .real-life-task {
+  border-left-color: var(--seal);
+  border-radius: 0 12px 2px 0;
+  background: #eee4d3;
+}
+.concept-summary-card, .analysis-guide { background: #e2e6dc; }
+.check-option, .practice-mode, .self-study-group-tab { border-radius: 2px 11px 2px 2px; }
+.check-option.selected { background: #e5e8df; }
+.self-study-group-tabs { background: #e6e1d6; }
+.daily-roadmap-shell { background: linear-gradient(180deg, #f4f0e7, #eae5db); }
+.daily-roadmap-summary { border-radius: 3px 22px 3px 3px; border-color: #d4ccbd; box-shadow: 10px 12px 0 rgba(52,47,38,.05); }
+.daily-path-node { border-radius: 50% 50% 50% 8px; background: #d2d0c9; box-shadow: 0 7px 0 #aaa89f; }
+.daily-path-step.status-completed .daily-path-node { background: #687f70; box-shadow: 0 7px 0 #405448; }
+.daily-path-step.status-today .daily-path-node { background: var(--seal); box-shadow: 0 8px 0 #743126, 0 0 0 8px rgba(165,68,50,.12); }
+
+/* 첫 장: 사진 대신 먹선 삽화를 둔 현대적 양면 편집 */
+.v3-book-journey {
+  --stage-left: #e4e0d5;
+  --stage-right: #faf6ec;
+  --stage-accent: #a5523d;
+}
+.v3-book-journey.story-step-1 { --stage-left: #ddd7ca; --stage-right: #faf6ec; --stage-accent: #a5523d; }
+.v3-book-journey.story-step-2 { --stage-left: #dce1d9; --stage-right: #f8f5ec; --stage-accent: #52695b; }
+.v3-book-journey.story-step-3 { --stage-left: #dedbd2; --stage-right: #f8f5ed; --stage-accent: #6d6b63; }
+.v3-book-journey.story-step-4 { --stage-left: #e5ddcc; --stage-right: #fbf7ed; --stage-accent: #a5523d; }
+.v3-book-stage {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+    #202722;
+  background-size: 31px 100%, auto;
+}
+.v3-page-left,
+.v3-page-right {
+  background-image:
+    radial-gradient(circle at 21% 23%, rgba(66,58,43,.04) 0 1px, transparent 1.5px),
+    repeating-linear-gradient(0deg, transparent 0 33px, rgba(55,49,40,.035) 34px);
+  background-size: 21px 25px, auto;
+}
+.v3-page-left::after {
+  content: "ㄱ · ㄴ · ㄷ · ㄹ";
+  position: absolute;
+  left: 8%;
+  bottom: 7%;
+  color: rgba(38,42,36,.12);
+  font: 700 11px/1 var(--font-brand), serif;
+  letter-spacing: .22em;
+}
+.v3-story-panel h1 { color: #20231e; font-family: var(--font-brand), serif; font-weight: 700; letter-spacing: -.055em; }
+.v3-story-panel p { color: #716d63; }
+.v3-stage-svg { filter: drop-shadow(14px 20px 0 rgba(50,45,36,.08)); }
+.v3-stage-svg .hangul-art { font-size: 34px; font-weight: 900; letter-spacing: .08em; }
+.fill-paper { fill: #fbf7ec; }
+.fill-green { fill: #34463c; }
+.fill-lime { fill: #c1c5ab; }
+.fill-lime-soft { fill: #e0e2d2; }
+.fill-orange { fill: #a5523d; }
+.fill-orange-soft { fill: #d7b5a5; }
+.stroke-soft { stroke: #bcb6aa; }
+.stroke-green, .stroke-green-heavy, .stroke-ink { stroke: #303d35; }
+.v3-visual-stack figcaption { color: rgba(42,45,39,.55); font-family: var(--font-brand), serif; }
+.v3-book-stage > .v3-book-cover {
+  background: linear-gradient(90deg, #212a25 0 50%, #f8f3e8 50% 100%);
+  color: #20231e;
+}
+.v3-cover-grain {
+  opacity: .16;
+  background-image:
+    radial-gradient(circle at 20% 40%, rgba(255,255,255,.3) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 76% 62%, rgba(70,59,40,.18) 0 1px, transparent 1.5px);
+  background-size: 9px 9px, 17px 19px;
+}
+.v3-cover-visual { background: transparent; }
+.v3-cover-visual .fill-green { fill: #f5eee0; }
+.v3-cover-visual .fill-paper { fill: #d7d0c2; }
+.v3-cover-visual .fill-lime { fill: #b8bda3; }
+.v3-cover-visual .stroke-light { stroke: rgba(37,43,38,.58); }
+.v3-cover-visual .stroke-ink { stroke: #29342e; }
+.v3-cover-visual .light-text { fill: #26322c; }
+.v3-cover-title > i {
+  border: 1px solid var(--seal);
+  border-radius: 2px;
+  background: var(--seal);
+  color: #fff8eb;
+  font-weight: 900;
+  transform: rotate(-2deg);
+}
+.v3-cover-title h2 { color: #20231e; font-family: var(--font-brand), serif; font-weight: 900; }
+.v3-cover-title p { color: #736d62; font-family: var(--font-brand), serif; }
+.v3-cover-rule { height: 4px; background: var(--seal); }
+.v3-cover-foot { color: #777166; font-family: var(--font-brand), serif; }
+.story-step-0 .v3-wordmark { color: #f5efe3; }
+.story-step-0 .v3-wordmark i { border-color: rgba(255,255,255,.45); color: #f5efe3; }
+.story-step-0 .v3-journey-header > span { color: #6d685f; }
+.v3-wordmark strong { font-family: var(--font-brand), serif; font-weight: 900; }
+.v3-progress span.active { color: var(--seal); }
+.v3-progress span.passed { color: #627668; }
+
+@media (max-width: 620px) {
+  .site-header { height: 68px; }
+  .auth-shell { background: #f4f0e7; }
+  .auth-intro::after { display: none; }
+  .auth-card { box-shadow: 8px 10px 0 #ded7ca; }
+  .student-dashboard::before { opacity: .6; }
+  .student-dashboard-intro::before { display: none; }
+  .student-dashboard-card { min-height: 245px; }
+  .v3-book-stage > .v3-book-cover { background: linear-gradient(180deg, #212a25 0 53%, #f8f3e8 53% 100%); }
+  .v3-cover-title h2 { color: #20231e; }
+}

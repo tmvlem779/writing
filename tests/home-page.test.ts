@@ -67,6 +67,18 @@ test("공통 화면의 브랜드명을 문득문득으로 통일한다", () => {
   assert.doesNotMatch(layout, /문장나래/);
 });
 
+test("한국어 편집 디자인은 명조 제목과 한지·먹색·인주색을 공통 언어로 사용한다", () => {
+  assert.match(layout, /Noto_Serif_KR/);
+  assert.match(layout, /variable: "--font-brand"/);
+  assert.match(brandLogo, /<b>한<\/b>/);
+  assert.match(bookJourney, /className="hangul-art/);
+  assert.match(styles, /--seal: #a54432/);
+  assert.match(styles, /현대적인 한국어 편집 디자인/);
+  assert.match(styles, /\.v3-book-stage > \.v3-book-cover \{[^}]*linear-gradient\(90deg, #212a25 0 50%, #f8f3e8 50% 100%\)/s);
+  assert.match(styles, /\.student-dashboard::before \{[^}]*content: "문 장"/s);
+  assert.match(styles, /\.auth-intro::before \{[^}]*writing-mode: vertical-rl/s);
+});
+
 test("상단 메뉴에는 별도 로그인 버튼을 두지 않는다", () => {
   assert.doesNotMatch(layout, /className="nav-button"/);
   assert.doesNotMatch(layout, />로그인<\/Link>/);
