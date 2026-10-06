@@ -12,12 +12,16 @@ export async function runOpenAiAgent(
   const history = request.history.map((item) => `${item.role === "student" ? "학생" : "튜터"}: ${item.content}`).join("\n");
   const input = `
 활동: ${request.activity}
+요청 유형: ${request.supportMode === "hint" ? "AI 힌트 요청" : "도움 없이 답 제출"}
 현재 비계 단계: ${request.scaffoldLevel}
 현재 시도 횟수: ${request.attemptCount}
 최근 대화:\n${history || "없음"}
 학생 입력:\n${request.message}
 
-내부 진단을 확정적 평가처럼 말하지 말고, 학생에게 한 가지 다음 행동만 요청하라.
+${request.supportMode === "hint"
+    ? "정답이나 완성 문장을 주지 말고 현재 단계에 맞는 질문 또는 단서 하나만 제공하라."
+    : "학생이 AI 도움 없이 낸 답을 먼저 진단하고, 정오 판단의 근거를 묻는 다음 행동 하나만 요청하라."}
+내부 진단을 확정적 평가처럼 말하지 말라.
 `;
 
   const result = await client.responses.create({

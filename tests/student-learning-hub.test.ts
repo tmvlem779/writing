@@ -26,6 +26,7 @@ const learnLayout = read("src/app/learn/layout.tsx");
 const learningBookShell = read("src/components/learning-book-shell.tsx");
 const writingStudio = read("src/components/writing-studio.tsx");
 const conceptChapter = read("src/components/concept-chapter.tsx");
+const practiceChapter = read("src/components/practice-chapter.tsx");
 
 test("ver.2 학생 학습 홈과 공통 탭에서는 AI 진단평가를 제외한다", () => {
   for (const [label, href] of [
@@ -88,6 +89,29 @@ test("P3: 스스로 확인하기 질문은 선택지와 같은 카드 안에 표
   assert.match(conceptChapter, /<strong>\{currentCheck\.prompt\}<\/strong>/);
   assert.match(styles, /\.concept-check-legend \{[^}]*position: absolute;[^}]*clip: rect\(0 0 0 0\)/s);
   assert.match(styles, /\.concept-check-question \{[^}]*display: grid;/s);
+});
+
+test("P1·P5: 확인 문제는 세 문항의 최초 정오답을 요약하고 오답을 다시 풀게 한다", () => {
+  assert.match(conceptChapter, /firstAttemptResults/);
+  assert.match(conceptChapter, /1차 결과/);
+  assert.match(conceptChapter, /오답 다시 풀기/);
+  assert.match(conceptChapter, /다음 오답 풀기/);
+  assert.match(conceptChapter, /먼저 세 문항에 모두 답한 뒤 정오답을 확인해요/);
+});
+
+test("P1: 챕터 2는 도움 없이 제출과 AI 힌트를 분리하고 제출 뒤 입력을 비운다", () => {
+  assert.match(practiceChapter, /sendTurn\("submit"\)/);
+  assert.match(practiceChapter, /sendTurn\("hint"\)/);
+  assert.match(practiceChapter, /"AI 힌트"/);
+  assert.match(practiceChapter, /: "제출"/);
+  assert.match(practiceChapter, /if \(supportMode === "submit"\) setDraft\(""\)/);
+  assert.doesNotMatch(practiceChapter, /질문과 힌트 받기/);
+});
+
+test("MOBILE: 핵심 학습 화면과 답 제출 영역은 좁은 화면에서 한 열로 재배치된다", () => {
+  assert.match(styles, /\.concept-header, \.material-header, \.workspace-header \{ display: grid;/);
+  assert.match(styles, /\.editor-actions \{ width: 100%; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+  assert.match(styles, /\.check-result-summary ol \{ grid-template-columns: 1fr;/);
 });
 
 test("스스로 유형 학습 로드맵은 그림과 제목이 겹치지 않도록 방향별 간격을 둔다", () => {

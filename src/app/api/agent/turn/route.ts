@@ -110,7 +110,7 @@ export async function POST(request: Request) {
 
     const cost = estimateTurnCostUsd(result.usage.input, result.usage.output, result.model);
     if (admin && auth.user) {
-      const evidence = deriveLearningEvidence(parsed.data.activity, result.response);
+      const evidence = deriveLearningEvidence(parsed.data.activity, result.response, parsed.data.supportMode);
       const { error: recordError } = await admin.rpc("record_learning_turn", {
         target_user_id: auth.user.id,
         target_session_id: parsed.data.sessionId,

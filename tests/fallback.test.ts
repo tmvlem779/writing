@@ -4,8 +4,14 @@ import { buildFallbackResponse } from "../src/lib/agent/fallback.ts";
 import type { Activity, TurnRequest } from "../src/lib/agent/schema.ts";
 
 function request(activity: Activity, message = "학생이 쓴 문장입니다."): TurnRequest {
-  return { sessionId: "demo-test", activity, message, scaffoldLevel: 0, attemptCount: 0, history: [] };
+  return { sessionId: "demo-test", activity, message, supportMode: "submit", scaffoldLevel: 0, attemptCount: 0, history: [] };
 }
+
+test("P1: 명시적인 힌트 요청은 도움 단계로 처리한다", () => {
+  const result = buildFallbackResponse({ ...request("create"), supportMode: "hint" });
+  assert.ok(result.scaffoldLevel > 0);
+  assert.equal(result.mode, "hint");
+});
 
 test("P2: 문장 만들기에서는 학생이 기본 문장을 먼저 생성한다", () => {
   const result = buildFallbackResponse(request("create"));

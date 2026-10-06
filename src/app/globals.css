@@ -366,6 +366,15 @@ body:has(.v3-home) { background: #10291f; }
 .concept-check-set { margin-top: 28px; }.concept-check-set > header { display: flex; justify-content: space-between; gap: 16px; align-items: center; }.concept-check-set > header span { color: var(--orange); font-size: 12px; font-weight: 800; letter-spacing: .08em; }.concept-check-set > header strong { color: var(--green); font-size: 12px; }
 .concept-check-set .concept-check { margin-top: 12px; }
 .check-sequence-guide { margin: 10px 0 0; color: var(--muted); font-size: 12px; }.concept-check { min-width: 0; }.concept-check-legend { width: 1px; height: 1px; padding: 0; margin: -1px; position: absolute; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }.concept-check-question { display: grid; gap: 6px; }.concept-check-question > span { color: var(--orange); font-size: 11px; font-weight: 800; letter-spacing: .08em; }.concept-check-question > strong { font-size: 18px; font-weight: 800; line-height: 1.55; }.check-options { display: grid; gap: 9px; margin-top: 20px; }.check-option { padding: 14px 16px; border: 1px solid var(--line); border-radius: 11px; background: white; color: var(--ink); cursor: pointer; text-align: left; }.check-option:hover { border-color: var(--green); }.check-option.selected { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); background: #f0f6ef; font-weight: 750; }.check-option:disabled { cursor: default; }.check-option:disabled:not(.selected) { opacity: .62; }.check-feedback { margin-top: 16px; padding: 16px 18px; border-radius: 12px; }.check-feedback.correct { background: #e3edde; color: var(--green-dark); }.check-feedback.retry { background: #fff1dd; color: #734419; }.check-feedback p { margin: 5px 0; }.check-feedback small { display: block; color: inherit; opacity: .82; }.check-next-row { display: flex; justify-content: flex-end; margin-top: 16px; }.check-complete-message { margin: 16px 0 0; color: var(--green); font-weight: 800; }
+.check-submit-row { display: flex; justify-content: flex-end; margin-top: 16px; }
+.check-result-summary { margin-top: 14px; padding: 18px; display: grid; gap: 14px; border: 1px solid #cbd5ca; border-radius: 14px; background: #f7f7f2; }
+.check-result-summary > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.check-result-summary > div span { color: var(--orange); font-size: 11px; font-weight: 800; letter-spacing: .06em; }
+.check-result-summary > div strong { color: var(--green-dark); }
+.check-result-summary ol { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; list-style: none; }
+.check-result-summary li { padding: 11px 12px; display: flex; justify-content: space-between; gap: 8px; border-radius: 10px; background: #e9eee8; font-size: 12px; }
+.check-result-summary li.correct strong { color: #28623c; }.check-result-summary li.incorrect { background: #fff0e8; }.check-result-summary li.incorrect strong { color: #a33f2c; }
+.check-result-summary > button { justify-self: end; }
 .concept-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 28px; }.chapter-lock-message { margin: 0; align-self: center; color: var(--muted); font-size: 12px; }.concept-progress { padding: 42px 24px; border-left: 1px solid var(--line); background: #e6e5dd; }.concept-progress h2 { margin: 6px 0 20px; font-size: 20px; }.progress-ring { width: 98px; height: 98px; display: grid; place-items: center; margin-bottom: 26px; border: 10px solid #cdd6cc; border-top-color: var(--green); border-radius: 50%; background: var(--surface); }.progress-ring strong { color: var(--green); font: 700 22px/1 serif; }.concept-progress ol { list-style: none; margin: 0; padding: 0; }.concept-progress li { display: grid; grid-template-columns: 42px 1fr; gap: 8px; padding: 11px 0; border-bottom: 1px solid #ccd0c8; color: var(--muted); font-size: 12px; }.concept-progress li span { color: var(--orange); font: 700 11px/1.7 serif; }.concept-progress li.done { color: var(--ink); font-weight: 750; }.concept-progress li.done span { color: var(--green); }.source-note { margin-top: 24px; color: var(--muted); font-size: 11px; line-height: 1.7; }
 
 .material-sidebar { padding: 30px 18px; background: #263f38; color: white; }.material-button { width: 100%; padding: 13px 12px; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px; align-items: center; border: 0; border-radius: 10px; background: transparent; color: rgba(255,255,255,.68); cursor: pointer; text-align: left; }.material-button > span:first-child { color: #f3b98e; font: 700 12px/1.7 serif; }.material-button i { color: var(--lime); font-style: normal; }.material-button.active { background: rgba(255,255,255,.1); color: white; font-weight: 800; }
@@ -382,7 +391,9 @@ body:has(.v3-home) { background: #10291f; }
 .workspace { width: min(820px, 100%); padding: 52px clamp(24px,5vw,68px) 80px; margin: 0 auto; }.workspace-header { display: flex; justify-content: space-between; align-items: start; }.workspace h1 { font-size: 36px; margin: 8px 0 30px; letter-spacing: -.045em; }.demo-badge { font-size: 11px; font-weight: 800; padding: 6px 10px; border-radius: 99px; background: #fff0d5; color: #8b4a1d; }
 .task-card { padding: 20px 22px; border-left: 4px solid var(--orange); background: var(--surface); border-radius: 0 14px 14px 0; box-shadow: 0 8px 30px rgba(30,50,40,.05); }.task-card p { margin: 5px 0 0; font-weight: 700; }
 .draft-label { display: block; margin: 32px 0 9px; font-size: 13px; font-weight: 800; }.workspace textarea { width: 100%; min-height: 220px; resize: vertical; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); line-height: 1.9; box-shadow: inset 0 1px 2px rgba(0,0,0,.02); }.workspace textarea:focus { border-color: var(--green); outline: 3px solid rgba(36,91,67,.1); }
-.editor-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }.editor-footer > span { color: var(--muted); font-size: 12px; }
+.editor-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 12px; }.editor-footer > span { color: var(--muted); font-size: 12px; }
+.editor-actions { display: grid; grid-template-columns: auto auto; gap: 9px; }
+.editor-actions button { min-width: 104px; }
 .error-panel { margin-top: 18px; padding: 14px 16px; background: #fde5df; color: #8b2d1e; border-radius: 10px; }
 .coach-card { margin-top: 28px; padding: 26px; background: #e3edde; border: 1px solid #c8dbc9; border-radius: 18px; }.coach-label { display: flex; justify-content: space-between; color: var(--green); font-size: 12px; font-weight: 800; }.coach-label small { font-weight: 700; }.coach-card > p { margin: 16px 0; }.coach-question { display: grid; gap: 5px; padding: 16px; background: rgba(255,255,255,.7); border-radius: 12px; }.coach-question span { font-size: 11px; color: var(--orange); font-weight: 800; }.coach-question strong { line-height: 1.65; }.concept-tags { display: flex; gap: 7px; margin-top: 14px; flex-wrap: wrap; }.concept-tags span { background: transparent; }
 .evidence-panel { padding: 42px 24px; background: #e6e5dd; border-left: 1px solid var(--line); }.evidence-panel h2 { margin: 6px 0 26px; font-size: 20px; }.evidence-panel dl { margin: 0; }.evidence-panel dl div { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid #ccd0c8; }.evidence-panel dt { color: var(--muted); font-size: 12px; }.evidence-panel dd { margin: 0; font-weight: 800; }.evidence-panel p { margin-top: 24px; font-size: 12px; color: var(--muted); }
@@ -2162,4 +2173,83 @@ body *::after {
     top: 76px;
     opacity: .035;
   }
+}
+
+/* 좁은 화면 안정화: 학습 카드와 교사 현황이 360px에서도 가로로 밀리지 않게 한다. */
+@media (max-width: 720px) {
+  html, body { max-width: 100%; overflow-x: clip; }
+  .learning-book-shell,
+  .student-activity-page,
+  .student-learning-nav,
+  .course-map,
+  .course-map-feature,
+  .course-map-index,
+  .chapter-switcher,
+  .concept-shell,
+  .studio-shell,
+  .authentic-shell,
+  .concept-workspace,
+  .workspace,
+  .material-workspace,
+  .teacher-shell,
+  .teacher-card { width: 100%; max-width: 100%; min-width: 0; }
+
+  .student-learning-nav .student-learning-tabs { width: 100%; max-width: 100%; }
+  .student-learning-nav .student-learning-tabs a { flex: 0 0 142px; min-width: 0; }
+  .student-learning-home { display: inline-flex; max-width: 100%; }
+
+  .course-map-feature > header { min-height: 270px; }
+  .course-map .lesson-tab { min-width: 0; padding: 14px 12px; grid-template-columns: 24px minmax(0, 1fr); }
+  .course-map .lesson-tab strong,
+  .lesson-activity-summary li { overflow-wrap: anywhere; }
+  .chapter-switcher, .chapter-switcher.two-chapters { width: 100%; max-width: 100vw; }
+  .chapter-tab { flex: 0 0 152px; min-width: 0; }
+
+  .concept-workspace, .workspace, .material-workspace { padding: 28px 16px 64px; }
+  .concept-header, .material-header, .workspace-header { display: grid; gap: 10px; }
+  .concept-header > div, .material-header > div, .workspace-header > div { min-width: 0; }
+  .concept-count { min-width: 0; justify-self: start; }
+  .workspace h1, .concept-header h1, .material-header h1 { font-size: clamp(25px, 8vw, 30px); overflow-wrap: anywhere; }
+  .lesson-question-card, .task-card, .coach-card, .coach-question,
+  .inquiry-card, .concept-summary-card, .concept-check,
+  .real-material-card, .analysis-guide, .summary-notebook { min-width: 0; padding: 18px 16px; overflow-wrap: anywhere; }
+  .concept-check-set > header { align-items: flex-start; flex-wrap: wrap; }
+  .concept-check-question > strong { font-size: 16px; }
+  .check-option { width: 100%; white-space: normal; overflow-wrap: anywhere; }
+  .check-submit-row, .check-next-row { display: grid; }
+  .check-submit-row button, .check-next-row button { width: 100%; }
+  .check-result-summary { padding: 14px; }
+  .check-result-summary > div { align-items: flex-start; }
+  .check-result-summary ol { grid-template-columns: 1fr; }
+  .check-result-summary > button { width: 100%; justify-self: stretch; }
+  .concept-actions { display: grid; }
+  .concept-actions .primary-button { width: 100%; }
+
+  .workspace textarea, .real-life-practice textarea, .literature-followup-panel textarea { width: 100%; max-width: 100%; min-width: 0; }
+  .editor-footer { display: grid; align-items: stretch; }
+  .editor-actions { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .editor-actions button { width: 100%; min-width: 0; padding-inline: 10px; }
+  .coach-label { flex-wrap: wrap; }
+  .concept-tags { max-width: 100%; }
+  .concept-tags span { max-width: 100%; overflow-wrap: anywhere; }
+
+  .teacher-shell { padding: 38px 16px 64px; }
+  .teacher-header h1 { font-size: clamp(34px, 11vw, 44px); }
+  .teacher-card, .student-monitor-panel, .student-area-summary, .student-blocker-diagnosis { padding: 16px; }
+  .student-account-heading { align-items: flex-start; padding: 16px; }
+  .student-account-list li { grid-template-columns: 28px minmax(0, 1fr); }
+  .student-account-status, .student-account-list time { grid-column: 2; justify-self: start; text-align: left; }
+  .student-monitor-tabs, .student-area-tabs { width: 100%; max-width: 100%; }
+  .student-area-tabs button { flex: 0 0 148px; min-width: 0; }
+  .student-area-summary > div { align-items: flex-start; }
+}
+
+@media (max-width: 420px) {
+  .course-map .lesson-switcher,
+  .course-map .lesson-switcher.six-lessons { grid-template-columns: 1fr; }
+  .course-map .lesson-tab, .course-map .lesson-tab:nth-child(n + 4), .course-map .lesson-tab:nth-child(n + 5) { border-bottom: 1px solid #d8d1c5; }
+  .course-map .lesson-tab:last-child { border-bottom: 0; }
+  .dashboard-progress dl, .diagnostic-domain-grid { grid-template-columns: 1fr; }
+  .editor-actions { grid-template-columns: 1fr; }
+  .check-result-summary > div, .student-account-heading { display: grid; }
 }

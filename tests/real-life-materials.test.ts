@@ -79,6 +79,7 @@ test("P6: 실생활 자료 활동은 서버 입력 스키마와 비계 응답에
     sessionId: "demo-session",
     activity: "authentic",
     message: "기사의 첫 문장은 원인과 결과가 연결되어 있습니다.",
+    supportMode: "submit",
     scaffoldLevel: 0,
     attemptCount: 0,
     history: []
@@ -92,6 +93,7 @@ test("P3·P5: 소설 전체 문장 표시는 짧은 확인 뒤 다음 문장으�
     sessionId: "demo-session",
     activity: "authentic",
     message: "[첫 과제] 작품의 모든 문장을 차례로 살펴보고, 문장 구조의 단서에 밑줄을 그으시오.\n[학생이 문장 안에서 밑줄 친 연결 표현] 올라서려니까\n[학생이 고른 문장 구조] 둘 이상의 내용\n[학생 답] 산에 올라가려는 일과 닭 우는 소리를 담고 있다.",
+    supportMode: "submit",
     scaffoldLevel: 0,
     attemptCount: 0,
     history: []
@@ -107,6 +109,7 @@ test("P3·P4: 시의 선택은 문법 형태와 표현 효과 질문으로 이�
     sessionId: "demo-session",
     activity: "authentic",
     message: "[첫 과제] 시에서 표현 효과를 만드는 문법 요소가 드러난 구절을 고르시오.\n[학생이 문법 요소 탐구 구절로 고른 부분]\n1. 죽어도 아니 눈물 흘리오리다.",
+    supportMode: "submit",
     scaffoldLevel: 0,
     attemptCount: 0,
     history: []

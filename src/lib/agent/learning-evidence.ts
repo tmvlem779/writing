@@ -1,4 +1,4 @@
-import type { Activity, AgentResponse } from "./schema";
+import type { Activity, AgentResponse, TurnRequest } from "./schema";
 
 export type LearningEvidence = {
   conceptCode: Activity;
@@ -7,9 +7,13 @@ export type LearningEvidence = {
   eventType: "attempt" | "independent_success" | "scaffolded_success";
 };
 
-export function deriveLearningEvidence(activity: Activity, response: AgentResponse): LearningEvidence {
+export function deriveLearningEvidence(
+  activity: Activity,
+  response: AgentResponse,
+  supportMode: TurnRequest["supportMode"] = "submit"
+): LearningEvidence {
   const hasMasteryEvidence = response.masteryEvidence.length > 0;
-  const independentSuccess = hasMasteryEvidence && response.scaffoldLevel === 0;
+  const independentSuccess = hasMasteryEvidence && response.scaffoldLevel === 0 && supportMode === "submit";
 
   return {
     conceptCode: activity,

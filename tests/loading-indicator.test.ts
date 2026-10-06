@@ -11,11 +11,12 @@ test("AI 요청 중에는 버튼 안에 문득문득 네 글자 로딩 상태를
   assert.match(loader, /role="status"/);
   assert.match(loader, /aria-live="polite"/);
   assert.doesNotMatch(loader, /mondeuk-loading-message/);
-  assert.match(practice, /pending \? <MondeukLoading compact \/>/);
+  assert.match(practice, /pendingAction === "hint" \? <MondeukLoading compact \/>/);
+  assert.match(practice, /pendingAction === "submit" \? <MondeukLoading compact \/>/);
   assert.match(realLife, /pending \? <MondeukLoading compact/);
   assert.doesNotMatch(practice, /pending && <MondeukLoading \/>/);
   assert.doesNotMatch(realLife, /pending && <MondeukLoading \/>/);
-  assert.match(practice, /aria-busy=\{pending\}/);
+  assert.match(practice, /aria-busy=\{pendingAction !== null\}/);
   assert.match(realLife, /aria-busy=\{pending\}/);
 });
 

@@ -7,6 +7,7 @@ import { scaffoldLabel } from "@/lib/agent/state-machine";
 import { getCourseLesson, getCourseTrack, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 
 type Message = { role: "student" | "assistant"; content: string };
+type SupportMode = "submit" | "hint";
 
 type PracticeChapterProps = {
   lessonNumber: CourseLessonNumber;
@@ -24,7 +25,8 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
   const [history, setHistory] = useState<Message[]>([]);
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
-  const [pending, setPending] = useState(false);
+  const [hintCount, setHintCount] = useState(0);
+  const [pendingAction, setPendingAction] = useState<SupportMode | null>(null);
   const [error, setError] = useState("");
   const [demo, setDemo] = useState(false);
 
@@ -44,19 +46,22 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
     return body.id as string;
   }
 
-  async function submit() {
-    if (!draft.trim() || pending) return;
-    setPending(true);
+  async function sendTurn(supportMode: SupportMode) {
+    if ((supportMode === "submit" && !draft.trim()) || pendingAction) return;
+    setPendingAction(supportMode);
     setError("");
     try {
       const id = await ensureSession();
+      const submittedDraft = draft.trim();
       const studentMessage = [
         `[수업안] ${track.optionLabel} · ${track.title}`,
         `[수업 차시] ${lessonNumber}차시 · ${lesson.title}`,
         `[핵심 질문] ${lesson.keyQuestion}`,
         `[현재 과제] ${selected.prompt}`,
-        `[학생 답]\n${draft}`
+        `[요청 유형] ${supportMode === "hint" ? "AI 힌트" : "도움 없이 제출"}`,
+        `[학생 답]\n${submittedDraft || "아직 답을 쓰지 않았습니다."}`
       ].join("\n\n");
+      const requestedScaffoldLevel = supportMode === "hint" ? Math.min(4, scaffoldLevel + 1) : scaffoldLevel;
       const result = await fetch("/api/agent/turn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,7 +69,8 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
           sessionId: id,
           activity: selected.activity,
           message: studentMessage,
-          scaffoldLevel,
+          supportMode,
+          scaffoldLevel: requestedScaffoldLevel,
           attemptCount,
           history: history.slice(-6)
         })
@@ -75,16 +81,18 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
       setResponse(next);
       setDemo((current) => current || Boolean(next.demo));
       setScaffoldLevel(next.scaffoldLevel);
-      setAttemptCount((count) => count + 1);
+      if (supportMode === "submit") setAttemptCount((count) => count + 1);
+      if (supportMode === "hint") setHintCount((count) => count + 1);
       setHistory((items) => [
         ...items,
-        { role: "student", content: draft },
+        { role: "student", content: supportMode === "hint" ? `힌트 요청: ${submittedDraft || "작성 전"}` : submittedDraft },
         { role: "assistant", content: `${next.studentMessage} ${next.question}` }
       ]);
+      if (supportMode === "submit") setDraft("");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "문제가 생겼습니다.");
     } finally {
-      setPending(false);
+      setPendingAction(null);
     }
   }
 
@@ -94,6 +102,7 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
     setSessionId(null);
     setHistory([]);
     setAttemptCount(0);
+    setHintCount(0);
     setScaffoldLevel(0);
     setDraft("");
   }
@@ -126,7 +135,7 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
         </div>
       </aside>
 
-      <section className="workspace" aria-busy={pending} aria-labelledby="workspace-title">
+      <section className="workspace" aria-busy={pendingAction !== null} aria-labelledby="workspace-title">
         <header className="workspace-header">
           <div>
             <span className="eyebrow">{lessonNumber}차시 · {selected.label}</span>
@@ -163,6 +172,7 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
 
         <label className="draft-label" htmlFor="student-draft">내 문장과 생각</label>
         <textarea
+          key={activityId}
           id="student-draft"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
@@ -171,9 +181,26 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
         />
         <div className="editor-footer">
           <span>{draft.length.toLocaleString()} / 4,000자</span>
-          <button aria-busy={pending} className="primary-button" onClick={submit} disabled={pending || !draft.trim()} type="button">
-            {pending ? <MondeukLoading compact /> : "질문과 힌트 받기"}
-          </button>
+          <div className="editor-actions" aria-label="답 제출과 도움 선택">
+            <button
+              aria-busy={pendingAction === "hint"}
+              className="secondary-button hint-button"
+              disabled={pendingAction !== null}
+              onClick={() => sendTurn("hint")}
+              type="button"
+            >
+              {pendingAction === "hint" ? <MondeukLoading compact /> : "AI 힌트"}
+            </button>
+            <button
+              aria-busy={pendingAction === "submit"}
+              className="primary-button"
+              disabled={pendingAction !== null || !draft.trim()}
+              onClick={() => sendTurn("submit")}
+              type="button"
+            >
+              {pendingAction === "submit" ? <MondeukLoading compact /> : "제출"}
+            </button>
+          </div>
         </div>
 
         {error && <div className="error-panel" role="alert">{error}</div>}
@@ -184,6 +211,7 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
         <h2>내가 해낸 과정</h2>
         <dl>
           <div><dt>시도 횟수</dt><dd>{attemptCount}</dd></div>
+          <div><dt>AI 힌트</dt><dd>{hintCount}</dd></div>
           <div><dt>현재 도움</dt><dd>{scaffoldLevel + 1}/5</dd></div>
           <div><dt>대화 기록</dt><dd>{Math.floor(history.length / 2)}</dd></div>
         </dl>

@@ -30,6 +30,16 @@ test("P1: 비계를 사용한 성취는 독립 성공과 구분한다", () => {
   assert.equal(evidence.eventType, "scaffolded_success");
 });
 
+test("P1: 힌트를 요청한 뒤의 성취는 0단계 응답이어도 독립 성공으로 기록하지 않는다", () => {
+  const evidence = deriveLearningEvidence(
+    "expand",
+    response({ scaffoldLevel: 0, masteryEvidence: ["문장 구조를 설명함"] }),
+    "hint"
+  );
+  assert.equal(evidence.independentSuccess, false);
+  assert.equal(evidence.eventType, "scaffolded_success");
+});
+
 test("P1: 성취 근거가 없으면 시도로 기록한다", () => {
   assert.equal(deriveLearningEvidence("error", response()).eventType, "attempt");
 });

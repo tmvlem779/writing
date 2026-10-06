@@ -24,7 +24,7 @@ const nextActions = {
 } as const;
 
 export function buildFallbackResponse(request: TurnRequest): AgentResponse {
-  const asksForHelp = /(모르|도와|힌트|어려)/.test(request.message);
+  const asksForHelp = request.supportMode === "hint" || /(모르|도와|힌트|어려)/.test(request.message);
   const isPoetryGrammarSelection = request.activity === "authentic"
     && /\[첫 과제\] 시에서 표현 효과를 만드는 문법 요소가 드러난 구절을 고르시오/.test(request.message);
   const isNovelSentenceMarking = request.activity === "authentic"

@@ -15,6 +15,7 @@ export const turnRequestSchema = z.object({
   sessionId: z.string().min(1).max(100),
   activity: activitySchema,
   message: z.string().trim().min(1).max(4000),
+  supportMode: z.enum(["submit", "hint"]).default("submit"),
   scaffoldLevel: z.number().int().min(0).max(4).default(0),
   attemptCount: z.number().int().min(0).max(20).default(0),
   history: z
