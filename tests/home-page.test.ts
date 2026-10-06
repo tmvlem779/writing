@@ -78,7 +78,8 @@ test("한국어 편집 디자인은 산세리프 제목과 서로 다른 장면 
   assert.match(styles, /--stage-left: #cbd9ce/);
   assert.match(styles, /--stage-left: #e5ceb8/);
   assert.match(styles, /\.v3-book-stage > \.v3-book-cover \{[^}]*linear-gradient\(90deg, #212a25 0 50%, #f8f3e8 50% 100%\)/s);
-  assert.match(styles, /\.student-dashboard::before \{[^}]*content: "문 장"/s);
+  assert.match(styles, /\.student-dashboard::before \{[^}]*hunminjeongeum-glyphs\.png/s);
+  assert.match(styles, /\.student-dashboard-card\.dashboard-card-1::before \{[^}]*content: none;[^}]*display: none;/s);
   assert.match(styles, /\.auth-intro::before \{[^}]*writing-mode: vertical-rl/s);
 });
 

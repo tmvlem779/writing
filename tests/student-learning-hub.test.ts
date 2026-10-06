@@ -174,6 +174,16 @@ test("학생 학습 정보 구조는 비대칭 홈과 번호형 상단 탭, 편�
   assert.match(nav, /note: "배우기"/);
   assert.match(writingStudio, /course-map-feature/);
   assert.match(writingStudio, /course-feature-art/);
+  assert.match(writingStudio, /오늘의<br \/>챌린지/);
+  assert.match(writingStudio, /\{lessonNumber\} \/ \{courseLessons\.length\}/);
+  assert.match(writingStudio, /1: "기본"/);
+  assert.match(writingStudio, /2: "연결"/);
+  assert.match(writingStudio, /3: "확장"/);
+  assert.match(writingStudio, /4: "표현"/);
+  assert.match(writingStudio, /5: "변형"/);
+  assert.match(writingStudio, /6: "활용"/);
+  assert.match(writingStudio, /<strong>핵심 질문<\/strong>/);
+  assert.doesNotMatch(writingStudio, /<strong>\{lessonNumber\}차시 핵심 질문<\/strong>/);
   assert.match(writingStudio, /course-map-index/);
   assert.match(styles, /--blue: #405965/);
   assert.match(styles, /--plum: #6f5664/);

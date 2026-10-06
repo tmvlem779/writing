@@ -2135,3 +2135,30 @@ body *::after {
     opacity: .035;
   }
 }
+
+/* 최종 우선순위: 홈의 기존 '문장' 워터마크를 훈민정음 자형으로 완전히 교체 */
+.learning-book-shell:has(> .student-dashboard)::before { display: none; }
+.student-dashboard::before {
+  content: "";
+  width: min(38vw, 510px);
+  height: min(70vh, 680px);
+  right: -4%;
+  top: 86px;
+  z-index: 0;
+  background: url("/images/hunminjeongeum-glyphs.png") right top / contain no-repeat;
+  opacity: .045;
+  filter: blur(.3px);
+  writing-mode: initial;
+}
+.student-dashboard-card.dashboard-card-1::before { content: none; display: none; }
+.course-feature-art > strong { letter-spacing: .08em; }
+
+@media (max-width: 720px) {
+  .student-dashboard::before {
+    width: 76vw;
+    height: 520px;
+    right: -24%;
+    top: 76px;
+    opacity: .035;
+  }
+}

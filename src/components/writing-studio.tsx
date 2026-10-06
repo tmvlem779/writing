@@ -7,19 +7,26 @@ import { RealLifeChapter } from "@/components/real-life-chapter";
 import {
   getCourseLesson,
   getCourseLessons,
-  getCourseTrack,
   type CourseLessonNumber,
   type CourseTrackId
 } from "@/lib/curriculum/five-lesson-course";
 
 type Chapter = "concept" | "practice" | "real-life";
 
+const lessonKeywords: Record<CourseLessonNumber, string> = {
+  1: "기본",
+  2: "연결",
+  3: "확장",
+  4: "표현",
+  5: "변형",
+  6: "활용"
+};
+
 export function WritingStudio() {
   const trackId: CourseTrackId = "grammar";
   const [lessonNumber, setLessonNumber] = useState<CourseLessonNumber>(1);
   const [chapter, setChapter] = useState<Chapter>("concept");
   const [completedConcepts, setCompletedConcepts] = useState<Set<string>>(new Set());
-  const track = getCourseTrack(trackId);
   const courseLessons = getCourseLessons(trackId);
   const lesson = getCourseLesson(lessonNumber, trackId);
   const hasRealLifeChapter = lesson.realLifeMaterialIds.length > 0;
@@ -48,17 +55,17 @@ export function WritingStudio() {
       <section className="course-map" aria-labelledby="course-map-title">
         <div className="course-map-feature">
           <header>
-            <span>{track.optionLabel} · 총 {courseLessons.length}차시</span>
-            <h1 id="course-map-title">{track.title}<br />수업안</h1>
+            <span>{lessonNumber} / {courseLessons.length}</span>
+            <h1 id="course-map-title">오늘의<br />챌린지</h1>
             <p>문장의 구조를 읽고, 표시하고, 직접 쓰는 여섯 번의 탐구</p>
           </header>
           <div className="course-feature-art" aria-hidden="true">
             <span>{String(lessonNumber).padStart(2, "0")}</span>
-            <strong>문장</strong>
+            <strong>{lessonKeywords[lessonNumber]}</strong>
             <i>語</i>
           </div>
           <p className="course-key-question">
-            <strong>{lessonNumber}차시 핵심 질문</strong>
+            <strong>핵심 질문</strong>
             {lesson.keyQuestion}
           </p>
         </div>
