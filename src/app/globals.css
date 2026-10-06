@@ -2053,3 +2053,85 @@ h1, h2, h3,
   }
   .chapter-tab { min-width: 176px; }
 }
+
+/* 문득문득 ver.3.7: 산세리프 통일, 장면별 색상, 훈민정음 자형 배경 */
+:root { --font-brand: var(--font-body); }
+
+body,
+body *,
+body *::before,
+body *::after {
+  font-family: var(--font-body), "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif !important;
+}
+
+/* 로그인 전 책의 2~5장은 색만 보아도 현재 장면을 구분할 수 있게 한다. */
+.v3-book-journey.story-step-1 { --stage-left: #c9dbe4; --stage-right: #edf3f5; --stage-accent: #426d80; }
+.v3-book-journey.story-step-2 { --stage-left: #ddd0df; --stage-right: #f3edf3; --stage-accent: #745b78; }
+.v3-book-journey.story-step-3 { --stage-left: #cbd9ce; --stage-right: #eef3ec; --stage-accent: #55715e; }
+.v3-book-journey.story-step-4 { --stage-left: #e5ceb8; --stage-right: #faeee3; --stage-accent: #9a654c; }
+
+.story-step-1 .v3-page-left,
+.story-step-2 .v3-page-left,
+.story-step-3 .v3-page-left,
+.story-step-4 .v3-page-left {
+  background:
+    radial-gradient(circle at 20% 22%, rgba(46,54,50,.035) 0 1px, transparent 1.5px),
+    linear-gradient(140deg, color-mix(in srgb, var(--stage-left), white 12%), var(--stage-left));
+}
+
+.story-step-1 .v3-page-right,
+.story-step-2 .v3-page-right,
+.story-step-3 .v3-page-right,
+.story-step-4 .v3-page-right {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 33px, rgba(55,49,40,.032) 34px),
+    linear-gradient(145deg, color-mix(in srgb, var(--stage-right), white 18%), var(--stage-right));
+}
+
+.v3-scroll-sheet-front {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(55,72,62,.04) 32px),
+    linear-gradient(90deg, color-mix(in srgb, var(--stage-right), #c8bda4 22%), var(--stage-right) 14%, var(--stage-right) 92%);
+}
+.v3-scroll-sheet-back {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(55,72,62,.04) 32px),
+    linear-gradient(270deg, color-mix(in srgb, var(--stage-left), #b6aa90 24%), var(--stage-left) 14%, var(--stage-left) 92%);
+}
+
+/* 로그인 뒤에는 탭 전환 모션 대신 조용한 한글 자형 배경을 유지한다. */
+.learning-book-shell {
+  min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: #ece8df;
+}
+.learning-book-shell::before {
+  content: "";
+  position: fixed;
+  inset: 112px 3vw 0 auto;
+  z-index: 0;
+  width: min(42vw, 570px);
+  background: url("/images/hunminjeongeum-glyphs.png") right top / contain no-repeat;
+  opacity: .045;
+  filter: blur(.35px);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.learning-book-shell > * { position: relative; z-index: 1; }
+.learning-book-shell > .student-dashboard {
+  background:
+    linear-gradient(90deg, rgba(165,82,61,.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(248,245,237,.92), rgba(239,235,225,.9));
+}
+.learning-book-shell > .student-activity-page { background: rgba(241,237,228,.91); }
+.book-turn-transition { display: none !important; }
+
+@media (max-width: 720px) {
+  .learning-book-shell::before {
+    inset: 92px -12vw 0 auto;
+    width: 78vw;
+    opacity: .035;
+  }
+}

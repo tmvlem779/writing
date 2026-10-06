@@ -80,16 +80,11 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 매�
   assert.match(selfStudyPage, /하루 한 걸음, 문법 감각을 이어 가요/);
 });
 
-test("학생 학습 탭은 앞뒤 순서에 따라 오른쪽 또는 왼쪽 책장을 넘긴다", () => {
+test("학생 학습 탭은 별도 책장 애니메이션 없이 즉시 이동한다", () => {
   assert.match(learnLayout, /LearningBookShell/);
-  assert.match(nav, /useBookTurn/);
-  assert.match(nav, /turnTo\(href, label\)/);
-  assert.match(learningBookShell, /targetIndex > fromIndex \? "forward" : "backward"/);
-  assert.match(learningBookShell, /prefers-reduced-motion: reduce/);
-  assert.match(styles, /@keyframes book-turn-forward/);
-  assert.match(styles, /@keyframes book-turn-backward/);
-  assert.match(styles, /\.direction-forward \.book-turn-sheet/);
-  assert.match(styles, /\.direction-backward \.book-turn-sheet/);
+  assert.match(learningBookShell, /className="learning-book-shell"/);
+  assert.doesNotMatch(nav, /useBookTurn|turnTo\(/);
+  assert.doesNotMatch(learningBookShell, /book-turn-transition|rotateY|setTimeout/);
 });
 
 test("P1·P3·P5: 개념학습은 첫 답 뒤 오답에만 단서를 주고 정답을 찾으면 하루 학습을 완료한다", () => {
@@ -159,8 +154,8 @@ test("P3·P4: 시는 문법 요소를 고르고 소설은 모든 문장에 직�
   assert.match(agentTurnApi, /removeTrustedCurriculumPassages/);
 });
 
-test("학생 홈은 한국어 명조 브랜드 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {
-  assert.match(layout, /Noto_Serif_KR/);
+test("학생 홈은 산세리프 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {
+  assert.doesNotMatch(layout, /Noto_Serif_KR/);
   assert.match(layout, /Noto_Sans_KR/);
   assert.match(dashboard, /스스로 해결한 유형/);
   assert.match(dashboard, /도움이 필요한 영역/);
@@ -168,6 +163,7 @@ test("학생 홈은 한국어 명조 브랜드 글꼴과 실제 데이터 기반
   assert.match(dashboard, /추천 다음 활동/);
   assert.match(dashboard, /scaffoldLabel/);
   assert.match(styles, /learning-status-list/);
+  assert.match(styles, /hunminjeongeum-glyphs\.png/);
 });
 
 test("학생 학습 정보 구조는 비대칭 홈과 번호형 상단 탭, 편집형 차시 목차를 사용한다", () => {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 import { BrandLogo } from "@/components/brand-logo";
 import { PasswordSetupSessionRedirect } from "@/components/password-setup-session-redirect";
 import "./globals.css";
@@ -11,13 +11,6 @@ const bodyFont = Noto_Sans_KR({
   variable: "--font-body"
 });
 
-const brandFont = Noto_Serif_KR({
-  weight: ["500", "700", "900"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-brand"
-});
-
 export const metadata: Metadata = {
   title: "문득문득 | 문장 구조와 확장",
   description: "고등학생을 위한 문장 구조와 확장 AI 글쓰기 도우미"
@@ -25,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" data-scroll-behavior="smooth" className={`${bodyFont.variable} ${brandFont.variable}`}>
+    <html lang="ko" data-scroll-behavior="smooth" className={bodyFont.variable}>
       <body>
         <PasswordSetupSessionRedirect />
         <header className="site-header">
