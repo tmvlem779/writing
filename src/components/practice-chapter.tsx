@@ -10,7 +10,10 @@ type Message = { role: "student" | "assistant"; content: string };
 type SupportMode = "submit" | "hint";
 
 type PracticeChapterProps = {
+  initialActivityId?: string | null;
+  initialCompletedActivityIds?: string[];
   lessonNumber: CourseLessonNumber;
+  onProgressChange?: (completedActivityIds: string[], activeActivityId: string) => void;
   trackId: CourseTrackId;
 };
 
@@ -29,18 +32,28 @@ function criterionForActivity(activity: Activity) {
   return completionCriteria[activity];
 }
 
-export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps) {
+export function PracticeChapter({
+  initialActivityId,
+  initialCompletedActivityIds = [],
+  lessonNumber,
+  onProgressChange,
+  trackId
+}: PracticeChapterProps) {
   const lesson = getCourseLesson(lessonNumber, trackId);
   const track = getCourseTrack(trackId);
   const activities = lesson.practiceActivities;
-  const [activityId, setActivityId] = useState(activities[0].id);
+  const [activityId, setActivityId] = useState(() => (
+    activities.some((item) => item.id === initialActivityId) ? initialActivityId as string : activities[0].id
+  ));
   const [draft, setDraft] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [response, setResponse] = useState<AgentResponse | null>(null);
   const [history, setHistory] = useState<Message[]>([]);
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
-  const [completedActivityIds, setCompletedActivityIds] = useState<string[]>([]);
+  const [completedActivityIds, setCompletedActivityIds] = useState<string[]>(() => (
+    initialCompletedActivityIds.filter((id) => activities.some((item) => item.id === id))
+  ));
   const [pendingAction, setPendingAction] = useState<SupportMode | null>(null);
   const [error, setError] = useState("");
   const [demo, setDemo] = useState(false);
@@ -99,7 +112,11 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
       setScaffoldLevel(next.scaffoldLevel);
       if (supportMode === "submit") setAttemptCount((count) => count + 1);
       if (next.activityComplete) {
-        setCompletedActivityIds((items) => items.includes(selected.id) ? items : [...items, selected.id]);
+        const nextCompleted = completedActivityIds.includes(selected.id)
+          ? completedActivityIds
+          : [...completedActivityIds, selected.id];
+        setCompletedActivityIds(nextCompleted);
+        onProgressChange?.(nextCompleted, selected.id);
       }
       setHistory((items) => [
         ...items,
@@ -122,6 +139,7 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
     setAttemptCount(0);
     setScaffoldLevel(0);
     setDraft("");
+    onProgressChange?.(completedActivityIds, nextId);
   }
 
   return (
@@ -167,7 +185,7 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
         {response && (
           <article className="coach-card" aria-live="polite">
             <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
-            <p>{response.studentMessage}</p>
+            {!response.activityComplete && <p>{response.studentMessage}</p>}
             {response.activityComplete ? (
               <div className="activity-completion-card">
                 <span>활동 완료</span>

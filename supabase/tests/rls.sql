@@ -47,6 +47,8 @@ insert into public.learning_events (session_id, user_id, event_type, concept_cod
 values ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '33333333-3333-3333-3333-333333333333', 'attempt', 'diagnose');
 insert into public.wrong_answers (user_id, source, source_label, problem_id, problem_title, question, submitted_answer, feedback_hint)
 values ('33333333-3333-3333-3333-333333333333', 'diagnosis', 'AI 진단평가', 'test-question', '테스트 문항', '테스트 질문', '학생 B의 오답', '테스트 단서');
+insert into public.challenge_progress (user_id, track_id, lesson_number, concept_completed, completed_activity_ids, last_chapter)
+values ('33333333-3333-3333-3333-333333333333', 'grammar', 1, true, array['grammar-components'], 'practice');
 
 set local role authenticated;
 
@@ -59,6 +61,29 @@ begin
   if (select count(*) from public.concept_states) <> 0 then raise exception 'student_a can read student_b concept state'; end if;
   if (select count(*) from public.learning_events) <> 0 then raise exception 'student_a can read student_b events'; end if;
   if (select count(*) from public.wrong_answers) <> 0 then raise exception 'student_a can read student_b wrong answers'; end if;
+  if (select count(*) from public.challenge_progress) <> 0 then raise exception 'student_a can read student_b challenge progress'; end if;
+end $$;
+
+do $$
+begin
+  begin
+    insert into public.challenge_progress (user_id, track_id, lesson_number)
+    values ('33333333-3333-3333-3333-333333333333', 'grammar', 2);
+    raise exception 'student_a inserted student_b challenge progress';
+  exception
+    when insufficient_privilege then null;
+  end;
+end $$;
+
+do $$
+declare
+  affected_rows integer;
+begin
+  update public.challenge_progress
+  set last_chapter = 'concept'
+  where user_id = '33333333-3333-3333-3333-333333333333';
+  get diagnostics affected_rows = row_count;
+  if affected_rows <> 0 then raise exception 'student_a updated student_b challenge progress'; end if;
 end $$;
 
 select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', true);
@@ -70,6 +95,7 @@ begin
   if (select count(*) from public.concept_states) <> 1 then raise exception 'owner cannot read own concept state'; end if;
   if (select count(*) from public.learning_events) <> 1 then raise exception 'owner cannot read own event'; end if;
   if (select count(*) from public.wrong_answers) <> 1 then raise exception 'owner cannot read own wrong answer'; end if;
+  if (select count(*) from public.challenge_progress) <> 1 then raise exception 'owner cannot read own challenge progress'; end if;
 end $$;
 
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', true);
@@ -81,6 +107,7 @@ begin
   if (select count(*) from public.concept_states) <> 1 then raise exception 'teacher cannot read class concept state'; end if;
   if (select count(*) from public.learning_events) <> 1 then raise exception 'teacher cannot read class event'; end if;
   if (select count(*) from public.wrong_answers) <> 1 then raise exception 'teacher cannot read class wrong answer'; end if;
+  if (select count(*) from public.challenge_progress) <> 1 then raise exception 'teacher cannot read class challenge progress'; end if;
 end $$;
 
 reset role;

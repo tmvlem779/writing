@@ -117,6 +117,23 @@ test("P1·P3: 챕터 2는 불필요한 수치를 숨기고 숙달되면 질문�
   assert.match(practiceChapter, /\[활동 완료 기준\]/);
 });
 
+test("P1·DATA: 오늘의 챌린지 진행을 계정별로 복원하고 완료 활동도 다시 풀 수 있다", () => {
+  assert.match(writingStudio, /fetch\("\/api\/challenge-progress"/);
+  assert.match(writingStudio, /progressHydrated/);
+  assert.match(writingStudio, /initialCompletedActivityIds/);
+  assert.match(writingStudio, /initialActivityId/);
+  assert.match(writingStudio, /onProgressChange=\{updatePracticeProgress\}/);
+  assert.match(practiceChapter, /initialCompletedActivityIds/);
+  assert.match(practiceChapter, /onProgressChange\?\./);
+  assert.match(conceptChapter, /1장 다시 풀기/);
+  assert.match(conceptChapter, /restartChapter/);
+  assert.match(conceptChapter, /const chapterUnlocked = completed \|\| chapterComplete/);
+});
+
+test("P3: 완료된 AI 활동에서는 다음 과제를 요구하는 윗문장을 숨긴다", () => {
+  assert.match(practiceChapter, /!response\.activityComplete && <p>\{response\.studentMessage\}<\/p>/);
+});
+
 test("MOBILE: 핵심 학습 화면과 답 제출 영역은 좁은 화면에서 한 열로 재배치된다", () => {
   assert.match(styles, /\.concept-header, \.material-header, \.workspace-header \{ display: grid;/);
   assert.match(styles, /\.editor-actions \{ width: 100%; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);

@@ -52,6 +52,8 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onCompletionC
   );
   const [currentCheckIndex, setCurrentCheckIndex] = useState(() => completed ? checks.length - 1 : 0);
   const [summaryNotebookComplete, setSummaryNotebookComplete] = useState(() => completed);
+  const [reviewing, setReviewing] = useState(false);
+  const [summaryNotebookRun, setSummaryNotebookRun] = useState(0);
   const currentCheck = checks[currentCheckIndex];
   const selectedAnswer = selectedAnswers[currentCheck.prompt] ?? "";
   const evaluatedAnswer = evaluatedAnswers[currentCheck.prompt] ?? "";
@@ -63,6 +65,7 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onCompletionC
   const completedChecks = passedCheckIndexes.length;
   const allChecksPassed = isConceptCheckComplete(checks.length, passedCheckIndexes);
   const chapterComplete = canCompleteConceptChapter(allChecksPassed, summaryRequired, summaryNotebookComplete);
+  const chapterUnlocked = completed || chapterComplete;
   const initialCorrectIndexes = Object.entries(firstAttemptResults)
     .filter(([, correct]) => correct)
     .map(([index]) => Number(index));
@@ -138,6 +141,18 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onCompletionC
     });
   }
 
+  function restartChapter() {
+    setSelectedAnswers({});
+    setEvaluatedAnswers({});
+    setSubmittedCheckIndexes([]);
+    setFirstAttemptResults({});
+    setPassedCheckIndexes([]);
+    setCurrentCheckIndex(0);
+    setSummaryNotebookComplete(false);
+    setSummaryNotebookRun((run) => run + 1);
+    setReviewing(true);
+  }
+
   return (
     <div className="concept-shell">
       <aside className="concept-sidebar" aria-label={`${lessonNumber}차시 1장 학습 순서`}>
@@ -201,7 +216,9 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onCompletionC
           )}
         </section>
 
-        {summaryRequired && <GrammarSummaryNotebook onCompletionChange={updateSummaryNotebookCompletion} />}
+        {summaryRequired && (!completed || reviewing) && (
+          <GrammarSummaryNotebook key={summaryNotebookRun} onCompletionChange={updateSummaryNotebookCompletion} />
+        )}
 
         <section className="concept-check-set" aria-labelledby="check-set-heading">
           <header>
@@ -289,14 +306,19 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onCompletionC
         </section>
 
         <div className="concept-actions concept-actions-end">
-          {!chapterComplete && (
+          {!chapterUnlocked && (
             <p className="chapter-lock-message" role="status">
               {summaryRequired
                 ? "정리 노트의 모든 빈칸을 맞히고 스스로 확인하기의 모든 문항을 통과하면 Chapter 02가 열려요."
                 : "스스로 확인하기의 모든 문항을 통과하면 Chapter 02가 열려요."}
             </p>
           )}
-          <button className="primary-button" disabled={!chapterComplete} onClick={onStartPractice} type="button">
+          {completed && (
+            <button className="secondary-button" onClick={restartChapter} type="button">
+              {reviewing ? "처음부터 다시 풀기" : "1장 다시 풀기"}
+            </button>
+          )}
+          <button className="primary-button" disabled={!chapterUnlocked} onClick={onStartPractice} type="button">
             이 차시의 2장 연습으로
           </button>
         </div>
