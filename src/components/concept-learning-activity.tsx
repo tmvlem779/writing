@@ -25,7 +25,7 @@ export function ConceptLearningActivity({ questionId, onDailyComplete }: Concept
     const response = await fetch("/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ activity: "diagnose" })
+      body: JSON.stringify({ activity: "diagnose", learningArea: "self-study" })
     });
     const body = await response.json();
     if (!response.ok) throw new Error(body.error ?? "개념학습을 시작할 수 없습니다.");

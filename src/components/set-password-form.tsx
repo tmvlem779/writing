@@ -39,8 +39,8 @@ export function SetPasswordForm() {
   }
 
   return <form className="auth-form" onSubmit={submit}>
-    <label>새 비밀번호<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} maxLength={128} autoComplete="new-password" required /></label>
-    <label>새 비밀번호 확인<input type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength={8} maxLength={128} autoComplete="new-password" required /></label>
+    <label>새 비밀번호<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} maxLength={128} pattern="(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z0-9]{8,128}" title="영문자와 숫자를 모두 포함하여 8자 이상 입력하세요." autoComplete="new-password" required /></label>
+    <label>새 비밀번호 확인<input type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength={8} maxLength={128} pattern="(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z0-9]{8,128}" title="영문자와 숫자를 모두 포함하여 8자 이상 입력하세요." autoComplete="new-password" required /></label>
     <button aria-busy={pending} className="primary-button full-button" type="submit" disabled={pending}>
       {pending ? <MondeukLoading compact message="새 비밀번호를 안전하게 저장하고 있어요." /> : "비밀번호 설정"}
     </button>

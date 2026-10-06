@@ -89,7 +89,7 @@ export function SituationWritingActivity({
     const result = await fetch("/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ activity: "create" })
+      body: JSON.stringify({ activity: "create", learningArea: "self-study" })
     });
     const body = await result.json();
     if (!result.ok) throw new Error(body.error ?? "학습을 시작할 수 없습니다.");

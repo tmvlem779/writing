@@ -11,9 +11,11 @@ test("비밀번호 설정은 과도하게 긴 입력을 거부한다", () => {
   assert.equal(passwordUpdateSchema.safeParse({ password: "가".repeat(129) }).success, false);
 });
 
-test("비밀번호 설정은 영문 소문자와 숫자를 모두 요구한다", () => {
+test("비밀번호 설정은 대소문자 구분 없이 영문자와 숫자를 모두 요구한다", () => {
   assert.equal(passwordUpdateSchema.safeParse({ password: "abcdefgh" }).success, false);
   assert.equal(passwordUpdateSchema.safeParse({ password: "12345678" }).success, false);
-  assert.equal(passwordUpdateSchema.safeParse({ password: "Abcd1234" }).success, false);
+  assert.equal(passwordUpdateSchema.safeParse({ password: "Abcd1234" }).success, true);
+  assert.equal(passwordUpdateSchema.safeParse({ password: "ABCD1234" }).success, true);
   assert.equal(passwordUpdateSchema.safeParse({ password: "abcd123!" }).success, false);
+  assert.equal(passwordUpdateSchema.safeParse({ password: "한글123456" }).success, false);
 });

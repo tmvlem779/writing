@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { activitySchema } from "@/lib/agent/schema";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+const sessionRequestSchema = z.object({
+  activity: activitySchema.catch("diagnose"),
+  learningArea: z.enum(["challenge", "self-study"]).default("challenge")
+});
+
 export async function POST(request: Request) {
-  const requestBody = await request.json().catch(() => ({}));
-  const activity = activitySchema.catch("diagnose").parse(requestBody.activity);
+  const input = sessionRequestSchema.parse(await request.json().catch(() => ({})));
+  const activity = input.activity;
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
     if (process.env.APP_ENV === "production" || process.env.NODE_ENV === "production") {
@@ -31,5 +37,13 @@ export async function POST(request: Request) {
     .select("id")
     .single();
   if (error) return NextResponse.json({ error: "학습 세션을 만들 수 없습니다." }, { status: 500 });
+  const { error: eventError } = await supabase.from("learning_events").insert({
+    session_id: data.id,
+    user_id: auth.user.id,
+    event_type: "area_started",
+    concept_code: input.learningArea,
+    metadata: { learningArea: input.learningArea }
+  });
+  if (eventError) return NextResponse.json({ error: "학습 위치를 기록할 수 없습니다." }, { status: 500 });
   return NextResponse.json(data, { status: 201 });
 }

@@ -100,7 +100,7 @@ export function RealLifeChapter({
     const result = await fetch("/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ activity: "authentic" })
+      body: JSON.stringify({ activity: "authentic", learningArea: dailyMode ? "self-study" : "challenge" })
     });
     const body = await result.json();
     if (!result.ok) throw new Error(body.error ?? "세션을 시작할 수 없습니다.");

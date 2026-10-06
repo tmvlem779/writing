@@ -81,7 +81,7 @@ for (const required of [
 }
 
 const passwordPolicy = fs.readFileSync("src/lib/auth/password-policy.ts", "utf8");
-for (const required of ["password.length >= 8", "/^[a-z0-9]+$/", "/[a-z]/", "/\\d/"]) {
+for (const required of ["password.length >= 8", "/^[A-Za-z0-9]+$/", "/[A-Za-z]/", "/\\d/"]) {
   if (!passwordPolicy.includes(required)) {
     console.error(`앱 비밀번호 정책 누락: ${required}`);
     process.exit(1);

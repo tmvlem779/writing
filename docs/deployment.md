@@ -26,7 +26,7 @@
 5. 운영 서비스 역할 키는 Vercel 서버 환경 변수에만 둔다.
 6. 학생의 실제 이메일은 수집하지 않는다. 교사가 학생 아이디와 초기 비밀번호를 입력하면 서버 전용 Admin API가 예약 도메인의 내부 인증 주소로 계정을 만들고 학급 멤버십을 `active`로 연결한다.
 7. 로그인 화면은 학교 아이디를 동일한 내부 인증 주소로 변환해 Supabase 비밀번호 인증을 수행한다. 내부 주소와 서비스 역할 키는 UI에 노출하지 않는다.
-8. 앱 비밀번호는 8~128자의 영문 소문자와 숫자만 허용하고 두 종류를 각각 1개 이상 요구한다. Supabase Auth는 `minimum_password_length=8`, `password_requirements=letters_digits`로 맞춘다.
+8. 앱 비밀번호는 8~128자의 영문자와 숫자만 허용하고 두 종류를 각각 1개 이상 요구한다. 영문자는 대문자와 소문자를 모두 허용한다. Supabase Auth는 `minimum_password_length=8`, `password_requirements=letters_digits`로 맞춘다.
 
 ## 2. OpenAI
 

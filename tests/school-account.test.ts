@@ -23,9 +23,25 @@ test("AUTH: 교사는 이메일 초대 대신 아이디와 초기 비밀번호�
   const form = fs.readFileSync("src/components/invite-form.tsx", "utf8");
   const route = fs.readFileSync("src/app/api/teacher/invite/route.ts", "utf8");
   assert.match(form, /학생 아이디/);
+  assert.match(form, />이름<input/);
   assert.match(form, /초기 비밀번호/);
+  assert.match(form, /pattern="\(\?=\.\*\[A-Za-z\]\)\(\?=\.\*\[0-9\]\)\[A-Za-z0-9\]\{8,128\}"/);
   assert.match(route, /admin\.auth\.admin\.createUser/);
+  assert.match(route, /display_alias: input\.data\.displayName/);
   assert.match(route, /email_confirm: true/);
   assert.match(route, /status: "active"/);
   assert.doesNotMatch(route, /inviteUserByEmail/);
+});
+
+test("AUTH·PRIVACY: 교사는 담당 학급의 학생 계정 목록을 보고 생성 직후 갱신한다", () => {
+  const page = fs.readFileSync("src/app/teacher/page.tsx", "utf8");
+  const form = fs.readFileSync("src/components/invite-form.tsx", "utf8");
+  const styles = fs.readFileSync("src/app/globals.css", "utf8");
+  assert.match(page, /학생 계정 목록/);
+  assert.match(page, /student-account-list/);
+  assert.match(page, /class_id,user_id,status,created_at/);
+  assert.match(page, /\.eq\("user_id", auth\.user\.id\)\.eq\("role", "teacher"\)\.eq\("status", "active"\)/);
+  assert.match(page, /memberships\.filter\(\(membership\) => membership\.class_id === item\.id\)/);
+  assert.match(form, /router\.refresh\(\)/);
+  assert.match(styles, /\.student-account-list li/);
 });

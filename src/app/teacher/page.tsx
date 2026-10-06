@@ -1,13 +1,18 @@
 import Link from "next/link";
 import { InviteForm } from "@/components/invite-form";
-import { scaffoldLabel } from "@/lib/agent/state-machine";
+import { StudentLearningMonitor } from "@/components/student-learning-monitor";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { buildStudentLearningMonitor, type StudentLearningMonitor as StudentLearningMonitorData } from "@/lib/teacher/learning-monitor";
 
 type ClassRow = { id: string; name: string };
-type MembershipRow = { class_id: string; user_id: string; status: "invited" | "active" };
+type MembershipRow = { class_id: string; user_id: string; status: "invited" | "active"; created_at: string };
 type ProfileRow = { user_id: string; display_alias: string };
-type SessionRow = { id: string; user_id: string; activity_type: string; updated_at: string };
-type ConceptRow = { user_id: string; scaffold_level: number; evidence_count: number; independent_success_count: number };
+type SessionRow = { id: string; user_id: string; activity_type: string; status: string; updated_at: string };
+type ConceptRow = { user_id: string; concept_code: string; scaffold_level: number; evidence_count: number; independent_success_count: number };
+type LearningEventRow = { user_id: string; session_id: string; event_type: string; concept_code: string | null; metadata: unknown; created_at: string };
+type WrongAnswerRow = { user_id: string; source: "diagnosis" | "challenge" | "self-study"; source_label: string; problem_title: string; attempt_count: number; resolved_at: string | null; updated_at: string };
+type AccountIdentity = { userId: string; loginId: string };
 type StudentSummary = {
   userId: string;
   alias: string;
@@ -19,16 +24,10 @@ type StudentSummary = {
   independentSuccessCount: number;
 };
 
-const activityLabels: Record<string, string> = {
-  diagnose: "시작 진단", create: "문장 만들기", expand: "문장 확장", compare: "구조 비교",
-  error: "오류 탐구", transfer: "짧은 글쓰기", reflect: "성찰", authentic: "실생활 자료"
-};
-
 export const dynamic = "force-dynamic";
 
-function formatDate(value: string | null) {
-  if (!value) return "아직 활동 없음";
-  return new Intl.DateTimeFormat("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
+function formatRegistrationDate(value: string) {
+  return new Intl.DateTimeFormat("ko-KR", { year: "numeric", month: "short", day: "numeric" }).format(new Date(value));
 }
 
 export default async function TeacherPage() {
@@ -38,6 +37,9 @@ export default async function TeacherPage() {
   let profiles: ProfileRow[] = [];
   let sessions: SessionRow[] = [];
   let concepts: ConceptRow[] = [];
+  let learningEvents: LearningEventRow[] = [];
+  let wrongAnswers: WrongAnswerRow[] = [];
+  let accountIdentities: AccountIdentity[] = [];
   const configured = Boolean(supabase);
   let signedIn = false;
 
@@ -55,26 +57,43 @@ export default async function TeacherPage() {
 
       const classIds = classes.map((item) => item.id);
       if (classIds.length > 0) {
-        const { data } = await supabase.from("class_memberships").select("class_id,user_id,status")
-          .in("class_id", classIds).eq("role", "student").in("status", ["invited", "active"]);
+        const { data } = await supabase.from("class_memberships").select("class_id,user_id,status,created_at")
+          .in("class_id", classIds).eq("role", "student").in("status", ["invited", "active"])
+          .order("created_at", { ascending: true });
         memberships = (data ?? []) as MembershipRow[];
       }
 
       const studentIds = [...new Set(memberships.map((item) => item.user_id))];
       if (studentIds.length > 0) {
-        const [profileResult, sessionResult, conceptResult] = await Promise.all([
+        const [profileResult, sessionResult, conceptResult, eventResult, wrongAnswerResult] = await Promise.all([
           supabase.from("profiles").select("user_id,display_alias").in("user_id", studentIds),
-          supabase.from("learning_sessions").select("id,user_id,activity_type,updated_at").in("user_id", studentIds).order("updated_at", { ascending: false }),
-          supabase.from("concept_states").select("user_id,scaffold_level,evidence_count,independent_success_count").in("user_id", studentIds)
+          supabase.from("learning_sessions").select("id,user_id,activity_type,status,updated_at").in("user_id", studentIds).order("updated_at", { ascending: false }),
+          supabase.from("concept_states").select("user_id,concept_code,scaffold_level,evidence_count,independent_success_count").in("user_id", studentIds),
+          supabase.from("learning_events").select("user_id,session_id,event_type,concept_code,metadata,created_at").in("user_id", studentIds).order("created_at", { ascending: false }).limit(1000),
+          supabase.from("wrong_answers").select("user_id,source,source_label,problem_title,attempt_count,resolved_at,updated_at").in("user_id", studentIds).order("updated_at", { ascending: false }).limit(1000)
         ]);
         profiles = (profileResult.data ?? []) as ProfileRow[];
         sessions = (sessionResult.data ?? []) as SessionRow[];
         concepts = (conceptResult.data ?? []) as ConceptRow[];
+        learningEvents = (eventResult.data ?? []) as LearningEventRow[];
+        wrongAnswers = (wrongAnswerResult.data ?? []) as WrongAnswerRow[];
+
+        const admin = createAdminSupabaseClient();
+        if (admin) {
+          accountIdentities = (await Promise.all(studentIds.map(async (userId) => {
+            const { data } = await admin.auth.admin.getUserById(userId);
+            const metadataLoginId = data.user?.user_metadata?.login_id;
+            const internalEmail = data.user?.email?.endsWith("@accounts.mundeuk.invalid") ? data.user.email.split("@")[0] : null;
+            const loginId = typeof metadataLoginId === "string" ? metadataLoginId : internalEmail;
+            return loginId ? { userId, loginId } : null;
+          }))).filter((item): item is AccountIdentity => Boolean(item));
+        }
       }
     }
   }
 
   const aliasByUser = new Map(profiles.map((item) => [item.user_id, item.display_alias]));
+  const loginIdByUser = new Map(accountIdentities.map((item) => [item.userId, item.loginId]));
   const summaryByUser = new Map<string, StudentSummary>();
   for (const membership of memberships) {
     const studentSessions = sessions.filter((item) => item.user_id === membership.user_id);
@@ -90,6 +109,42 @@ export default async function TeacherPage() {
       evidenceCount: studentConcepts.reduce((sum, item) => sum + item.evidence_count, 0),
       independentSuccessCount: studentConcepts.reduce((sum, item) => sum + item.independent_success_count, 0)
     });
+  }
+  const monitorByUser = new Map<string, StudentLearningMonitorData>();
+  for (const membership of memberships) {
+    const userId = membership.user_id;
+    monitorByUser.set(userId, buildStudentLearningMonitor({
+      userId,
+      name: aliasByUser.get(userId) ?? "학생",
+      loginId: loginIdByUser.get(userId) ?? aliasByUser.get(userId) ?? "아이디 미확인",
+      sessions: sessions.filter((item) => item.user_id === userId).map((item) => ({
+        id: item.id,
+        activityType: item.activity_type,
+        status: item.status,
+        updatedAt: item.updated_at
+      })),
+      concepts: concepts.filter((item) => item.user_id === userId).map((item) => ({
+        conceptCode: item.concept_code,
+        scaffoldLevel: item.scaffold_level,
+        evidenceCount: item.evidence_count,
+        independentSuccessCount: item.independent_success_count
+      })),
+      events: learningEvents.filter((item) => item.user_id === userId).map((item) => ({
+        sessionId: item.session_id,
+        eventType: item.event_type,
+        conceptCode: item.concept_code,
+        metadata: item.metadata,
+        createdAt: item.created_at
+      })),
+      wrongAnswers: wrongAnswers.filter((item) => item.user_id === userId).map((item) => ({
+        source: item.source,
+        sourceLabel: item.source_label,
+        problemTitle: item.problem_title,
+        attemptCount: item.attempt_count,
+        resolvedAt: item.resolved_at,
+        updatedAt: item.updated_at
+      }))
+    }));
   }
   const summaries = [...summaryByUser.values()];
   const today = new Date();
@@ -120,20 +175,28 @@ export default async function TeacherPage() {
         ) : (
           <div className="class-grid">
             {classes.map((item) => {
-              const students = memberships.filter((membership) => membership.class_id === item.id)
+              const studentMemberships = memberships.filter((membership) => membership.class_id === item.id);
+              const students = studentMemberships
                 .map((membership) => summaryByUser.get(membership.user_id)).filter((summary): summary is StudentSummary => Boolean(summary));
+              const studentMonitors = studentMemberships
+                .map((membership) => monitorByUser.get(membership.user_id)).filter((monitor): monitor is StudentLearningMonitorData => Boolean(monitor));
               return <article className="class-card" key={item.id}>
                 <span>진행 중 · 학생 {students.length}명</span><h3>{item.name}</h3>
-                {students.length === 0 ? <p>등록된 학생의 활동이 아직 없습니다.</p> : <div className="student-progress-list">
-                  {students.map((student) => <div className="student-progress" key={student.userId}>
-                    <div><strong>{student.alias}</strong><small>{student.lastActivity ? activityLabels[student.lastActivity] : "미시작"} · {formatDate(student.lastSeenAt)}</small></div>
-                    <dl>
-                      <div><dt>세션</dt><dd>{student.sessionCount}</dd></div>
-                      <div><dt>독립 성공</dt><dd>{student.independentSuccessCount}/{student.evidenceCount}</dd></div>
-                      <div><dt>최대 도움</dt><dd>{scaffoldLabel(student.maxScaffoldLevel)}</dd></div>
-                    </dl>
-                  </div>)}
-                </div>}
+                <section className="student-account-section" aria-labelledby={`student-accounts-${item.id}`}>
+                  <div className="student-account-heading">
+                    <div><span>계정 관리</span><h4 id={`student-accounts-${item.id}`}>학생 계정 목록</h4></div>
+                    <strong>{studentMemberships.length}명</strong>
+                  </div>
+                  {studentMemberships.length === 0 ? <p className="student-account-empty">아직 만든 학생 계정이 없습니다.</p> : <ol className="student-account-list">
+                    {studentMemberships.map((membership, index) => <li key={membership.user_id}>
+                      <span className="student-account-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                      <div><strong>{aliasByUser.get(membership.user_id) ?? "학생"}</strong><small>{loginIdByUser.get(membership.user_id) ?? "아이디 미확인"}</small></div>
+                      <span className={`student-account-status ${membership.status}`}>{membership.status === "active" ? "사용 중" : "초대 중"}</span>
+                      <time dateTime={membership.created_at}>{formatRegistrationDate(membership.created_at)} 등록</time>
+                    </li>)}
+                  </ol>}
+                </section>
+                <StudentLearningMonitor classId={item.id} students={studentMonitors} />
                 <InviteForm classId={item.id} />
               </article>;
             })}
