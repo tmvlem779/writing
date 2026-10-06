@@ -108,6 +108,15 @@ test("P1: 챕터 2는 도움 없이 제출과 AI 힌트를 분리하고 제출 �
   assert.doesNotMatch(practiceChapter, /질문과 힌트 받기/);
 });
 
+test("P1·P3: 챕터 2는 불필요한 수치를 숨기고 숙달되면 질문을 끝낸다", () => {
+  assert.doesNotMatch(practiceChapter, /시도 횟수|대화 기록|현재 도움 단계/);
+  assert.doesNotMatch(practiceChapter, /className="evidence-panel"/);
+  assert.match(practiceChapter, /response\.activityComplete/);
+  assert.match(practiceChapter, /활동 완료/);
+  assert.match(practiceChapter, /다음 활동으로/);
+  assert.match(practiceChapter, /\[활동 완료 기준\]/);
+});
+
 test("MOBILE: 핵심 학습 화면과 답 제출 영역은 좁은 화면에서 한 열로 재배치된다", () => {
   assert.match(styles, /\.concept-header, \.material-header, \.workspace-header \{ display: grid;/);
   assert.match(styles, /\.editor-actions \{ width: 100%; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);

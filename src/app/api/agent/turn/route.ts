@@ -97,6 +97,7 @@ export async function POST(request: Request) {
         focusConcepts: [],
         observations: [],
         nextAction: "rewrite",
+        activityComplete: false,
         masteryEvidence: [],
         safety: { blocked: true, reason: "입력 안전 검사" }
       });
@@ -130,6 +131,14 @@ export async function POST(request: Request) {
         target_independent_success: evidence.independentSuccess
       });
       if (recordError) throw recordError;
+      if (result.response.activityComplete) {
+        const { error: completionError } = await admin
+          .from("learning_sessions")
+          .update({ status: "completed", ended_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+          .eq("id", parsed.data.sessionId)
+          .eq("user_id", auth.user.id);
+        if (completionError) throw completionError;
+      }
     }
     return NextResponse.json(result.response);
   } catch (error) {

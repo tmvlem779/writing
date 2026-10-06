@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { MondeukLoading } from "@/components/mondeuk-loading";
-import type { AgentResponse } from "@/lib/agent/schema";
+import type { Activity, AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
 import { getCourseLesson, getCourseTrack, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 
@@ -13,6 +13,21 @@ type PracticeChapterProps = {
   lessonNumber: CourseLessonNumber;
   trackId: CourseTrackId;
 };
+
+const completionCriteria: Record<Activity, string> = {
+  diagnose: "요구된 문장 요소를 찾고, 답을 판단한 눈에 보이는 단서를 한 가지 설명했다.",
+  create: "조건에 맞는 문장을 학생이 직접 만들고, 사용한 문장 구조를 확인했다.",
+  expand: "조건에 맞게 문장을 직접 확장하고 덧붙인 부분을 확인했다.",
+  compare: "비교 대상의 차이를 찾고 그 차이가 뜻에 미치는 영향을 한 가지 설명했다.",
+  error: "요구된 부분을 학생이 직접 고쳐 쓰고 바꾼 까닭을 한 가지 설명했다.",
+  transfer: "배운 원리를 새 문장이나 상황에 직접 적용하고 사용한 단서를 확인했다.",
+  reflect: "현재 과제의 답과 그 근거를 한 가지 설명했다.",
+  authentic: "자료에서 근거를 찾고 자료의 목적이나 표현 효과를 한 가지 설명했다."
+};
+
+function criterionForActivity(activity: Activity) {
+  return completionCriteria[activity];
+}
 
 export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps) {
   const lesson = getCourseLesson(lessonNumber, trackId);
@@ -25,7 +40,7 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
   const [history, setHistory] = useState<Message[]>([]);
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
-  const [hintCount, setHintCount] = useState(0);
+  const [completedActivityIds, setCompletedActivityIds] = useState<string[]>([]);
   const [pendingAction, setPendingAction] = useState<SupportMode | null>(null);
   const [error, setError] = useState("");
   const [demo, setDemo] = useState(false);
@@ -58,6 +73,7 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
         `[수업 차시] ${lessonNumber}차시 · ${lesson.title}`,
         `[핵심 질문] ${lesson.keyQuestion}`,
         `[현재 과제] ${selected.prompt}`,
+        `[활동 완료 기준] ${criterionForActivity(selected.activity)}`,
         `[요청 유형] ${supportMode === "hint" ? "AI 힌트" : "도움 없이 제출"}`,
         `[학생 답]\n${submittedDraft || "아직 답을 쓰지 않았습니다."}`
       ].join("\n\n");
@@ -72,7 +88,7 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
           supportMode,
           scaffoldLevel: requestedScaffoldLevel,
           attemptCount,
-          history: history.slice(-6)
+          history: history.slice(-4)
         })
       });
       const body = await result.json();
@@ -82,11 +98,13 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
       setDemo((current) => current || Boolean(next.demo));
       setScaffoldLevel(next.scaffoldLevel);
       if (supportMode === "submit") setAttemptCount((count) => count + 1);
-      if (supportMode === "hint") setHintCount((count) => count + 1);
+      if (next.activityComplete) {
+        setCompletedActivityIds((items) => items.includes(selected.id) ? items : [...items, selected.id]);
+      }
       setHistory((items) => [
         ...items,
         { role: "student", content: supportMode === "hint" ? `힌트 요청: ${submittedDraft || "작성 전"}` : submittedDraft },
-        { role: "assistant", content: `${next.studentMessage} ${next.question}` }
+        { role: "assistant", content: [next.studentMessage, next.question].filter(Boolean).join(" ") }
       ]);
       if (supportMode === "submit") setDraft("");
     } catch (caught) {
@@ -102,13 +120,12 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
     setSessionId(null);
     setHistory([]);
     setAttemptCount(0);
-    setHintCount(0);
     setScaffoldLevel(0);
     setDraft("");
   }
 
   return (
-    <div className="studio-shell">
+    <div className="studio-shell practice-studio-shell">
       <aside className="activity-sidebar" aria-label={`${lessonNumber}차시 2장 학습 활동`}>
         <div className="sidebar-heading">
           <span>Chapter 02 · {lessonNumber}차시</span>
@@ -117,22 +134,15 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
         {activities.map((item, index) => (
           <button
             aria-current={activityId === item.id ? "step" : undefined}
-            className={activityId === item.id ? "activity-button active" : "activity-button"}
+            className={`${activityId === item.id ? "activity-button active" : "activity-button"}${completedActivityIds.includes(item.id) ? " completed" : ""}`}
             key={item.id}
             onClick={() => changeActivity(item.id)}
             type="button"
           >
             <span>{String(index + 1).padStart(2, "0")}</span>
-            {item.label}
+            {item.label}{completedActivityIds.includes(item.id) && <i aria-label="완료">✓</i>}
           </button>
         ))}
-        <div className="scaffold-meter">
-          <span>현재 도움 단계</span>
-          <strong>{scaffoldLabel(scaffoldLevel)}</strong>
-          <div className="meter-track" aria-label={`도움 단계 ${scaffoldLevel + 1}/5`}>
-            <i style={{ width: `${((scaffoldLevel + 1) / 5) * 100}%` }} />
-          </div>
-        </div>
       </aside>
 
       <section className="workspace" aria-busy={pendingAction !== null} aria-labelledby="workspace-title">
@@ -158,10 +168,17 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
           <article className="coach-card" aria-live="polite">
             <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
             <p>{response.studentMessage}</p>
-            <div className="coach-question">
-              <span>다음 생각</span>
-              <strong>{response.question}</strong>
-            </div>
+            {response.activityComplete ? (
+              <div className="activity-completion-card">
+                <span>활동 완료</span>
+                <strong>이번 과제에서 확인할 내용을 모두 익혔어요.</strong>
+              </div>
+            ) : (
+              <div className="coach-question">
+                <span>다음 생각</span>
+                <strong>{response.question}</strong>
+              </div>
+            )}
             {response.focusConcepts.length > 0 && (
               <div className="concept-tags" aria-label="학습 초점">
                 {response.focusConcepts.map((concept) => <span key={concept}>{concept}</span>)}
@@ -170,53 +187,58 @@ export function PracticeChapter({ lessonNumber, trackId }: PracticeChapterProps)
           </article>
         )}
 
-        <label className="draft-label" htmlFor="student-draft">내 문장과 생각</label>
-        <textarea
-          key={activityId}
-          id="student-draft"
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="완벽하게 쓰려고 하지 않아도 괜찮아요. 먼저 생각나는 문장을 적어 보세요."
-          maxLength={4000}
-        />
-        <div className="editor-footer">
-          <span>{draft.length.toLocaleString()} / 4,000자</span>
-          <div className="editor-actions" aria-label="답 제출과 도움 선택">
-            <button
-              aria-busy={pendingAction === "hint"}
-              className="secondary-button hint-button"
-              disabled={pendingAction !== null}
-              onClick={() => sendTurn("hint")}
-              type="button"
-            >
-              {pendingAction === "hint" ? <MondeukLoading compact /> : "AI 힌트"}
-            </button>
-            <button
-              aria-busy={pendingAction === "submit"}
-              className="primary-button"
-              disabled={pendingAction !== null || !draft.trim()}
-              onClick={() => sendTurn("submit")}
-              type="button"
-            >
-              {pendingAction === "submit" ? <MondeukLoading compact /> : "제출"}
-            </button>
+        {response?.activityComplete ? (
+          <div className="completion-actions">
+            {activities.findIndex((item) => item.id === selected.id) < activities.length - 1 ? (
+              <button
+                className="primary-button"
+                onClick={() => changeActivity(activities[activities.findIndex((item) => item.id === selected.id) + 1].id)}
+                type="button"
+              >
+                다음 활동으로
+              </button>
+            ) : <strong>이 차시의 쓰기와 성찰 활동을 마쳤어요.</strong>}
           </div>
-        </div>
+        ) : (
+          <>
+            <label className="draft-label" htmlFor="student-draft">내 문장과 생각</label>
+            <textarea
+              key={activityId}
+              id="student-draft"
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder="완벽하게 쓰려고 하지 않아도 괜찮아요. 먼저 생각나는 문장을 적어 보세요."
+              maxLength={4000}
+            />
+            <div className="editor-footer">
+              <span>{draft.length.toLocaleString()} / 4,000자</span>
+              <div className="editor-actions" aria-label="답 제출과 도움 선택">
+                <button
+                  aria-busy={pendingAction === "hint"}
+                  className="secondary-button hint-button"
+                  disabled={pendingAction !== null}
+                  onClick={() => sendTurn("hint")}
+                  type="button"
+                >
+                  {pendingAction === "hint" ? <MondeukLoading compact /> : "AI 힌트"}
+                </button>
+                <button
+                  aria-busy={pendingAction === "submit"}
+                  className="primary-button"
+                  disabled={pendingAction !== null || !draft.trim()}
+                  onClick={() => sendTurn("submit")}
+                  type="button"
+                >
+                  {pendingAction === "submit" ? <MondeukLoading compact /> : "제출"}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
 
         {error && <div className="error-panel" role="alert">{error}</div>}
       </section>
 
-      <aside className="evidence-panel" aria-label="학습 기록">
-        <span className="panel-kicker">{lessonNumber}차시 학습 기록</span>
-        <h2>내가 해낸 과정</h2>
-        <dl>
-          <div><dt>시도 횟수</dt><dd>{attemptCount}</dd></div>
-          <div><dt>AI 힌트</dt><dd>{hintCount}</dd></div>
-          <div><dt>현재 도움</dt><dd>{scaffoldLevel + 1}/5</dd></div>
-          <div><dt>대화 기록</dt><dd>{Math.floor(history.length / 2)}</dd></div>
-        </dl>
-        <p>독립적으로 해결한 부분과 도움을 받은 부분을 구분해 다음 활동의 난이도를 조절합니다.</p>
-      </aside>
     </div>
   );
 }

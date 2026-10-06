@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { resolveOpenAiModel } from "./model";
+import { applyTutorResponsePolicy } from "./response-policy";
 import { agentResponseJsonSchema, agentResponseSchema, type AgentResponse, type TurnRequest } from "./schema";
 import { PROMPT_VERSION, SYSTEM_PROMPT } from "./system-prompt";
 
@@ -30,9 +31,11 @@ ${request.supportMode === "hint"
     input,
     store: false,
     safety_identifier: safetyIdentifier,
-    max_output_tokens: 700,
+    prompt_cache_key: PROMPT_VERSION,
+    max_output_tokens: 420,
     reasoning: { effort: "none" },
     text: {
+      verbosity: "low",
       format: {
         type: "json_schema",
         name: "writing_tutor_response",
@@ -44,7 +47,7 @@ ${request.supportMode === "hint"
 
   const parsed = agentResponseSchema.parse(JSON.parse(result.output_text));
   return {
-    response: parsed,
+    response: applyTutorResponsePolicy(request, parsed),
     usage: {
       input: result.usage?.input_tokens ?? 0,
       output: result.usage?.output_tokens ?? 0

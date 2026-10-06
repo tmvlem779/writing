@@ -20,7 +20,9 @@ test("P2: 문장 만들기에서는 학생이 기본 문장을 먼저 생성한�
 });
 
 test("P3: 진단에서는 문장 성분의 근거를 설명하게 한다", () => {
-  assert.match(buildFallbackResponse(request("diagnose")).question, /찾아.*설명/);
+  const question = buildFallbackResponse(request("diagnose")).question;
+  assert.match(question, /조사나 형태.*설명/);
+  assert.ok(question.length <= 76);
 });
 
 test("P4: 구조 비교에서는 강조되는 정보를 비교하게 한다", () => {

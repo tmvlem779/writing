@@ -2,7 +2,7 @@ import type { AgentResponse, TurnRequest } from "./schema.ts";
 import { nextScaffoldLevel, scaffoldLabel } from "./state-machine.ts";
 
 const activityQuestions = {
-  diagnose: "이 문장에서 주어와 서술어를 찾아 서로 어떻게 호응하는지 설명해 볼까요?",
+  diagnose: "답을 찾을 때 살핀 조사나 형태 하나로 설명해 보세요.",
   create: "주어와 서술어가 분명한 기본 문장을 먼저 한 문장 만들어 볼까요?",
   expand: "원래 뜻을 유지하면서 수식어나 절 하나를 더해 문장을 확장해 볼까요?",
   compare: "두 문장에서 더 강조되는 정보가 무엇인지 각각 설명해 볼까요?",
@@ -77,6 +77,7 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
       : ["문장 성분", "호응과 확장"],
     observations: ["개발용 규칙 기반 응답이며 실제 수업에서는 AI 진단 결과로 대체됩니다."],
     nextAction: nextActions[request.activity],
+    activityComplete: false,
     masteryEvidence: [],
     safety: { blocked: false, reason: null }
   };

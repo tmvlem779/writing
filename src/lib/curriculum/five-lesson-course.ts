@@ -38,7 +38,7 @@ export const fiveLessonCourse: CourseLesson[] = [
     activities: ["문장 성분 복습", "주어·서술어 관계 찾기", "홑문장·겹문장 구별", "문장 구조 진단"],
     conceptLessonId: "sentence-and-clause",
     practiceActivities: [
-      { id: "components", activity: "diagnose", label: "문장 성분 복습", prompt: "‘학생들이 운동장에서 공을 찬다.’에서 주어와 서술어를 찾고, 그렇게 판단한 근거를 적어 보세요." },
+      { id: "components", activity: "diagnose", label: "문장 성분 복습", prompt: "‘학생들이 운동장에서 공을 찬다.’에서 주어와 서술어를 찾아 적어 보세요." },
       { id: "predicate-pairs", activity: "diagnose", label: "관계 찾기", prompt: "‘종이 울리자 학생들이 교실로 들어갔다.’에서 주어·서술어 관계를 모두 찾아 짝지어 보세요." },
       { id: "simple-complex", activity: "compare", label: "홑문장·겹문장", prompt: "‘바람이 분다.’와 ‘바람이 불어서 나뭇잎이 흔들린다.’의 구조를 비교하고 구별 근거를 설명해 보세요." },
       { id: "structure-diagnosis", activity: "reflect", label: "구조 진단", prompt: "홑문장 하나와 겹문장 하나를 직접 만든 뒤, 각 문장의 주어·서술어 관계 수를 설명해 보세요." }
@@ -112,7 +112,7 @@ export const grammarSixLessonCourse: CourseLesson[] = [
     activities: ["문장 성분 역할 확인", "성분 카드 조합", "홑문장 생성", "구조 자기 설명"],
     conceptLessonId: "grammar-basic-sentence",
     practiceActivities: [
-      { id: "grammar-components", activity: "diagnose", label: "성분 역할 찾기", prompt: "‘학생들이 운동장에서 공을 찬다.’의 문장 성분을 나누고 주어·서술어를 먼저 찾은 근거를 적어 보세요." },
+      { id: "grammar-components", activity: "diagnose", label: "성분 역할 찾기", prompt: "‘학생들이 운동장에서 공을 찬다.’에서 주어와 서술어를 찾아 적어 보세요." },
       { id: "grammar-component-cards", activity: "compare", label: "성분 조합", prompt: "‘민지가 / 도서관에서 / 책을 / 읽는다’의 어순을 한 번 바꾸어 보고, 자연스러운 문장을 고른 뒤 각 성분의 역할을 설명해 보세요." },
       { id: "grammar-simple-create", activity: "create", label: "홑문장 만들기", prompt: "학교생활을 주제로 주어·서술어·목적어·부사어가 모두 들어간 홑문장을 직접 만들어 보세요." },
       { id: "grammar-simple-explain", activity: "reflect", label: "구조 설명", prompt: "내가 만든 문장에서 각 문장 성분과 주어·서술어 관계의 수를 표시하고, 왜 홑문장인지 설명해 보세요." }

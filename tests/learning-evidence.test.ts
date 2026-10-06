@@ -12,6 +12,7 @@ function response(overrides: Partial<AgentResponse> = {}): AgentResponse {
     focusConcepts: ["문장 성분"],
     observations: [],
     nextAction: "explain",
+    activityComplete: false,
     masteryEvidence: [],
     safety: { blocked: false, reason: null },
     ...overrides

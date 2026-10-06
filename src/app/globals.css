@@ -396,7 +396,14 @@ body:has(.v3-home) { background: #10291f; }
 .editor-actions button { min-width: 104px; }
 .error-panel { margin-top: 18px; padding: 14px 16px; background: #fde5df; color: #8b2d1e; border-radius: 10px; }
 .coach-card { margin-top: 28px; padding: 26px; background: #e3edde; border: 1px solid #c8dbc9; border-radius: 18px; }.coach-label { display: flex; justify-content: space-between; color: var(--green); font-size: 12px; font-weight: 800; }.coach-label small { font-weight: 700; }.coach-card > p { margin: 16px 0; }.coach-question { display: grid; gap: 5px; padding: 16px; background: rgba(255,255,255,.7); border-radius: 12px; }.coach-question span { font-size: 11px; color: var(--orange); font-weight: 800; }.coach-question strong { line-height: 1.65; }.concept-tags { display: flex; gap: 7px; margin-top: 14px; flex-wrap: wrap; }.concept-tags span { background: transparent; }
-.evidence-panel { padding: 42px 24px; background: #e6e5dd; border-left: 1px solid var(--line); }.evidence-panel h2 { margin: 6px 0 26px; font-size: 20px; }.evidence-panel dl { margin: 0; }.evidence-panel dl div { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid #ccd0c8; }.evidence-panel dt { color: var(--muted); font-size: 12px; }.evidence-panel dd { margin: 0; font-weight: 800; }.evidence-panel p { margin-top: 24px; font-size: 12px; color: var(--muted); }
+.practice-studio-shell { grid-template-columns: 230px minmax(0, 1fr); }
+.activity-button i { margin-left: auto; color: var(--green); font-style: normal; font-weight: 900; }
+.activity-button.completed:not(.active) { background: rgba(255,255,255,.45); }
+.activity-completion-card { padding: 16px 18px; display: grid; gap: 5px; border-radius: 13px; background: #edf3e7; }
+.activity-completion-card span { color: var(--green); font-size: 11px; font-weight: 850; }
+.activity-completion-card strong { font-size: 17px; line-height: 1.5; }
+.completion-actions { margin-top: 20px; padding: 20px; display: flex; justify-content: flex-end; align-items: center; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.completion-actions > strong { color: var(--green); }
 
 .teacher-shell { padding: 72px clamp(24px, 7vw, 110px) 100px; min-height: 80vh; }.teacher-header { display: grid; grid-template-columns: 1fr .7fr; gap: 60px; align-items: end; }.teacher-header h1 { font-size: clamp(44px, 6vw, 70px); line-height: 1.12; letter-spacing: -.055em; margin: 12px 0; }.teacher-header > p { color: var(--muted); font-size: 17px; }
 .notice-card { margin-top: 28px; padding: 18px 20px; border-radius: 12px; background: #fff2da; }.notice-card p { margin: 4px 0; }.notice-card a { color: var(--green); font-weight: 800; }
@@ -616,7 +623,7 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
   .student-dashboard-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dashboard-progress { grid-template-columns: 1fr; }.student-learning-nav > div a { min-width: 0; }
   .lesson-switcher { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .studio-shell, .concept-shell, .authentic-shell { grid-template-columns: 190px 1fr; }.evidence-panel, .concept-progress, .transfer-panel { display: none; }
+  .studio-shell, .concept-shell, .authentic-shell { grid-template-columns: 190px 1fr; }.concept-progress, .transfer-panel { display: none; }
   .situation-writing-shell { grid-template-columns: 190px minmax(0, 1fr); }.situation-learning-guide { display: none; }
   .site-header nav { display: none; }
 }
