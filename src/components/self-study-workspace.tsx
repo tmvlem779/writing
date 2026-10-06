@@ -66,7 +66,6 @@ export function SelfStudyWorkspace() {
         <div>
           <span>매일 한 걸음 · 7일 문법 루틴</span>
           <h2 id="daily-roadmap-title">오늘도 문장을 발견하러 가요</h2>
-          <p>문학 작품, 실생활 자료, 문장 만들기, 개념학습을 매일 복불복으로 만납니다.</p>
         </div>
         <dl>
           <div><dt>🔥 연속 학습</dt><dd>{streak}일</dd></div>

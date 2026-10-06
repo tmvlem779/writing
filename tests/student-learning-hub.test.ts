@@ -25,6 +25,7 @@ const styles = read("src/app/globals.css");
 const learnLayout = read("src/app/learn/layout.tsx");
 const learningBookShell = read("src/components/learning-book-shell.tsx");
 const writingStudio = read("src/components/writing-studio.tsx");
+const conceptChapter = read("src/components/concept-chapter.tsx");
 
 test("ver.2 학생 학습 홈과 공통 탭에서는 AI 진단평가를 제외한다", () => {
   for (const [label, href] of [
@@ -68,6 +69,7 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 매�
   assert.match(selfStudyWorkspace, /href="\/learn\/self-study\/today"/);
   assert.doesNotMatch(selfStudyWorkspace, /target="_blank"/);
   assert.doesNotMatch(selfStudyWorkspace, /새 탭에서/);
+  assert.doesNotMatch(selfStudyWorkspace, /문학 작품, 실생활 자료, 문장 만들기, 개념학습을 매일 복불복으로 만납니다/);
   assert.doesNotMatch(selfStudyWorkspace, /SituationWritingActivity/);
   assert.match(todayPracticePage, /DailyPracticeToday/);
   assert.match(dailyPracticeToday, /SituationWritingActivity/);
@@ -78,6 +80,20 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 매�
   assert.match(dailyPracticeToday, /showOverview=\{false\}/);
   assert.match(dailyPracticeToday, /일 연속 학습/);
   assert.match(selfStudyPage, /하루 한 걸음, 문법 감각을 이어 가요/);
+});
+
+test("P3: 스스로 확인하기 질문은 선택지와 같은 카드 안에 표시된다", () => {
+  assert.match(conceptChapter, /className="concept-check-legend"/);
+  assert.match(conceptChapter, /className="concept-check-question"/);
+  assert.match(conceptChapter, /<strong>\{currentCheck\.prompt\}<\/strong>/);
+  assert.match(styles, /\.concept-check-legend \{[^}]*position: absolute;[^}]*clip: rect\(0 0 0 0\)/s);
+  assert.match(styles, /\.concept-check-question \{[^}]*display: grid;/s);
+});
+
+test("스스로 유형 학습 로드맵은 그림과 제목이 겹치지 않도록 방향별 간격을 둔다", () => {
+  assert.match(styles, /\.daily-path-step\.offset-1 \.daily-path-copy \{[^}]*padding-left: 34px;/s);
+  assert.match(styles, /\.daily-path-step\.offset-2 \.daily-path-copy \{[^}]*justify-self: end;[^}]*transform: translateX\(clamp\(80px, 10vw, 140px\)\);/s);
+  assert.match(styles, /\.daily-path-step \.daily-path-copy \{[^}]*margin-right: 0;[^}]*padding-left: 0;[^}]*transform: none;/s);
 });
 
 test("학생 학습 탭은 별도 책장 애니메이션 없이 즉시 이동한다", () => {

@@ -165,10 +165,13 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onCompletionC
               : "마지막 문항이에요."}
           </p>
           <fieldset className="concept-check" key={currentCheck.prompt}>
-            <legend>
-              <span>문항 {currentCheckIndex + 1}</span>
-              {currentCheck.prompt}
+            <legend className="concept-check-legend">
+              문항 {currentCheckIndex + 1}: {currentCheck.prompt}
             </legend>
+            <div className="concept-check-question" aria-hidden="true">
+              <span>문항 {currentCheckIndex + 1}</span>
+              <strong>{currentCheck.prompt}</strong>
+            </div>
             <div className="check-options">
               {currentCheck.options.map((option) => (
                 <button
