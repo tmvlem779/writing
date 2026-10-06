@@ -182,11 +182,14 @@ test("P1·P3·P5: 개념학습은 첫 답 뒤 오답에만 단서를 주고 정�
   assert.doesNotMatch(conceptLearningActivity, /AI 진단평가/);
 });
 
-test("P2·P3·P4: 그림 상황에서는 학생이 먼저 문장을 만들고 그 문장으로 질문을 이어 간다", () => {
+test("P2·P3·P4: 그림 없이 글로 제시한 상황에서 학생이 먼저 문장을 만들고 질문을 이어 간다", () => {
   assert.equal(situationScenes.length, 3);
-  assert.ok(situationScenes.every((scene) => scene.observations.length >= 3));
+  assert.ok(situationScenes.every((scene) => scene.setting.length >= 45));
   assert.ok(situationScenes.every((scene) => scene.firstCondition.length > 20));
-  assert.match(situationWritingActivity, /role="img"/);
+  assert.ok(situationScenes.every((scene) => !scene.firstCondition.includes("그림")));
+  assert.doesNotMatch(situationWritingActivity, /<svg|SituationIllustration|role="img"|situation-figure|그림 관찰/);
+  assert.match(situationWritingActivity, /className="situation-prompt"/);
+  assert.match(situationWritingActivity, /\[스스로 유형 학습 · 상황으로 문장 만들기\]/);
   assert.match(situationWritingActivity, /내가 만든 문장/);
   assert.match(situationWritingActivity, /문장 보내고 질문 받기/);
   assert.match(situationWritingActivity, /activity: "create"/);
@@ -196,7 +199,14 @@ test("P2·P3·P4: 그림 상황에서는 학생이 먼저 문장을 만들고 �
   assert.doesNotMatch(situationWritingActivity, /모범 답안|정답 문장:/);
   assert.ok(situationWritingActivity.indexOf('className="coach-card situation-coach"') < situationWritingActivity.indexOf('htmlFor="situation-sentence"'));
   assert.match(styles, /\.situation-writing-shell/);
-  assert.match(styles, /\.situation-illustration/);
+  assert.match(styles, /\.situation-prompt/);
+  assert.doesNotMatch(styles, /\.situation-illustration|\.situation-figure/);
+});
+
+test("DATA: 그림 없는 상황 문장 생성 규칙은 프롬프트 v17로 추적한다", () => {
+  const migration = read("supabase/migrations/202610070001_add_text_situation_prompt.sql");
+  assert.match(migration, /writing-tutor-v17/);
+  assert.match(migration, /text-only-situation-sentence-generation/);
 });
 
 test("P3·P4: 시는 문법 요소를 고르고 소설은 모든 문장에 직접 표시하고 답한다", () => {

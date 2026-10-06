@@ -471,28 +471,9 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
 .situation-writing-workspace > header span { color: var(--orange); font-size: 11px; font-weight: 850; letter-spacing: .05em; }
 .situation-writing-workspace > header h1 { margin: 6px 0 0; font-size: clamp(30px, 4vw, 46px); letter-spacing: -.045em; }
 .situation-writing-workspace > header > strong { padding: 7px 11px; border-radius: 999px; background: var(--green-soft); color: var(--green-dark); font-size: 11px; white-space: nowrap; }
-.situation-figure { margin: 24px 0 0; overflow: hidden; border: 1px solid #ced9d0; border-radius: 24px; background: #fdfcf7; box-shadow: 0 16px 34px rgba(38,67,51,.08); }
-.situation-figure figcaption { padding: 12px 18px 15px; color: var(--muted); font-size: 12px; text-align: center; }
-.situation-illustration { width: 100%; height: auto; display: block; }
-.situation-illustration .scene-sky { fill: #eef4ea; }
-.situation-illustration .scene-building { fill: #f8f4e7; stroke: #245b43; stroke-width: 5; }
-.situation-illustration .scene-window { fill: #d5e6e7; stroke: #245b43; stroke-width: 4; }
-.situation-illustration .scene-ground { fill: #dce6d2; }
-.situation-illustration .scene-accent { fill: #ee7953; stroke: #9f4930; stroke-width: 4; }
-.situation-illustration .scene-person { fill: #f2bf78; stroke: #245b43; stroke-width: 5; }
-.situation-illustration .scene-person.secondary { fill: #a9bd3b; }
-.situation-illustration .scene-line { fill: none; stroke: #245b43; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
-.situation-illustration .scene-line.thin { stroke-width: 5; }
-.situation-illustration .scene-rain { fill: none; stroke: #667b8c; stroke-width: 6; stroke-linecap: round; }
-.situation-illustration .scene-books { fill: #a9bd3b; stroke: #245b43; stroke-width: 3; }
-.situation-illustration .scene-clock { fill: #fffdf7; stroke: #245b43; stroke-width: 5; }
-.situation-illustration .scene-table { fill: #e2c39b; stroke: #245b43; stroke-width: 5; }
-.situation-observation { margin-top: 18px; padding: 18px 20px; display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: start; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
-.situation-observation > div span, .situation-condition > span { color: var(--green); font-size: 11px; font-weight: 850; }
-.situation-observation p { margin: 5px 0 0; line-height: 1.65; }
-.situation-observation details { min-width: 180px; color: var(--muted); font-size: 12px; }
-.situation-observation summary { color: var(--green); cursor: pointer; font-weight: 800; }
-.situation-observation ul { margin: 10px 0 0; padding-left: 18px; line-height: 1.7; }
+.situation-prompt { margin-top: 24px; padding: clamp(24px, 4vw, 38px); border: 1px solid #ced9d0; border-left: 5px solid var(--green); border-radius: 3px 20px 3px 3px; background: var(--surface); box-shadow: 9px 11px 0 rgba(53,48,39,.05); }
+.situation-prompt > span, .situation-condition > span { color: var(--green); font-size: 11px; font-weight: 850; letter-spacing: .06em; }
+.situation-prompt p { max-width: 720px; margin: 10px 0 0; font-size: clamp(18px, 2.2vw, 23px); font-weight: 700; line-height: 1.75; }
 .situation-condition { margin-top: 14px; padding: 20px; display: grid; gap: 9px; border-radius: 16px; background: #fff6e8; }
 .situation-condition > strong { line-height: 1.65; }
 .situation-condition > div { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -637,7 +618,7 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
 }
 @media (max-width: 720px) {
   .student-dashboard { padding: 0 20px 50px; }.student-dashboard-header { min-height: 82px; }.student-dashboard-header > div { gap: 8px; }.student-dashboard-header > div > span { display: none; }.student-dashboard-intro { padding: 44px 0 28px; }.student-dashboard-cards { grid-template-columns: 1fr; }.student-dashboard-card { min-height: 230px; }.dashboard-progress { padding: 24px; }.dashboard-progress dl { grid-template-columns: repeat(2, 1fr); }
-  .student-learning-nav { min-height: auto; padding: 16px 16px 0; display: grid; gap: 12px; align-items: initial; position: static; }.student-learning-home { font-size: 22px; }.student-learning-nav > div { overflow-x: auto; scrollbar-width: none; }.student-learning-nav > div a { min-width: max-content; padding: 12px 14px; font-size: 12px; }.diagnostic-shell { display: block; }.diagnostic-sidebar { padding: 14px 16px; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); }.diagnostic-sidebar > span, .diagnostic-sidebar h2 { display: none; }.diagnostic-sidebar ol { display: flex; }.diagnostic-sidebar li { min-width: 44px; padding: 6px; grid-template-columns: 30px; }.diagnostic-sidebar li p { display: none; }.diagnostic-workspace { width: calc(100% - 32px); padding: 32px 0 60px; }.diagnostic-header h1 { font-size: 30px; }.diagnostic-options { grid-template-columns: 1fr; }.diagnostic-question-card { padding: 22px; }.diagnostic-result { padding: 26px; }.diagnostic-result h1 { font-size: 30px; }.diagnostic-domain-grid { grid-template-columns: repeat(2, 1fr); }.self-study-heading { padding: 34px 20px 24px; }.self-study-heading h1 { font-size: 30px; }.self-study-group-tabs { padding: 14px 16px; grid-template-columns: 1fr; }.self-study-group-tab { padding: 17px; }.self-study-group-tab strong { font-size: 17px; }.situation-writing-shell { display: block; }.situation-scene-list { padding: 14px 16px; display: flex; gap: 8px; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); scrollbar-width: none; }.situation-scene-list > div, .situation-scene-list > p { display: none; }.situation-scene-list > button { min-width: max-content; width: auto; }.situation-writing-workspace { width: calc(100% - 32px); padding: 30px 0 64px; }.situation-writing-workspace > header h1 { font-size: 30px; }.situation-writing-workspace > header > strong { display: none; }.situation-figure { border-radius: 18px; }.situation-observation { grid-template-columns: 1fr; }.situation-observation details { min-width: 0; }.situation-writing-workspace > textarea { min-height: 150px; }.wrong-notes-page { width: calc(100% - 32px); padding-top: 36px; }.wrong-notes-page > header { align-items: flex-start; }.wrong-notes-page > header > strong { min-width: 82px; }.wrong-note-card dl { grid-template-columns: 1fr; }.wrong-note-card footer { display: grid; }
+  .student-learning-nav { min-height: auto; padding: 16px 16px 0; display: grid; gap: 12px; align-items: initial; position: static; }.student-learning-home { font-size: 22px; }.student-learning-nav > div { overflow-x: auto; scrollbar-width: none; }.student-learning-nav > div a { min-width: max-content; padding: 12px 14px; font-size: 12px; }.diagnostic-shell { display: block; }.diagnostic-sidebar { padding: 14px 16px; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); }.diagnostic-sidebar > span, .diagnostic-sidebar h2 { display: none; }.diagnostic-sidebar ol { display: flex; }.diagnostic-sidebar li { min-width: 44px; padding: 6px; grid-template-columns: 30px; }.diagnostic-sidebar li p { display: none; }.diagnostic-workspace { width: calc(100% - 32px); padding: 32px 0 60px; }.diagnostic-header h1 { font-size: 30px; }.diagnostic-options { grid-template-columns: 1fr; }.diagnostic-question-card { padding: 22px; }.diagnostic-result { padding: 26px; }.diagnostic-result h1 { font-size: 30px; }.diagnostic-domain-grid { grid-template-columns: repeat(2, 1fr); }.self-study-heading { padding: 34px 20px 24px; }.self-study-heading h1 { font-size: 30px; }.self-study-group-tabs { padding: 14px 16px; grid-template-columns: 1fr; }.self-study-group-tab { padding: 17px; }.self-study-group-tab strong { font-size: 17px; }.situation-writing-shell { display: block; }.situation-scene-list { padding: 14px 16px; display: flex; gap: 8px; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); scrollbar-width: none; }.situation-scene-list > div, .situation-scene-list > p { display: none; }.situation-scene-list > button { min-width: max-content; width: auto; }.situation-writing-workspace { width: calc(100% - 32px); padding: 30px 0 64px; }.situation-writing-workspace > header h1 { font-size: 30px; }.situation-writing-workspace > header > strong { display: none; }.situation-prompt { padding: 22px; }.situation-prompt p { font-size: 18px; }.situation-writing-workspace > textarea { min-height: 150px; }.wrong-notes-page { width: calc(100% - 32px); padding-top: 36px; }.wrong-notes-page > header { align-items: flex-start; }.wrong-notes-page > header > strong { min-width: 82px; }.wrong-note-card dl { grid-template-columns: 1fr; }.wrong-note-card footer { display: grid; }
   .site-header { height: 64px; }.hero { min-height: calc(100vh - 64px); padding: 72px 24px; }.hero h1 { font-size: clamp(40px, 12vw, 54px); }.hero-copy { font-size: 16px; }.hero-actions { flex-wrap: wrap; }
   .auth-shell, .teacher-header, .metric-grid, .class-grid, .history-grid, .concept-progress-grid { grid-template-columns: 1fr; }.teacher-shell { padding: 66px 24px; }.site-footer { flex-direction: column; }
   .auth-intro { padding: 64px 24px; }.auth-intro h1 { font-size: 42px; }
@@ -1574,7 +1555,7 @@ h1, h2, h3,
 .concept-step, .material-button { border-radius: 2px 10px 2px 2px; }
 .inquiry-card, .concept-summary-card, .concept-check,
 .summary-notebook, .real-material-card, .diagnostic-question-card,
-.diagnostic-result, .daily-concept-card, .situation-figure {
+.diagnostic-result, .daily-concept-card, .situation-prompt {
   border-radius: 3px 20px 3px 3px;
   border-color: #d5cdbf;
   box-shadow: 9px 11px 0 rgba(53,48,39,.05);

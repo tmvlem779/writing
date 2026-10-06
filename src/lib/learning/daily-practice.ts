@@ -39,7 +39,7 @@ const authenticItems = [
 ] satisfies Array<{ id: RealLifeMaterialKind; title: string; description: string }>;
 
 const sentenceItems = [
-  { id: "rainy-gate", title: "비 오는 등굣길 문장 만들기", description: "그림 속 두 사실을 관계가 드러나는 한 문장으로 만들어요." },
+  { id: "rainy-gate", title: "비 오는 등굣길 문장 만들기", description: "상황에 제시된 두 사실을 관계가 드러나는 한 문장으로 만들어요." },
   { id: "library-help", title: "도서관에서 문장 만들기", description: "상황에 맞는 높임 표현을 사용해 문장을 만들어요." },
   { id: "group-presentation", title: "모둠 발표 문장 만들기", description: "여러 행동을 알맞은 의미 관계로 연결해요." }
 ] satisfies Array<{ id: SituationSceneId; title: string; description: string }>;
