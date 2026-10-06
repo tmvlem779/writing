@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { grammarDiagnosticQuestions, scoreDiagnosticAnswers } from "../src/lib/diagnosis/grammar-diagnostic.ts";
 import { situationScenes } from "../src/lib/curriculum/situation-writing.ts";
+import { getCourseLesson, getCourseLessons } from "../src/lib/curriculum/five-lesson-course.ts";
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const dashboard = read("src/app/learn/page.tsx");
@@ -132,6 +133,24 @@ test("P1·DATA: 오늘의 챌린지 진행을 계정별로 복원하고 완료 �
 
 test("P3: 완료된 AI 활동에서는 다음 과제를 요구하는 윗문장을 숨긴다", () => {
   assert.match(practiceChapter, /!response\.activityComplete && <p>\{response\.studentMessage\}<\/p>/);
+});
+
+test("P2·P3: 챕터 2는 참고 중인 학생 문장을 밝히고 생성 뒤 같은 분석을 반복하지 않는다", () => {
+  const firstLesson = getCourseLesson(1, "grammar");
+  const creation = firstLesson.practiceActivities.find((activity) => activity.id === "grammar-simple-create");
+  const explanation = firstLesson.practiceActivities.find((activity) => activity.id === "grammar-simple-explain");
+  assert.match(creation?.completionCriterion ?? "", /문장 성분 분석은 다음 활동/);
+  assert.equal(explanation?.usesAnswerFrom, "grammar-simple-create");
+  assert.match(practiceChapter, /AI가 참고한 내 답/);
+  assert.match(practiceChapter, /앞 활동에서 만든 문장/);
+  assert.match(practiceChapter, /sourceAnswer/);
+  assert.match(practiceChapter, /Chapter 02 · \{lessonNumber\}\/\{lessonCount\}/);
+  assert.match(practiceChapter, /\{lessonNumber\}\/\{lessonCount\} · \{selected\.label\}/);
+  const dependentActivities = getCourseLessons("grammar")
+    .flatMap((lesson) => lesson.practiceActivities)
+    .filter((activity) => /앞의 ‘/.test(activity.prompt));
+  assert.ok(dependentActivities.length >= 6);
+  assert.ok(dependentActivities.every((activity) => activity.usesAnswerFrom));
 });
 
 test("MOBILE: 핵심 학습 화면과 답 제출 영역은 좁은 화면에서 한 열로 재배치된다", () => {

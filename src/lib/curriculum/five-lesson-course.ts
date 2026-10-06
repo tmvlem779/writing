@@ -18,6 +18,8 @@ export type CoursePracticeActivity = {
   activity: Activity;
   label: string;
   prompt: string;
+  completionCriterion?: string;
+  usesAnswerFrom?: string;
 };
 
 export type CourseLesson = {
@@ -114,8 +116,20 @@ export const grammarSixLessonCourse: CourseLesson[] = [
     practiceActivities: [
       { id: "grammar-components", activity: "diagnose", label: "성분 역할 찾기", prompt: "‘학생들이 운동장에서 공을 찬다.’에서 주어와 서술어를 찾아 적어 보세요." },
       { id: "grammar-component-cards", activity: "compare", label: "성분 조합", prompt: "‘민지가 / 도서관에서 / 책을 / 읽는다’의 어순을 한 번 바꾸어 보고, 자연스러운 문장을 고른 뒤 각 성분의 역할을 설명해 보세요." },
-      { id: "grammar-simple-create", activity: "create", label: "홑문장 만들기", prompt: "학교생활을 주제로 주어·서술어·목적어·부사어가 모두 들어간 홑문장을 직접 만들어 보세요." },
-      { id: "grammar-simple-explain", activity: "reflect", label: "구조 설명", prompt: "내가 만든 문장에서 각 문장 성분과 주어·서술어 관계의 수를 표시하고, 왜 홑문장인지 설명해 보세요." }
+      {
+        id: "grammar-simple-create",
+        activity: "create",
+        label: "홑문장 만들기",
+        prompt: "학교생활을 주제로 주어·서술어·목적어·부사어가 모두 들어간 홑문장을 직접 만들어 보세요.",
+        completionCriterion: "학교생활을 주제로 주어·서술어·목적어·부사어가 모두 포함된 홑문장을 학생이 직접 만들었다. 문장 성분 분석은 다음 활동에서 하므로 여기서 다시 묻지 않는다."
+      },
+      {
+        id: "grammar-simple-explain",
+        activity: "reflect",
+        label: "구조 설명",
+        prompt: "앞의 ‘홑문장 만들기’ 활동에서 만든 문장을 보고, 각 문장 성분과 주어·서술어 관계의 수를 표시한 뒤 왜 홑문장인지 설명해 보세요.",
+        usesAnswerFrom: "grammar-simple-create"
+      }
     ],
     realLifeMaterialIds: []
   },
@@ -129,7 +143,7 @@ export const grammarSixLessonCourse: CourseLesson[] = [
       { id: "grammar-clause-pairs", activity: "diagnose", label: "두 절 찾기", prompt: "‘비가 그쳤다. 경기가 시작되었다.’에서 각 홑문장의 주어·서술어를 찾고 두 사건 사이에 가능한 관계를 두 가지 적어 보세요." },
       { id: "grammar-connective-choice", activity: "compare", label: "의미 관계 선택", prompt: "나열·대조·원인·조건 가운데 두 관계를 골라 알맞은 연결 어미를 붙이고, 관계가 어떻게 달라지는지 설명해 보세요." },
       { id: "grammar-connected-create", activity: "expand", label: "이어진문장 만들기", prompt: "학교 행사에 관한 두 홑문장을 만든 뒤, 나열·대조·원인·조건 중 하나가 분명히 드러나도록 한 문장으로 연결해 보세요." },
-      { id: "grammar-connected-effect", activity: "reflect", label: "효과 비교", prompt: "같은 두 절을 서로 다른 연결 어미로 두 번 결합하고, 독자가 사건 관계를 어떻게 다르게 이해하는지 설명해 보세요." }
+      { id: "grammar-connected-effect", activity: "reflect", label: "효과 비교", prompt: "앞의 ‘이어진문장 만들기’에서 만든 문장의 두 절을 서로 다른 연결 어미로 두 번 결합하고, 독자가 사건 관계를 어떻게 다르게 이해하는지 설명해 보세요.", usesAnswerFrom: "grammar-connected-create" }
     ],
     realLifeMaterialIds: []
   },
@@ -143,7 +157,7 @@ export const grammarSixLessonCourse: CourseLesson[] = [
       { id: "grammar-embedded-boundary", activity: "diagnose", label: "안긴절 찾기", prompt: "‘나는 친구가 약속을 지켰음을 알았다.’에서 안긴절의 경계와 그 안의 주어·서술어를 표시해 보세요." },
       { id: "grammar-embedded-role", activity: "compare", label: "절의 역할", prompt: "‘친구가 고른 책을 읽었다.’와 ‘친구가 듣도록 말했다.’에서 안긴절이 각각 무엇을 꾸미는지 비교해 보세요." },
       { id: "grammar-embedded-transform", activity: "expand", label: "문장 확대", prompt: "‘친구가 발표한다.’를 다른 문장 속 명사절·관형절·부사절로 각각 넣어 세 문장을 만들어 보세요." },
-      { id: "grammar-embedded-effect", activity: "reflect", label: "확대 효과", prompt: "만든 세 문장 중 하나를 고르고, 안긴절을 사용하면서 새로 더해지거나 강조된 정보가 무엇인지 설명해 보세요." }
+      { id: "grammar-embedded-effect", activity: "reflect", label: "확대 효과", prompt: "앞의 ‘문장 확대’에서 만든 세 문장 중 하나를 고르고, 안긴절을 사용하면서 새로 더해지거나 강조된 정보가 무엇인지 설명해 보세요.", usesAnswerFrom: "grammar-embedded-transform" }
     ],
     realLifeMaterialIds: []
   },
@@ -158,7 +172,7 @@ export const grammarSixLessonCourse: CourseLesson[] = [
       { id: "grammar-time", activity: "compare", label: "시간 표현", prompt: "‘학생이 운동장을 달린다.’를 과거·미래·진행상·완료상으로 바꾸고, 각 표현이 사건을 바라보는 방식을 비교해 보세요." },
       { id: "grammar-honorific", activity: "create", label: "높임 표현", prompt: "‘선생님이 교실에 있다.’를 주체를 높이는 문장으로 바꾸고, 조사·선어말 어미·특수 어휘 중 무엇을 바꾸었는지 설명해 보세요." },
       { id: "grammar-ending-context", activity: "transfer", label: "상황별 선택", prompt: "친구에게 말하는 상황과 학교 공식 발표 상황을 정하고, 같은 내용을 종결·높임·시간 표현을 달리하여 각각 써 보세요." },
-      { id: "grammar-ending-effect", activity: "reflect", label: "표현 효과 설명", prompt: "앞에서 바꾼 문장 하나를 골라 종결 어미, 높임 방식, 시간 표현이 화자 태도와 독자 이해에 미친 효과를 설명해 보세요." }
+      { id: "grammar-ending-effect", activity: "reflect", label: "표현 효과 설명", prompt: "앞의 ‘상황별 선택’에서 바꾼 문장 하나를 골라 종결 어미, 높임 방식, 시간 표현이 화자 태도와 독자 이해에 미친 효과를 설명해 보세요.", usesAnswerFrom: "grammar-ending-context" }
     ],
     realLifeMaterialIds: []
   },
@@ -186,9 +200,9 @@ export const grammarSixLessonCourse: CourseLesson[] = [
     practiceActivities: [
       { id: "grammar-context", activity: "diagnose", label: "맥락 분석", prompt: "‘창문을 닫아 주세요.’가 사용될 수 있는 화자·청자·목적을 정하고, 같은 요청을 친구와 교장 선생님께 할 때 무엇을 달리해야 하는지 적어 보세요." },
       { id: "grammar-integrated-create", activity: "create", label: "종합 문장 생성", prompt: "학교 행사 안내 상황을 정한 뒤 이어진문장이나 안은문장 하나와 시간·높임·피동/사동·부정 표현 중 두 가지를 사용해 3~5문장을 써 보세요." },
-      { id: "grammar-context-transform", activity: "transfer", label: "상황별 변형", prompt: "내 문장 중 하나를 골라 친구 대화용과 학교 공식 안내용으로 각각 바꾸어 쓰고, 바꾼 문법 요소를 표시해 보세요." },
-      { id: "grammar-self-explain", activity: "reflect", label: "선택 이유 설명", prompt: "사용한 문장 구조 하나와 문법 요소 두 가지가 의미·정보 초점·화자 태도에 미친 효과를 근거와 함께 설명해 보세요." },
-      { id: "grammar-peer-review", activity: "error", label: "상호 피드백·평가", prompt: "친구에게 보여 줄 문장과 ‘상황에 어울리는가, 의도가 분명한가, 선택 이유가 타당한가’ 중 받고 싶은 기준을 정하세요. 의견을 받은 뒤 수정 여부와 이유를 직접 결정하세요." }
+      { id: "grammar-context-transform", activity: "transfer", label: "상황별 변형", prompt: "앞의 ‘종합 문장 생성’에서 쓴 문장 중 하나를 골라 친구 대화용과 학교 공식 안내용으로 각각 바꾸어 쓰고, 바꾼 문법 요소를 표시해 보세요.", usesAnswerFrom: "grammar-integrated-create" },
+      { id: "grammar-self-explain", activity: "reflect", label: "선택 이유 설명", prompt: "앞의 ‘상황별 변형’에서 쓴 문장의 구조 하나와 문법 요소 두 가지가 의미·정보 초점·화자 태도에 미친 효과를 근거와 함께 설명해 보세요.", usesAnswerFrom: "grammar-context-transform" },
+      { id: "grammar-peer-review", activity: "error", label: "상호 피드백·평가", prompt: "앞의 ‘상황별 변형’에서 쓴 문장 가운데 친구에게 보여 줄 문장과 ‘상황에 어울리는가, 의도가 분명한가, 선택 이유가 타당한가’ 중 받고 싶은 기준을 정하세요. 의견을 받은 뒤 수정 여부와 이유를 직접 결정하세요.", usesAnswerFrom: "grammar-context-transform" }
     ],
     realLifeMaterialIds: []
   }

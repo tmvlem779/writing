@@ -77,3 +77,18 @@ test("DATA: 간결한 질문과 숙달 종료 규칙은 프롬프트 v15로 추�
   assert.match(migration, /writing-tutor-v15/);
   assert.match(migration, /concise-non-leading-mastery-stop/);
 });
+
+test("P2·P3: 문장 생성의 간결화 질문은 이미 사용한 성분을 다시 분석하게 하지 않는다", () => {
+  const result = applyTutorResponsePolicy(
+    request({ activity: "create" }),
+    response({ question: "내가 쓴 문장에서 주어와 목적어와 부사어와 서술어가 각각 무엇인지 모두 찾아서 그 역할을 자세하게 다시 설명해 보세요." })
+  );
+  assert.doesNotMatch(result.question, /주어|목적어|부사어|서술어/);
+  assert.match(result.question, /빠진 조건/);
+});
+
+test("DATA: 학생 문장 명시와 중복 분석 방지 규칙은 프롬프트 v16으로 추적한다", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/202610060003_add_explicit_answer_reference_prompt.sql", import.meta.url), "utf8");
+  assert.match(migration, /writing-tutor-v16/);
+  assert.match(migration, /explicit-answer-reference-no-duplicate-analysis/);
+});

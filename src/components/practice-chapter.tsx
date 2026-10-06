@@ -4,7 +4,14 @@ import { useMemo, useState } from "react";
 import { MondeukLoading } from "@/components/mondeuk-loading";
 import type { Activity, AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
-import { getCourseLesson, getCourseTrack, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
+import {
+  getCourseLesson,
+  getCourseLessons,
+  getCourseTrack,
+  type CourseLessonNumber,
+  type CoursePracticeActivity,
+  type CourseTrackId
+} from "@/lib/curriculum/five-lesson-course";
 
 type Message = { role: "student" | "assistant"; content: string };
 type SupportMode = "submit" | "hint";
@@ -28,8 +35,12 @@ const completionCriteria: Record<Activity, string> = {
   authentic: "자료에서 근거를 찾고 자료의 목적이나 표현 효과를 한 가지 설명했다."
 };
 
-function criterionForActivity(activity: Activity) {
-  return completionCriteria[activity];
+function criterionForActivity(activity: CoursePracticeActivity) {
+  return activity.completionCriterion ?? completionCriteria[activity.activity];
+}
+
+function previewAnswer(answer: string) {
+  return answer.length > 240 ? `${answer.slice(0, 240)}…` : answer;
 }
 
 export function PracticeChapter({
@@ -40,6 +51,7 @@ export function PracticeChapter({
   trackId
 }: PracticeChapterProps) {
   const lesson = getCourseLesson(lessonNumber, trackId);
+  const lessonCount = getCourseLessons(trackId).length;
   const track = getCourseTrack(trackId);
   const activities = lesson.practiceActivities;
   const [activityId, setActivityId] = useState(() => (
@@ -48,6 +60,8 @@ export function PracticeChapter({
   const [draft, setDraft] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [response, setResponse] = useState<AgentResponse | null>(null);
+  const [activityAnswers, setActivityAnswers] = useState<Record<string, string>>({});
+  const [lastSubmittedAnswer, setLastSubmittedAnswer] = useState("");
   const [history, setHistory] = useState<Message[]>([]);
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
@@ -59,6 +73,10 @@ export function PracticeChapter({
   const [demo, setDemo] = useState(false);
 
   const selected = useMemo(() => activities.find((item) => item.id === activityId) ?? activities[0], [activities, activityId]);
+  const sourceActivity = selected.usesAnswerFrom
+    ? activities.find((item) => item.id === selected.usesAnswerFrom)
+    : undefined;
+  const sourceAnswer = selected.usesAnswerFrom ? activityAnswers[selected.usesAnswerFrom] ?? "" : "";
 
   async function ensureSession() {
     if (sessionId) return sessionId;
@@ -81,12 +99,16 @@ export function PracticeChapter({
     try {
       const id = await ensureSession();
       const submittedDraft = draft.trim();
+      const answerReference = sourceActivity
+        ? `[앞 활동에서 만든 문장 · ${sourceActivity.label}]\n${sourceAnswer || "현재 화면에 남아 있지 않습니다. 학생이 분석할 문장을 현재 답에 다시 적어야 합니다."}`
+        : "";
       const studentMessage = [
         `[수업안] ${track.optionLabel} · ${track.title}`,
         `[수업 차시] ${lessonNumber}차시 · ${lesson.title}`,
         `[핵심 질문] ${lesson.keyQuestion}`,
         `[현재 과제] ${selected.prompt}`,
-        `[활동 완료 기준] ${criterionForActivity(selected.activity)}`,
+        answerReference,
+        `[활동 완료 기준] ${criterionForActivity(selected)}`,
         `[요청 유형] ${supportMode === "hint" ? "AI 힌트" : "도움 없이 제출"}`,
         `[학생 답]\n${submittedDraft || "아직 답을 쓰지 않았습니다."}`
       ].join("\n\n");
@@ -107,6 +129,10 @@ export function PracticeChapter({
       const body = await result.json();
       if (!result.ok) throw new Error(body.error ?? "응답을 불러오지 못했습니다.");
       const next = body as AgentResponse & { demo?: boolean };
+      if (submittedDraft) {
+        setActivityAnswers((answers) => ({ ...answers, [selected.id]: submittedDraft }));
+        setLastSubmittedAnswer(submittedDraft);
+      }
       setResponse(next);
       setDemo((current) => current || Boolean(next.demo));
       setScaffoldLevel(next.scaffoldLevel);
@@ -139,6 +165,7 @@ export function PracticeChapter({
     setAttemptCount(0);
     setScaffoldLevel(0);
     setDraft("");
+    setLastSubmittedAnswer(activityAnswers[nextId] ?? "");
     onProgressChange?.(completedActivityIds, nextId);
   }
 
@@ -146,7 +173,7 @@ export function PracticeChapter({
     <div className="studio-shell practice-studio-shell">
       <aside className="activity-sidebar" aria-label={`${lessonNumber}차시 2장 학습 활동`}>
         <div className="sidebar-heading">
-          <span>Chapter 02 · {lessonNumber}차시</span>
+          <span>Chapter 02 · {lessonNumber}/{lessonCount}</span>
           <strong>{lesson.title}</strong>
         </div>
         {activities.map((item, index) => (
@@ -166,7 +193,7 @@ export function PracticeChapter({
       <section className="workspace" aria-busy={pendingAction !== null} aria-labelledby="workspace-title">
         <header className="workspace-header">
           <div>
-            <span className="eyebrow">{lessonNumber}차시 · {selected.label}</span>
+            <span className="eyebrow">{lessonNumber}/{lessonCount} · {selected.label}</span>
             <h1 id="workspace-title">생각을 먼저 적어 보세요</h1>
           </div>
           {demo && <span className="demo-badge">개발용 데모</span>}
@@ -180,11 +207,27 @@ export function PracticeChapter({
         <div className="task-card">
           <span>이번 과제</span>
           <p>{selected.prompt}</p>
+          {sourceActivity && (
+            <div className="previous-answer-reference">
+              <span>앞 활동에서 만든 문장 · {sourceActivity.label}</span>
+              {sourceAnswer ? (
+                <blockquote>“{previewAnswer(sourceAnswer)}”</blockquote>
+              ) : (
+                <p>앞 활동의 문장이 이 화면에 남아 있지 않아요. 분석할 문장을 답안 첫 줄에 다시 적어 주세요.</p>
+              )}
+            </div>
+          )}
         </div>
 
         {response && (
           <article className="coach-card" aria-live="polite">
             <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
+            {lastSubmittedAnswer && (
+              <div className="coach-answer-reference">
+                <span>AI가 참고한 내 답</span>
+                <blockquote>“{previewAnswer(lastSubmittedAnswer)}”</blockquote>
+              </div>
+            )}
             {!response.activityComplete && <p>{response.studentMessage}</p>}
             {response.activityComplete ? (
               <div className="activity-completion-card">

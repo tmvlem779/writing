@@ -9,9 +9,9 @@ const conciseQuestions: Record<TurnRequest["activity"], string[]> = {
     "아직 헷갈리는 부분을 한 가지만 적어 보세요."
   ],
   create: [
-    "쓴 문장에서 주어와 서술어에 밑줄을 그어 보세요.",
-    "조건에 맞게 바꿀 말 하나만 골라 보세요.",
-    "바꾼 부분이 뜻에 준 차이를 한 가지 적어 보세요."
+    "현재 과제에서 빠진 조건 하나만 보태 문장을 다시 써 보세요.",
+    "아직 드러나지 않은 조건 하나를 문장에 보태 보세요.",
+    "조건을 모두 갖춘 한 문장으로 다시 써 보세요."
   ],
   expand: [
     "원래 문장에 덧붙인 부분만 찾아 적어 보세요.",
@@ -50,7 +50,7 @@ function needsSimplifying(question: string) {
   return question.trim().length === 0
     || question.length > MAX_QUESTION_LENGTH
     || questionMarks > 1
-    || /각각.*주어.*서술어|[‘'][^’']+[’'](?:을|를)?\s*주어.*[‘'][^’']+[’'](?:을|를)?\s*서술어|누가 무엇을 하는가|판단.*뒷받침|한 문장으로 설명/.test(question);
+    || /각각.*주어.*서술어|주어.*(?:목적어|부사어).*서술어|[‘'][^’']+[’'](?:을|를)?\s*주어.*[‘'][^’']+[’'](?:을|를)?\s*서술어|누가 무엇을 하는가|판단.*뒷받침|한 문장으로 설명/.test(question);
 }
 
 export function applyTutorResponsePolicy(request: TurnRequest, response: AgentResponse): AgentResponse {
