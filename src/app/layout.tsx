@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Noto_Sans_KR } from "next/font/google";
 import { BrandLogo } from "@/components/brand-logo";
 import { PasswordSetupSessionRedirect } from "@/components/password-setup-session-redirect";
@@ -23,12 +22,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <PasswordSetupSessionRedirect />
         <header className="site-header">
           <BrandLogo className="brand" />
-          <nav aria-label="주요 메뉴">
-            <Link href="/learn">학습하기</Link>
-            <Link href={{ pathname: "/history" }}>나의 기록</Link>
-            <Link href="/teacher">교사 화면</Link>
-            <Link href="/privacy">개인정보 안내</Link>
-          </nav>
         </header>
         <main>{children}</main>
         <footer className="site-footer">

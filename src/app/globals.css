@@ -1327,21 +1327,11 @@ h1, h2, h3,
 
 .site-header {
   height: 82px;
-  border-top: 3px solid var(--seal);
-  border-bottom-color: rgba(55, 49, 39, .18);
-  background: rgba(250, 247, 239, .94);
+  justify-content: flex-start;
+  border-top: 3px solid #e98792;
+  border-bottom-color: rgba(83, 103, 147, .14);
+  background: rgba(255, 253, 249, .96);
 }
-.site-header nav { gap: 34px; color: #49483f; font-weight: 700; }
-.site-header nav a { position: relative; }
-.site-header nav a::after {
-  content: "";
-  height: 1px;
-  position: absolute;
-  inset: auto 50% -8px;
-  background: var(--seal);
-  transition: inset .18s ease;
-}
-.site-header nav a:hover::after { inset-inline: 0; }
 
 .brand-logo { gap: 12px; }
 .brand-logo-type {
@@ -1390,67 +1380,46 @@ h1, h2, h3,
   color: rgba(255,255,255,.62);
 }
 
-/* 로그인: 한지 위 세로 조판과 낙관 */
+/* 로그인: 밝은 색면 위에 계정 입력만 남긴 간결한 첫 화면 */
 .auth-shell {
   min-height: calc(100vh - 82px);
   background:
-    linear-gradient(90deg, rgba(32,47,41,.985) 0 50%, rgba(250,247,239,.96) 50%),
-    var(--paper);
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,.72), transparent 25%),
+    linear-gradient(90deg, #dfeeff 0 50%, #fff9f0 50%);
 }
 .auth-intro {
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(135deg, rgba(255,255,255,.035), transparent 45%),
-    #202f29;
+    radial-gradient(circle at 78% 22%, rgba(255, 255, 255, .72), transparent 20%),
+    radial-gradient(circle at 22% 76%, rgba(244, 194, 207, .5), transparent 31%),
+    linear-gradient(145deg, #d8ecff, #eee5ff 68%, #f8e3e8);
 }
-.auth-intro::before {
-  content: "문\A 장";
-  white-space: pre;
-  position: absolute;
-  right: 7%;
-  top: 9%;
-  color: rgba(244,238,225,.075);
-  font: 900 170px/.78 var(--font-brand), serif;
-  writing-mode: vertical-rl;
+.auth-intro h1 {
+  max-width: 520px;
+  margin: 0;
+  color: #334368;
+  font-size: clamp(64px, 8vw, 116px);
+  font-weight: 900;
+  letter-spacing: -.075em;
+  text-shadow: 0 5px 0 rgba(255,255,255,.58);
 }
-.auth-intro::after {
-  content: "한글로 생각하고, 문장으로 쓰다";
-  position: absolute;
-  left: 8vw;
-  bottom: 55px;
-  padding-left: 14px;
-  border-left: 3px solid var(--seal);
-  color: rgba(255,255,255,.48);
-  font: 500 12px/1.5 var(--font-brand), serif;
-  letter-spacing: .12em;
-}
-.auth-intro h1 { max-width: 520px; font-weight: 700; letter-spacing: -.045em; }
-.auth-intro a { color: #d9caa9; }
 .auth-card {
-  border: 1px solid #d5cdbf;
-  border-radius: 3px 22px 3px 3px;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 31px, rgba(66,60,47,.035) 32px),
-    var(--surface);
-  box-shadow: 18px 22px 0 #ded7ca, var(--shadow);
+  border: 1px solid #d9deef;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,253,249,.96));
+  box-shadow: 18px 22px 0 #e5e8f2, 0 24px 70px rgba(68, 82, 127, .12);
 }
-.auth-card::before {
-  content: "학교 수업 기록";
-  display: inline-block;
-  margin-bottom: 20px;
-  padding: 5px 9px;
-  border: 1px solid var(--seal);
-  color: var(--seal);
-  font: 700 10px/1 var(--font-brand), serif;
-  letter-spacing: .08em;
-}
-.auth-card h2 { font-weight: 700; }
+.auth-card h2 { color: #334368; font-weight: 800; }
+.auth-card > p { color: #747b91; }
 .auth-form input, .invite-form input {
-  border-radius: 2px;
-  border-color: #cfc7b8;
-  background: rgba(255,255,255,.82);
+  border-radius: 12px;
+  border-color: #cbd3e7;
+  background: #fff;
 }
+.auth-form input:focus { border-color: #6e82ba; outline: 3px solid rgba(110,130,186,.15); }
+.auth-form .primary-button { border-radius: 12px; background: #6175ad; }
+.auth-form .primary-button:hover:not(:disabled) { background: #50659e; }
 
 /* 학생 홈: 국어 교과서의 목차와 학습 기록을 닮은 편집 화면 */
 .student-dashboard {
@@ -1687,9 +1656,10 @@ h1, h2, h3,
 
 @media (max-width: 620px) {
   .site-header { height: 68px; }
-  .auth-shell { background: #f4f0e7; }
-  .auth-intro::after { display: none; }
-  .auth-card { box-shadow: 8px 10px 0 #ded7ca; }
+  .auth-shell { background: linear-gradient(180deg, #e2efff 0 34%, #fff9f2 34%); }
+  .auth-intro { min-height: 180px; display: grid; align-items: center; }
+  .auth-intro h1 { font-size: clamp(48px, 16vw, 68px); }
+  .auth-card { box-shadow: 8px 10px 0 #e5e8f2; }
   .student-dashboard::before { opacity: .6; }
   .student-dashboard-intro::before { display: none; }
   .student-dashboard-card { min-height: 245px; }

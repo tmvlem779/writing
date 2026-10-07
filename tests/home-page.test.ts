@@ -13,8 +13,9 @@ test("첫 화면은 책 모션 없이 로그인 화면으로 바로 이동한다
   assert.match(page, /redirect\("\/login"\)/);
   assert.doesNotMatch(page, /BookJourney/);
   assert.match(loginPage, /<LoginForm \/>/);
-  assert.match(loginPage, /수업 계정으로/);
+  assert.match(loginPage, /<h1>문득문득<\/h1>/);
   assert.match(loginPage, /로그인/);
+  assert.doesNotMatch(loginPage, /학교 수업 전용|수업 계정으로|학생 데이터 안내 보기/);
 });
 
 test("공통 화면의 브랜드명을 문득문득으로 통일한다", () => {
@@ -36,10 +37,12 @@ test("한국어 편집 디자인은 산세리프 제목과 서로 다른 장면 
   assert.match(styles, /\.v3-book-stage > \.v3-book-cover \{[^}]*linear-gradient\(90deg, #212a25 0 50%, #f8f3e8 50% 100%\)/s);
   assert.match(styles, /\.student-dashboard::before \{[^}]*hunminjeongeum-glyphs\.png/s);
   assert.match(styles, /\.student-dashboard-card\.dashboard-card-1::before \{[^}]*content: none;[^}]*display: none;/s);
-  assert.match(styles, /\.auth-intro::before \{[^}]*writing-mode: vertical-rl/s);
+  assert.match(styles, /linear-gradient\(90deg, #dfeeff 0 50%, #fff9f0 50%\)/);
+  assert.doesNotMatch(styles, /content: "학교 수업 기록"/);
+  assert.doesNotMatch(styles, /content: "한글로 생각하고, 문장으로 쓰다"/);
 });
 
-test("상단 메뉴에는 별도 로그인 버튼을 두지 않는다", () => {
-  assert.doesNotMatch(layout, /className="nav-button"/);
-  assert.doesNotMatch(layout, />로그인<\/Link>/);
+test("로그인 화면 상단에는 브랜드만 남기고 공통 메뉴를 제거한다", () => {
+  assert.doesNotMatch(layout, /<nav/);
+  assert.doesNotMatch(layout, /학습하기|나의 기록|교사 화면|개인정보 안내/);
 });
