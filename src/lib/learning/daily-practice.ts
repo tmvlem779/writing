@@ -1,8 +1,9 @@
 import type { RealLifeMaterialKind } from "@/lib/curriculum/real-life-materials";
+import { errorCorrectionItems, type ErrorCorrectionItemId } from "../curriculum/error-correction.ts";
 import type { SituationSceneId } from "@/lib/curriculum/situation-writing";
 
-export type DailyPracticeType = "literature" | "authentic" | "sentence-making" | "concept-learning";
-export type DailyPracticeMaterialId = RealLifeMaterialKind | SituationSceneId | string;
+export type DailyPracticeType = "literature" | "authentic" | "sentence-making" | "concept-learning" | "error-correction";
+export type DailyPracticeMaterialId = RealLifeMaterialKind | SituationSceneId | ErrorCorrectionItemId | string;
 
 export type DailyPracticePlan = {
   date: string;
@@ -11,7 +12,7 @@ export type DailyPracticePlan = {
   materialId: DailyPracticeMaterialId;
   title: string;
   description: string;
-  icon: "book" | "news" | "pencil" | "concept";
+  icon: "book" | "news" | "pencil" | "concept" | "error";
 };
 
 export type DailyRoadmapDay = DailyPracticePlan & {
@@ -55,7 +56,7 @@ const conceptItems = [
   { id: "quotation-context", title: "인용 표현을 맥락에 맞게 바꾸기", description: "말한 사람과 시점에 맞게 인칭과 시간 표현을 바꿔요." }
 ] as const;
 
-const practiceTypes = ["literature", "authentic", "sentence-making", "concept-learning"] as const;
+const practiceTypes = ["literature", "authentic", "sentence-making", "concept-learning", "error-correction"] as const;
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -118,6 +119,18 @@ export function getDailyPracticePlan(date: string): DailyPracticePlan {
     const item = sentenceItems[positiveModulo(blockIndex, sentenceItems.length)];
     return { date, type: "sentence-making", typeLabel: "문장 만들기", materialId: item.id, title: item.title, description: item.description, icon: "pencil" };
   }
+  if (type === "error-correction") {
+    const item = errorCorrectionItems[positiveModulo(blockIndex, errorCorrectionItems.length)];
+    return {
+      date,
+      type: "error-correction",
+      typeLabel: "틀린 문장 고치기",
+      materialId: item.id,
+      title: item.title,
+      description: "틀린 부분에 밑줄을 긋고 문장을 바르게 고친 뒤 그 이유를 설명해요.",
+      icon: "error"
+    };
+  }
 
   const item = conceptItems[positiveModulo(blockIndex, conceptItems.length)];
   return { date, type: "concept-learning", typeLabel: "개념학습", materialId: item.id, title: item.title, description: item.description, icon: "concept" };
@@ -131,7 +144,7 @@ function formatRoadmapDate(date: string) {
   };
 }
 
-export function buildDailyRoadmap(today: string, completedDates: Iterable<string>, daysBefore = 3, daysAfter = 3): DailyRoadmapDay[] {
+export function buildDailyRoadmap(today: string, completedDates: Iterable<string>, daysBefore = 14, daysAfter = 15): DailyRoadmapDay[] {
   const completed = new Set(completedDates);
   return Array.from({ length: daysBefore + daysAfter + 1 }, (_, index) => {
     const offset = index - daysBefore;
@@ -146,6 +159,12 @@ export function buildDailyRoadmap(today: string, completedDates: Iterable<string
           : "locked";
     return { ...getDailyPracticePlan(date), ...labels, status };
   });
+}
+
+export function getSelectablePracticeDate(requestedDate: string | undefined, today: string, daysBefore = 14) {
+  if (!requestedDate || !/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) return today;
+  const distance = calendarDayDistance(requestedDate, today);
+  return distance >= 0 && distance <= daysBefore ? requestedDate : today;
 }
 
 export function calculateDailyStreak(completedDates: Iterable<string>, today: string) {

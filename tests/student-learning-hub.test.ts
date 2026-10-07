@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { grammarDiagnosticQuestions, scoreDiagnosticAnswers } from "../src/lib/diagnosis/grammar-diagnostic.ts";
 import { situationScenes } from "../src/lib/curriculum/situation-writing.ts";
+import { errorCorrectionItems } from "../src/lib/curriculum/error-correction.ts";
 import { getCourseLesson, getCourseLessons } from "../src/lib/curriculum/five-lesson-course.ts";
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -15,6 +16,7 @@ const selfStudyWorkspace = read("src/components/self-study-workspace.tsx");
 const todayPracticePage = read("src/app/learn/self-study/today/page.tsx");
 const dailyPracticeToday = read("src/components/daily-practice-today.tsx");
 const conceptLearningActivity = read("src/components/concept-learning-activity.tsx");
+const errorCorrectionActivity = read("src/components/error-correction-activity.tsx");
 const situationWritingActivity = read("src/components/situation-writing-activity.tsx");
 const realLifeChapter = read("src/components/real-life-chapter.tsx");
 const wrongNotesPage = read("src/app/learn/wrong-notes/page.tsx");
@@ -62,23 +64,25 @@ test("P1·P3: 진단 오답은 정답을 즉시 공개하지 않고 관찰 단�
   }
 });
 
-test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 매일 다른 유형의 로드맵으로 제공한다", () => {
+test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 매일 다른 유형의 30일 로드맵으로 제공한다", () => {
   assert.match(challengePage, /WritingStudio/);
   assert.match(selfStudyPage, /SelfStudyWorkspace/);
-  assert.match(selfStudyWorkspace, /7일 문법 루틴/);
+  assert.match(selfStudyWorkspace, /30일 문법 루틴/);
   assert.match(selfStudyWorkspace, /buildDailyRoadmap/);
   assert.match(selfStudyWorkspace, /getDailyPracticePlan/);
-  assert.match(selfStudyWorkspace, /href="\/learn\/self-study\/today"/);
+  assert.match(selfStudyWorkspace, /isToday \? "\/learn\/self-study\/today"/);
   assert.doesNotMatch(selfStudyWorkspace, /target="_blank"/);
   assert.doesNotMatch(selfStudyWorkspace, /새 탭에서/);
   assert.doesNotMatch(selfStudyWorkspace, /문학 작품, 실생활 자료, 문장 만들기, 개념학습을 매일 복불복으로 만납니다/);
+  assert.doesNotMatch(selfStudyPage, /문학 작품, 실생활 자료|복불복으로 만나/);
   assert.doesNotMatch(selfStudyWorkspace, /SituationWritingActivity/);
   assert.match(todayPracticePage, /DailyPracticeToday/);
   assert.match(dailyPracticeToday, /SituationWritingActivity/);
   assert.match(dailyPracticeToday, /ConceptLearningActivity/);
-  assert.match(dailyPracticeToday, /todayPlan\.type === "concept-learning"/);
-  assert.match(dailyPracticeToday, /todayPlan\.type === "sentence-making"/);
-  assert.match(dailyPracticeToday, /onDailyComplete=\{completeToday\}/);
+  assert.match(dailyPracticeToday, /practicePlan\.type === "concept-learning"/);
+  assert.match(dailyPracticeToday, /practicePlan\.type === "sentence-making"/);
+  assert.match(dailyPracticeToday, /practicePlan\.type === "error-correction"/);
+  assert.match(dailyPracticeToday, /onDailyComplete=\{isToday \? completeToday : undefined\}/);
   assert.match(dailyPracticeToday, /showOverview=\{false\}/);
   assert.match(dailyPracticeToday, /일 연속 학습/);
   assert.match(selfStudyPage, /하루 한 걸음, 문법 감각을 이어 가요/);
@@ -159,10 +163,34 @@ test("MOBILE: 핵심 학습 화면과 답 제출 영역은 좁은 화면에서 �
   assert.match(styles, /\.check-result-summary ol \{ grid-template-columns: 1fr;/);
 });
 
-test("스스로 유형 학습 로드맵은 그림과 제목이 겹치지 않도록 방향별 간격을 둔다", () => {
-  assert.match(styles, /\.daily-path-step\.offset-1 \.daily-path-copy \{[^}]*padding-left: 34px;/s);
-  assert.match(styles, /\.daily-path-step\.offset-2 \.daily-path-copy \{[^}]*justify-self: end;[^}]*transform: translateX\(clamp\(80px, 10vw, 140px\)\);/s);
-  assert.match(styles, /\.daily-path-step \.daily-path-copy \{[^}]*margin-right: 0;[^}]*padding-left: 0;[^}]*transform: none;/s);
+test("스스로 유형 학습 로드맵은 모든 방향에서 노드와 안내 글의 간격을 일정하게 둔다", () => {
+  assert.match(styles, /\.daily-path-copy \{[^}]*left: calc\(var\(--node-x\) \+ 76px\);/s);
+  assert.match(styles, /\.daily-path-step\.offset-2 \.daily-path-copy \{[^}]*right: calc\(100% - var\(--node-x\) \+ 76px\);/s);
+  assert.match(styles, /\.daily-path-step \.daily-path-copy, \.daily-path-step\.offset-2 \.daily-path-copy \{[^}]*right: auto;[^}]*left: 100px;[^}]*text-align: left;/s);
+});
+
+test("P1·P2·P3: 틀린 문장 고치기는 오류 표시, 수정, 이유 설명을 차례로 요구한다", () => {
+  assert.equal(errorCorrectionItems.length, 6);
+  assert.ok(errorCorrectionItems.every((item) => item.incorrectTokenIndexes.length > 0));
+  assert.ok(errorCorrectionItems.every((item) => item.acceptedCorrections.length > 0 && item.reasonKeywords.length > 0));
+  assert.match(errorCorrectionActivity, /1\. 틀린 부분 찾기/);
+  assert.match(errorCorrectionActivity, /문법적으로 잘못된 부분을 골라 밑줄/);
+  assert.match(errorCorrectionActivity, /2\. 바르게 고치고 이유 쓰기/);
+  assert.match(errorCorrectionActivity, /바르게 고친 문장/);
+  assert.match(errorCorrectionActivity, /고친 이유/);
+  assert.match(errorCorrectionActivity, /activity: "error"/);
+  assert.match(errorCorrectionActivity, /onDailyComplete\?\.\(sessionId\)/);
+  assert.match(errorCorrectionActivity, /if \(!acceptedCorrections\.includes/);
+});
+
+test("P4·P5: 지난 날짜는 다시 열리지만 연속 학습 완료 API에는 기록하지 않는다", () => {
+  assert.match(selfStudyWorkspace, /isAvailable = day\.status !== "locked"/);
+  assert.match(selfStudyWorkspace, /`\/learn\/self-study\/today\?date=\$\{day\.date\}`/);
+  assert.match(selfStudyWorkspace, /연속 학습 기록에는 포함되지 않아요/);
+  assert.match(todayPracticePage, /searchParams: Promise/);
+  assert.match(dailyPracticeToday, /getSelectablePracticeDate/);
+  assert.match(dailyPracticeToday, /if \(!isToday \|\| todayCompleted/);
+  assert.match(dailyPracticeToday, /연속 학습 기록 제외/);
 });
 
 test("학생 학습 탭은 별도 책장 애니메이션 없이 즉시 이동한다", () => {

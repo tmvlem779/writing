@@ -7,31 +7,40 @@ import {
   buildDailyRoadmap,
   calculateDailyStreak,
   getDailyPracticePlan,
-  getRecentSevenDays
+  getRecentSevenDays,
+  getSelectablePracticeDate
 } from "../src/lib/learning/daily-practice.ts";
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("P1·P3·P6: 네 유형은 4일마다 모두 나오되 날짜 기반 복불복 순서로 안정적으로 섞인다", () => {
-  const firstBlock = ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"].map((date) => getDailyPracticePlan(date).type);
-  const secondBlock = ["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08"].map((date) => getDailyPracticePlan(date).type);
-  const expectedTypes = ["authentic", "concept-learning", "literature", "sentence-making"];
+test("P1·P3·P6: 다섯 유형은 5일마다 모두 나오되 날짜 기반 복불복 순서로 안정적으로 섞인다", () => {
+  const firstDates = ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04", "2026-10-05"];
+  const secondDates = ["2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09", "2026-10-10"];
+  const firstBlock = firstDates.map((date) => getDailyPracticePlan(date).type);
+  const secondBlock = secondDates.map((date) => getDailyPracticePlan(date).type);
+  const expectedTypes = ["authentic", "concept-learning", "error-correction", "literature", "sentence-making"];
   assert.deepEqual([...firstBlock].sort(), expectedTypes);
   assert.deepEqual([...secondBlock].sort(), expectedTypes);
   assert.notDeepEqual(firstBlock, secondBlock);
-  assert.deepEqual(firstBlock, ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"].map((date) => getDailyPracticePlan(date).type));
+  assert.deepEqual(firstBlock, firstDates.map((date) => getDailyPracticePlan(date).type));
 
-  const conceptIds = Array.from({ length: 32 }, (_, index) => getDailyPracticePlan(addCalendarDays("2026-10-01", index)))
+  const conceptIds = Array.from({ length: 40 }, (_, index) => getDailyPracticePlan(addCalendarDays("2026-10-01", index)))
     .filter((plan) => plan.type === "concept-learning")
     .map((plan) => plan.materialId)
     .sort();
   assert.deepEqual(conceptIds, grammarDiagnosticQuestions.map((question) => question.id).sort());
 });
 
-test("P2·P4: 로드맵은 오늘만 열고 완료·지난 날·미래 날을 구분한다", () => {
+test("P2·P4: 30일 로드맵은 지난 14일·오늘·앞으로 15일을 구분한다", () => {
   const roadmap = buildDailyRoadmap("2026-10-05", ["2026-10-03", "2026-10-04"]);
-  assert.equal(roadmap.length, 7);
-  assert.deepEqual(roadmap.map((day) => day.status), ["missed", "completed", "completed", "today", "locked", "locked", "locked"]);
+  assert.equal(roadmap.length, 30);
+  assert.equal(roadmap[0].date, "2026-09-21");
+  assert.equal(roadmap[14].status, "today");
+  assert.equal(roadmap[29].date, "2026-10-20");
+  assert.deepEqual(roadmap.slice(12, 16).map((day) => day.status), ["completed", "completed", "today", "locked"]);
+  assert.equal(getSelectablePracticeDate("2026-09-21", "2026-10-05"), "2026-09-21");
+  assert.equal(getSelectablePracticeDate("2026-10-06", "2026-10-05"), "2026-10-05");
+  assert.equal(getSelectablePracticeDate("2026-09-20", "2026-10-05"), "2026-10-05");
 });
 
 test("P5: 연속 학습은 오늘 또는 어제부터 끊기지 않은 날짜만 센다", () => {

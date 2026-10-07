@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ConceptLearningActivity } from "@/components/concept-learning-activity";
+import { ErrorCorrectionActivity } from "@/components/error-correction-activity";
 import { MondeukLoading } from "@/components/mondeuk-loading";
 import { RealLifeChapter } from "@/components/real-life-chapter";
 import { SituationWritingActivity } from "@/components/situation-writing-activity";
 import type { RealLifeMaterialKind } from "@/lib/curriculum/real-life-materials";
 import type { SituationSceneId } from "@/lib/curriculum/situation-writing";
-import { getDailyPracticePlan, getKoreanDate, getRecentSevenDays } from "@/lib/learning/daily-practice";
+import { getDailyPracticePlan, getKoreanDate, getRecentSevenDays, getSelectablePracticeDate } from "@/lib/learning/daily-practice";
 
 type ProgressResponse = {
   today: string;
@@ -25,8 +26,13 @@ function StreakFlame() {
   );
 }
 
-export function DailyPracticeToday() {
+type DailyPracticeTodayProps = {
+  requestedDate?: string;
+};
+
+export function DailyPracticeToday({ requestedDate }: DailyPracticeTodayProps) {
   const [today, setToday] = useState(getKoreanDate());
+  const [practiceDate, setPracticeDate] = useState(() => getSelectablePracticeDate(requestedDate, getKoreanDate()));
   const [completionDates, setCompletionDates] = useState<string[]>([]);
   const [streak, setStreak] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -34,9 +40,10 @@ export function DailyPracticeToday() {
   const [showCelebration, setShowCelebration] = useState(false);
   const completingRef = useRef(false);
 
-  const todayPlan = useMemo(() => getDailyPracticePlan(today), [today]);
+  const practicePlan = useMemo(() => getDailyPracticePlan(practiceDate), [practiceDate]);
   const recentDays = useMemo(() => getRecentSevenDays(today, completionDates), [today, completionDates]);
   const todayCompleted = completionDates.includes(today);
+  const isToday = practiceDate === today;
 
   useEffect(() => {
     let active = true;
@@ -47,6 +54,7 @@ export function DailyPracticeToday() {
         if (!response.ok) throw new Error(body.error ?? "학습 기록을 불러오지 못했습니다.");
         if (!active) return;
         setToday(body.today);
+        setPracticeDate(getSelectablePracticeDate(requestedDate, body.today));
         setCompletionDates(body.completionDates);
         setStreak(body.streak);
       } catch (error) {
@@ -57,10 +65,10 @@ export function DailyPracticeToday() {
     }
     void loadProgress();
     return () => { active = false; };
-  }, []);
+  }, [requestedDate]);
 
   async function completeToday(sessionId: string) {
-    if (todayCompleted || completingRef.current) return;
+    if (!isToday || todayCompleted || completingRef.current) return;
     completingRef.current = true;
     setProgressError("");
     try {
@@ -88,31 +96,37 @@ export function DailyPracticeToday() {
     <>
       <main className="daily-activity-page">
         <header className="daily-activity-heading">
-          <div><span>오늘의 학습 · {todayPlan.typeLabel}</span><h1>{todayPlan.title}</h1><p>{todayPlan.description}</p></div>
-          <strong className={todayCompleted ? "complete" : "active"}>{todayCompleted ? "오늘 완료 ✓" : "오늘의 한 걸음"}</strong>
+          <div><span>{isToday ? "오늘의 학습" : "지난 학습 다시 보기"} · {practicePlan.typeLabel}</span><h1>{practicePlan.title}</h1><p>{practicePlan.description}</p></div>
+          <strong className={isToday && todayCompleted ? "complete" : isToday ? "active" : "review"}>{isToday ? todayCompleted ? "오늘 완료 ✓" : "오늘의 한 걸음" : "연속 학습 기록 제외"}</strong>
         </header>
         {progressError && <div className="error-panel daily-progress-error" role="alert">{progressError}</div>}
-        {todayPlan.type === "concept-learning" ? (
+        {practicePlan.type === "concept-learning" ? (
           <ConceptLearningActivity
-            key={todayPlan.date}
-            onDailyComplete={completeToday}
-            questionId={todayPlan.materialId}
+            key={practicePlan.date}
+            onDailyComplete={isToday ? completeToday : undefined}
+            questionId={practicePlan.materialId}
           />
-        ) : todayPlan.type === "sentence-making" ? (
+        ) : practicePlan.type === "sentence-making" ? (
           <SituationWritingActivity
             dailyMode
-            initialSceneId={todayPlan.materialId as SituationSceneId}
-            key={todayPlan.date}
-            onDailyComplete={completeToday}
+            initialSceneId={practicePlan.materialId as SituationSceneId}
+            key={practicePlan.date}
+            onDailyComplete={isToday ? completeToday : undefined}
+          />
+        ) : practicePlan.type === "error-correction" ? (
+          <ErrorCorrectionActivity
+            itemId={practicePlan.materialId}
+            key={practicePlan.date}
+            onDailyComplete={isToday ? completeToday : undefined}
           />
         ) : (
           <RealLifeChapter
             dailyMode
-            initialMaterialId={todayPlan.materialId as RealLifeMaterialKind}
-            key={todayPlan.date}
+            initialMaterialId={practicePlan.materialId as RealLifeMaterialKind}
+            key={practicePlan.date}
             lessonNumber={6}
-            materialGroup={todayPlan.type}
-            onDailyComplete={completeToday}
+            materialGroup={practicePlan.type}
+            onDailyComplete={isToday ? completeToday : undefined}
             showOverview={false}
             trackId="grammar"
           />
