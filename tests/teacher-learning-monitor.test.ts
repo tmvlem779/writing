@@ -73,3 +73,11 @@ test("TEACHER·PRIVACY: 교사 모니터는 담당 학생 데이터와 자동 �
   assert.match(practice, /learningArea: "challenge"/);
   assert.match(dailyConcept, /learningArea: "self-study"/);
 });
+
+test("RESPONSIVE: 교사 학습 현황은 태블릿과 모바일에서 열 수를 줄인다", () => {
+  const styles = read("src/app/globals.css");
+
+  assert.match(styles, /@media \(min-width: 641px\) and \(max-width: 1024px\)[\s\S]*\.metric-grid \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(styles, /@media \(min-width: 641px\) and \(max-width: 1024px\)[\s\S]*\.student-area-panel \{ grid-template-columns: 1fr; \}/);
+  assert.match(styles, /@media \(max-width: 640px\)[\s\S]*\.student-area-summary dl \{ grid-template-columns: 1fr; \}/);
+});

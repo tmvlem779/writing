@@ -314,6 +314,19 @@ test("학생 학습 정보 구조는 비대칭 홈과 번호형 상단 탭, 편�
   assert.match(styles, /\.course-map-feature \{[^}]*grid-template-columns: minmax\(330px, \.78fr\) minmax\(540px, 1\.22fr\)/s);
 });
 
+test("RESPONSIVE: 한국어는 어절 단위로 줄바꿈하고 모바일·태블릿을 별도 조판한다", () => {
+  assert.match(styles, /word-break: keep-all;/);
+  assert.match(styles, /overflow-wrap: break-word;/);
+  assert.doesNotMatch(styles, /overflow-wrap: anywhere;/);
+  assert.match(styles, /@media \(min-width: 641px\) and \(max-width: 1024px\)/);
+  assert.match(styles, /@media \(min-width: 1025px\)/);
+  assert.match(styles, /@media \(max-width: 640px\)[\s\S]*text-wrap: pretty;/);
+  assert.match(styles, /\.daily-path-step\.offset-0 \{ --node-x: 12% !important; \}/);
+  assert.match(styles, /\.daily-path-step\.offset-2 \{ --node-x: 88% !important; \}/);
+  assert.match(styles, /@media \(max-width: 640px\)[\s\S]*\.student-learning-nav \.student-learning-tabs \{[\s\S]*display: flex;[\s\S]*overflow-x: auto;/);
+  assert.match(styles, /\.story-step-0 \.v3-story-panel\.panel-1 \{ color: var\(--ink\); \}/);
+});
+
 test("PRIVACY: 오답은 학생별 RLS로 격리되고 오답노트는 로그인한 학생 행만 조회한다", () => {
   assert.match(migration, /alter table public\.wrong_answers enable row level security/);
   assert.match(migration, /user_id = auth\.uid\(\)/);

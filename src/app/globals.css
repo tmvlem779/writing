@@ -423,7 +423,7 @@ body:has(.v3-home) { background: #10291f; }
 .task-card { padding: 20px 22px; border-left: 4px solid var(--orange); background: var(--surface); border-radius: 0 14px 14px 0; box-shadow: 0 8px 30px rgba(30,50,40,.05); }.task-card p { margin: 5px 0 0; font-weight: 700; }
 .previous-answer-reference, .coach-answer-reference { display: grid; gap: 7px; margin-top: 16px; padding: 14px 16px; border: 1px solid rgba(25, 65, 49, .16); border-radius: 12px; background: rgba(255,255,255,.62); }
 .previous-answer-reference > span, .coach-answer-reference > span { color: var(--green); font-size: 12px; font-weight: 800; }
-.previous-answer-reference blockquote, .coach-answer-reference blockquote { margin: 0; color: var(--ink); font-style: normal; font-weight: 700; line-height: 1.65; overflow-wrap: anywhere; }
+.previous-answer-reference blockquote, .coach-answer-reference blockquote { margin: 0; color: var(--ink); font-style: normal; font-weight: 700; line-height: 1.65; word-break: keep-all; overflow-wrap: break-word; }
 .previous-answer-reference p { margin: 0; color: var(--muted); font-size: 14px; font-weight: 600; line-height: 1.6; }
 .draft-label { display: block; margin: 32px 0 9px; font-size: 13px; font-weight: 800; }.workspace textarea { width: 100%; min-height: 220px; resize: vertical; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); line-height: 1.9; box-shadow: inset 0 1px 2px rgba(0,0,0,.02); }.workspace textarea:focus { border-color: var(--green); outline: 3px solid rgba(36,91,67,.1); }
 .editor-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 12px; }.editor-footer > span { color: var(--muted); font-size: 12px; }
@@ -2225,7 +2225,7 @@ body *::after {
   .course-map-feature > header { min-height: 270px; }
   .course-map .lesson-tab { min-width: 0; padding: 14px 12px; grid-template-columns: 24px minmax(0, 1fr); }
   .course-map .lesson-tab strong,
-  .lesson-activity-summary li { overflow-wrap: anywhere; }
+  .lesson-activity-summary li { word-break: keep-all; overflow-wrap: break-word; }
   .chapter-switcher, .chapter-switcher.two-chapters { width: 100%; max-width: 100vw; }
   .chapter-tab { flex: 0 0 152px; min-width: 0; }
 
@@ -2233,13 +2233,13 @@ body *::after {
   .concept-header, .material-header, .workspace-header { display: grid; gap: 10px; }
   .concept-header > div, .material-header > div, .workspace-header > div { min-width: 0; }
   .concept-count { min-width: 0; justify-self: start; }
-  .workspace h1, .concept-header h1, .material-header h1 { font-size: clamp(25px, 8vw, 30px); overflow-wrap: anywhere; }
+  .workspace h1, .concept-header h1, .material-header h1 { font-size: clamp(25px, 8vw, 30px); word-break: keep-all; overflow-wrap: break-word; }
   .lesson-question-card, .task-card, .coach-card, .coach-question,
   .inquiry-card, .concept-summary-card, .concept-check,
-  .real-material-card, .analysis-guide, .summary-notebook { min-width: 0; padding: 18px 16px; overflow-wrap: anywhere; }
+  .real-material-card, .analysis-guide, .summary-notebook { min-width: 0; padding: 18px 16px; word-break: keep-all; overflow-wrap: break-word; }
   .concept-check-set > header { align-items: flex-start; flex-wrap: wrap; }
   .concept-check-question > strong { font-size: 16px; }
-  .check-option { width: 100%; white-space: normal; overflow-wrap: anywhere; }
+  .check-option { width: 100%; white-space: normal; word-break: keep-all; overflow-wrap: break-word; }
   .check-submit-row, .check-next-row { display: grid; }
   .check-submit-row button, .check-next-row button { width: 100%; }
   .check-result-summary { padding: 14px; }
@@ -2255,7 +2255,7 @@ body *::after {
   .editor-actions button { width: 100%; min-width: 0; padding-inline: 10px; }
   .coach-label { flex-wrap: wrap; }
   .concept-tags { max-width: 100%; }
-  .concept-tags span { max-width: 100%; overflow-wrap: anywhere; }
+  .concept-tags span { max-width: 100%; word-break: keep-all; overflow-wrap: break-word; }
 
   .teacher-shell { padding: 38px 16px 64px; }
   .teacher-header h1 { font-size: clamp(34px, 11vw, 44px); }
@@ -2276,4 +2276,257 @@ body *::after {
   .dashboard-progress dl, .diagnostic-domain-grid { grid-template-columns: 1fr; }
   .editor-actions { grid-template-columns: 1fr; }
   .check-result-summary > div, .student-account-heading { display: grid; }
+}
+
+/* 반응형 마감: 한국어 어절을 보존하고 모바일·태블릿을 별도 조판한다. */
+:where(
+  h1, h2, h3, h4, h5, h6,
+  p, li, dt, dd, label, legend, blockquote,
+  button, a, strong, small, span
+) {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+:where(p, li, dt, dd, label, legend, blockquote) { text-wrap: pretty; }
+:where(h1, h2, h3, h4, h5, h6) { text-wrap: balance; }
+
+textarea, input {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  html, body { max-width: 100%; overflow-x: clip; }
+
+  :where(p, li, dt, dd, label, legend, blockquote, button, a) {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+  }
+  :where(h1, h2, h3, h4, h5, h6) {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+
+  .student-learning-nav {
+    min-height: 96px;
+    padding: 0 24px;
+    grid-template-columns: minmax(130px, .52fr) minmax(480px, 1.8fr);
+    gap: 18px;
+  }
+  .student-learning-brand { gap: 10px; }
+  .student-learning-nav .student-learning-tabs a {
+    padding: 18px 13px 15px;
+    grid-template-columns: 24px minmax(0, 1fr);
+    column-gap: 7px;
+  }
+  .student-learning-nav .student-learning-tabs a strong { font-size: 12px; line-height: 1.4; }
+  .student-learning-nav .student-learning-tabs a small { font-size: 9px; }
+
+  .student-dashboard { padding-inline: 32px; }
+  .student-dashboard-intro { padding-block: 52px 32px; }
+  .student-dashboard-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-progress { padding: 26px; }
+
+  .daily-roadmap-shell { padding: 30px 32px 60px; }
+  .daily-roadmap-summary { padding: 24px; }
+  .daily-roadmap-summary h2 { font-size: clamp(27px, 4.3vw, 36px); }
+  .daily-roadmap-summary dl { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .daily-path { width: min(720px, 100%); }
+  .daily-path-step { min-height: 145px; }
+  .daily-path-step.offset-0 { --node-x: 12% !important; }
+  .daily-path-step.offset-1 { --node-x: 50% !important; }
+  .daily-path-step.offset-2 { --node-x: 88% !important; }
+  .daily-path-step::after {
+    width: 38%;
+    height: auto;
+    left: var(--node-x);
+    top: calc(50% + 44px);
+    border: 0;
+    border-top: 5px dotted #bdc8b9;
+    transform-origin: left center;
+  }
+  .daily-path-step.offset-0.to-1::after,
+  .daily-path-step.offset-1.to-2::after { transform: rotate(25deg) !important; }
+  .daily-path-step.offset-2.to-1::after,
+  .daily-path-step.offset-1.to-0::after { transform: rotate(155deg) !important; }
+  .daily-path-step .daily-path-node { width: 88px; height: 76px; }
+  .daily-path-step.status-today .daily-path-node { width: 98px; height: 84px; }
+  .daily-path-step .daily-path-copy {
+    width: min(245px, calc(38% - 18px));
+    right: auto;
+    left: calc(var(--node-x) + 66px);
+    text-align: left;
+  }
+  .daily-path-step.offset-2 .daily-path-copy {
+    width: min(245px, calc(38% - 18px));
+    right: calc(100% - var(--node-x) + 66px);
+    left: auto;
+    text-align: right;
+  }
+
+  .daily-activity-heading { padding-inline: 32px; }
+  .daily-concept-shell,
+  .error-correction-shell { width: min(880px, calc(100% - 64px)); }
+  .situation-writing-shell { grid-template-columns: 170px minmax(0, 1fr); }
+  .situation-writing-workspace { padding-inline: 30px; }
+
+  .teacher-shell { padding: 56px 32px 80px; }
+  .teacher-header { grid-template-columns: 1fr; gap: 14px; }
+  .teacher-header > p { max-width: 680px; }
+  .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-block: 38px 52px; }
+  .invite-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .student-area-panel { grid-template-columns: 1fr; }
+  .student-area-summary dl { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  :where(p, li, dt, dd, label, legend, blockquote, button, a, strong, small, span) {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+  }
+  :where(h1, h2, h3, h4, h5, h6) {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+  }
+
+  .student-learning-nav {
+    min-height: 0;
+    padding: 14px 16px 0;
+    display: block;
+  }
+  .student-learning-brand { margin-bottom: 12px; }
+  .student-learning-nav .student-learning-tabs {
+    width: calc(100% + 16px);
+    max-width: none;
+    margin-right: -16px;
+    padding-right: 16px;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .student-learning-nav .student-learning-tabs::-webkit-scrollbar { display: none; }
+  .student-learning-nav .student-learning-tabs a {
+    flex: 0 0 142px;
+    min-width: 142px;
+    min-height: 68px;
+    padding: 12px;
+    grid-template-columns: 22px minmax(0, 1fr);
+    column-gap: 6px;
+    scroll-snap-align: start;
+  }
+  .student-learning-nav .student-learning-tabs a strong { font-size: 12px; line-height: 1.35; }
+
+  .student-dashboard { padding-inline: 16px; }
+  .student-dashboard-intro h1 { font-size: clamp(31px, 9vw, 40px); }
+  .student-dashboard-intro p { font-size: 15px; }
+  .student-dashboard-card,
+  .student-dashboard-card.dashboard-card-1 { min-height: 0; padding: 26px 24px; }
+  .student-dashboard-card.dashboard-card-1 h2 { margin-top: 28px; font-size: 34px; }
+
+  .self-study-heading { padding: 30px 18px 22px; }
+  .self-study-heading h1 { font-size: clamp(27px, 8vw, 32px); }
+  .daily-roadmap-shell { padding: 20px 14px 44px; }
+  .daily-roadmap-summary { padding: 20px 18px; }
+  .daily-roadmap-summary h2 { font-size: clamp(25px, 7.2vw, 31px); }
+  .daily-roadmap-summary dl { grid-template-columns: 1fr; }
+  .daily-path-step { --node-x: 37px !important; min-height: 136px; }
+  .daily-path-step::after { left: 36px; }
+  .daily-path-step .daily-path-node { width: 74px; height: 66px; }
+  .daily-path-step.status-today .daily-path-node { width: 80px; height: 72px; }
+  .daily-path-step .daily-path-copy,
+  .daily-path-step.offset-2 .daily-path-copy {
+    width: calc(100% - 94px);
+    right: auto;
+    left: 92px;
+    text-align: left;
+  }
+  .daily-path-copy strong { font-size: 15px; }
+  .daily-path-copy small { font-size: 11px; }
+
+  .daily-activity-heading { min-height: 0; padding: 18px 16px; }
+  .daily-activity-heading h1 { font-size: clamp(23px, 7vw, 29px); }
+  .daily-activity-heading p { font-size: 14px; }
+  .daily-concept-shell,
+  .error-correction-shell { width: calc(100% - 28px); }
+  .daily-concept-card,
+  .error-correction-card { padding: 20px 16px; }
+  .error-token-line { padding: 16px 12px; font-size: 18px; }
+  .error-correction-stage > .primary-button,
+  .error-correction-stage > .secondary-button { width: 100%; }
+
+  .course-map-feature > header { padding: 34px 20px; }
+  .course-key-question { width: calc(100% - 28px); right: 14px; bottom: 14px; }
+  .course-map .lesson-tab strong,
+  .lesson-activity-summary li,
+  .workspace h1,
+  .concept-header h1,
+  .material-header h1,
+  .lesson-question-card,
+  .task-card,
+  .coach-card,
+  .coach-question,
+  .inquiry-card,
+  .concept-summary-card,
+  .concept-check,
+  .real-material-card,
+  .analysis-guide,
+  .summary-notebook,
+  .check-option,
+  .concept-tags span {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .editor-footer { gap: 10px; }
+  .editor-actions { grid-template-columns: 1fr; }
+  .editor-actions button { min-height: 48px; }
+  .literature-selection-actions,
+  .novel-sentence-actions,
+  .novel-sentence-complete-actions { align-items: stretch; display: grid; }
+  .literature-selection-actions button,
+  .novel-sentence-actions button,
+  .novel-sentence-complete-actions button { width: 100%; }
+
+  .teacher-shell { padding: 34px 14px 56px; }
+  .teacher-header h1 { font-size: clamp(31px, 10vw, 40px); }
+  .teacher-card,
+  .student-monitor-panel,
+  .student-area-summary,
+  .student-blocker-diagnosis { padding: 14px; }
+  .metric-grid { gap: 10px; margin-block: 32px 44px; }
+  .invite-form .secondary-button { min-width: 0; }
+  .student-monitor-tabs button { min-width: 132px; }
+  .student-area-summary dl { grid-template-columns: 1fr; }
+
+  .story-step-0 .v3-story-panel.panel-1 { color: var(--ink); }
+  .story-step-0 .v3-story-panel.panel-1 > span { color: var(--seal); }
+  .story-step-0 .v3-story-panel.panel-1 p { color: var(--muted); }
+}
+
+@media (min-width: 1025px) {
+  :where(p, li, dt, dd, label, legend, blockquote, button, a) {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+  }
+  :where(h1, h2, h3, h4, h5, h6) {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+}
+
+@media (max-width: 360px) {
+  .student-learning-nav .student-learning-tabs a { flex-basis: 132px; min-width: 132px; }
+  .daily-path-step { --node-x: 34px !important; }
+  .daily-path-step::after { left: 33px; }
+  .daily-path-step .daily-path-copy,
+  .daily-path-step.offset-2 .daily-path-copy { width: calc(100% - 86px); left: 84px; }
+  .daily-path-copy small { font-size: 10px; }
 }
