@@ -327,6 +327,11 @@ test("RESPONSIVE: 한국어는 어절 단위로 줄바꿈하고 모바일·태�
   assert.match(styles, /\.story-step-0 \.v3-story-panel\.panel-1 \{ color: var\(--ink\); \}/);
 });
 
+test("SCROLL: 챕터 전환 메뉴는 학습 내용을 가리는 고정 여백을 만들지 않는다", () => {
+  assert.match(styles, /\.chapter-switcher,\s*\.chapter-switcher\.two-chapters \{[^}]*position: relative;[^}]*top: auto;/s);
+  assert.match(styles, /\.chapter-switcher,\s*\.chapter-switcher\.two-chapters \{[^}]*backdrop-filter: none;/s);
+});
+
 test("PRIVACY: 오답은 학생별 RLS로 격리되고 오답노트는 로그인한 학생 행만 조회한다", () => {
   assert.match(migration, /alter table public\.wrong_answers enable row level security/);
   assert.match(migration, /user_id = auth\.uid\(\)/);
