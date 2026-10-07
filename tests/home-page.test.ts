@@ -3,61 +3,18 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const page = readFileSync(new URL("../src/app/page.tsx", import.meta.url), "utf8");
-const bookJourney = readFileSync(new URL("../src/components/book-journey.tsx", import.meta.url), "utf8");
+const loginPage = readFileSync(new URL("../src/app/login/page.tsx", import.meta.url), "utf8");
 const layout = readFileSync(new URL("../src/app/layout.tsx", import.meta.url), "utf8");
 const brandLogo = readFileSync(new URL("../src/components/brand-logo.tsx", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
 
-test("첫 화면은 문득문득을 먼저 보여 주고 학습 시작을 로그인으로 연결한다", () => {
-  assert.match(page, /BookJourney/);
-  assert.match(bookJourney, /<strong>문득문득<\/strong>/);
-  assert.match(bookJourney, /title: "질문으로 얻고,\\n문장으로 깨닫다"/);
-  assert.match(bookJourney, /단계별 질문으로 생각의 문을 열고, 스스로 올바른 문장을 쓰도록 돕습니다/);
-  assert.match(bookJourney, /<LoginForm \/>/);
-  assert.match(bookJourney, /학교 계정으로 학습 이어가기/);
-  assert.doesNotMatch(bookJourney, /title: "학교 계정으로\\n이어갑니다"/);
-});
-
-test("첫 화면에서 학습 원리와 수업 흐름 소개 영역을 제거한다", () => {
-  assert.doesNotMatch(bookJourney, /학습 원리/);
-  assert.doesNotMatch(bookJourney, /수업 흐름/);
-  assert.doesNotMatch(bookJourney, /principles/);
-  assert.doesNotMatch(bookJourney, /journey-list/);
-});
-
-test("ver.3 첫 화면은 종이 앞뒤와 그림자가 보이는 책장 넘김으로 전환된다", () => {
-  assert.match(bookJourney, /requestAnimationFrame/);
-  assert.match(bookJourney, /const open = clamp\(progress \/ 0\.14\)/);
-  assert.match(bookJourney, /progress < 0\.074 \? 0/);
-  assert.match(bookJourney, /storyStep > 1/);
-  assert.match(bookJourney, /--book-open/);
-  assert.match(bookJourney, /--book-explore/);
-  assert.match(bookJourney, /--page-write/);
-  assert.match(bookJourney, /v3-page-spread/);
-  assert.match(bookJourney, /v3-book-cover/);
-  assert.match(bookJourney, /title: "오늘의 문법책에\\n내 문장을 남겨 보세요\."/);
-  assert.match(bookJourney, /학교 계정으로 로그인하면 학습 기록이 이어집니다/);
-  assert.match(bookJourney, /StageIllustration/);
-  assert.match(bookJourney, /v3-visual-stack/);
-  assert.match(bookJourney, /v3-scroll-sheet-front/);
-  assert.match(bookJourney, /v3-scroll-sheet-back/);
-  assert.match(bookJourney, /turnDirection/);
-  assert.match(styles, /\.v3-book-stage \{[^}]*position: sticky/s);
-  assert.match(styles, /\.v3-page-spread \{[^}]*grid-template-columns: 1fr 18px 1fr/s);
-  assert.match(styles, /\.v3-book-journey\.story-step-1 \{ --stage-left:/);
-  assert.match(styles, /\.v3-book-journey\.story-step-4 \{ --stage-left:/);
-  assert.match(styles, /@keyframes v3-page-turn-forward-clear/);
-  assert.match(styles, /@keyframes v3-page-turn-backward-clear/);
-  assert.match(styles, /\.v3-scroll-sheet-face \{[^}]*backface-visibility: hidden/s);
-  assert.match(styles, /\.v3-book-viewport \{[^}]*width: 100vw/s);
-  assert.match(styles, /\.story-step-0 \.v3-story-copy \{ opacity: 0; \}/);
-  assert.match(styles, /\.v3-visual-stack figure:first-child \{ visibility: hidden; \}/);
-  assert.match(styles, /\.story-step-0 \.v3-visual-stack figure:first-child \{[^}]*display: none/s);
-  assert.match(styles, /\.story-step-0 \.v3-page-spread \{ visibility: visible; \}/);
-  assert.match(styles, /\.v3-book-stage > \.v3-book-cover \{[^}]*z-index: 18/s);
-  assert.match(styles, /\.story-step-0 \.v3-story-panel\.panel-1 \{[^}]*visibility: visible/s);
-  assert.match(styles, /\.story-step-0 \.v3-visual-stack figure:nth-child\(2\) \{[^}]*visibility: visible/s);
-  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
+test("첫 화면은 책 모션 없이 로그인 화면으로 바로 이동한다", () => {
+  assert.match(page, /import \{ redirect \} from "next\/navigation"/);
+  assert.match(page, /redirect\("\/login"\)/);
+  assert.doesNotMatch(page, /BookJourney/);
+  assert.match(loginPage, /<LoginForm \/>/);
+  assert.match(loginPage, /수업 계정으로/);
+  assert.match(loginPage, /로그인/);
 });
 
 test("공통 화면의 브랜드명을 문득문득으로 통일한다", () => {
@@ -71,7 +28,6 @@ test("한국어 편집 디자인은 산세리프 제목과 서로 다른 장면 
   assert.doesNotMatch(layout, /Noto_Serif_KR/);
   assert.match(layout, /Noto_Sans_KR/);
   assert.match(brandLogo, /<b>한<\/b>/);
-  assert.match(bookJourney, /className="hangul-art/);
   assert.match(styles, /--seal: #a54432/);
   assert.match(styles, /--stage-left: #c9dbe4/);
   assert.match(styles, /--stage-left: #ddd0df/);

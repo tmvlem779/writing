@@ -16,15 +16,6 @@ import type { ChallengeProgressInput, ChallengeProgressRecord } from "@/lib/lear
 type Chapter = "concept" | "practice" | "real-life";
 type ProgressByLesson = Partial<Record<CourseLessonNumber, ChallengeProgressRecord>>;
 
-const lessonKeywords: Record<CourseLessonNumber, string> = {
-  1: "기본",
-  2: "연결",
-  3: "확장",
-  4: "표현",
-  5: "변형",
-  6: "활용"
-};
-
 export function WritingStudio() {
   const trackId: CourseTrackId = "grammar";
   const [lessonNumber, setLessonNumber] = useState<CourseLessonNumber>(1);
@@ -162,7 +153,6 @@ export function WritingStudio() {
           </header>
           <div className="course-feature-art" aria-hidden="true">
             <span>{String(lessonNumber).padStart(2, "0")}</span>
-            <strong>{lessonKeywords[lessonNumber]}</strong>
             <i>語</i>
           </div>
           <p className="course-key-question">

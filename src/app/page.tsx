@@ -1,5 +1,5 @@
-import { BookJourney } from "@/components/book-journey";
+import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  return <BookJourney />;
+  redirect("/login");
 }

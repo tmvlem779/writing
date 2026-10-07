@@ -299,12 +299,9 @@ test("학생 학습 정보 구조는 비대칭 홈과 번호형 상단 탭, 편�
   assert.match(writingStudio, /course-feature-art/);
   assert.match(writingStudio, /오늘의<br \/>챌린지/);
   assert.match(writingStudio, /\{lessonNumber\} \/ \{courseLessons\.length\}/);
-  assert.match(writingStudio, /1: "기본"/);
-  assert.match(writingStudio, /2: "연결"/);
-  assert.match(writingStudio, /3: "확장"/);
-  assert.match(writingStudio, /4: "표현"/);
-  assert.match(writingStudio, /5: "변형"/);
-  assert.match(writingStudio, /6: "활용"/);
+  assert.doesNotMatch(writingStudio, /lessonKeywords/);
+  assert.doesNotMatch(writingStudio, /<strong>\{lessonKeywords/);
+  assert.doesNotMatch(writingStudio, /기본|연결|확장|표현|변형|활용/);
   assert.match(writingStudio, /<strong>핵심 질문<\/strong>/);
   assert.doesNotMatch(writingStudio, /<strong>\{lessonNumber\}차시 핵심 질문<\/strong>/);
   assert.match(writingStudio, /course-map-index/);
@@ -312,6 +309,8 @@ test("학생 학습 정보 구조는 비대칭 홈과 번호형 상단 탭, 편�
   assert.match(styles, /--plum: #6f5664/);
   assert.match(styles, /\.student-dashboard-cards \{[^}]*grid-template-columns: minmax\(0, 1\.4fr\) minmax\(320px, \.75fr\)/s);
   assert.match(styles, /\.course-map-feature \{[^}]*grid-template-columns: minmax\(330px, \.78fr\) minmax\(540px, 1\.22fr\)/s);
+  assert.match(styles, /\.course-map-feature \{[^}]*min-height: 260px;/s);
+  assert.match(styles, /\.course-feature-art \{[^}]*min-height: 260px;/s);
 });
 
 test("RESPONSIVE: 한국어는 어절 단위로 줄바꿈하고 모바일·태블릿을 별도 조판한다", () => {
