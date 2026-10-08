@@ -11,7 +11,8 @@ type ProfileRow = { user_id: string; display_alias: string };
 type SessionRow = { id: string; user_id: string; activity_type: string; status: string; updated_at: string };
 type ConceptRow = { user_id: string; concept_code: string; scaffold_level: number; evidence_count: number; independent_success_count: number };
 type LearningEventRow = { user_id: string; session_id: string; event_type: string; concept_code: string | null; metadata: unknown; created_at: string };
-type WrongAnswerRow = { user_id: string; source: "diagnosis" | "challenge" | "self-study"; source_label: string; problem_title: string; attempt_count: number; resolved_at: string | null; updated_at: string };
+type WrongAnswerRow = { user_id: string; source: "diagnosis" | "challenge" | "self-study"; source_label: string; problem_title: string; question: string; submitted_answer: string; feedback_hint: string; attempt_count: number; resolved_at: string | null; updated_at: string };
+type ChallengeProgressRow = { user_id: string; lesson_number: number; concept_completed: boolean; completed_activity_ids: string[]; updated_at: string };
 type AccountIdentity = { userId: string; loginId: string };
 type StudentSummary = {
   userId: string;
@@ -39,6 +40,7 @@ export default async function TeacherPage() {
   let concepts: ConceptRow[] = [];
   let learningEvents: LearningEventRow[] = [];
   let wrongAnswers: WrongAnswerRow[] = [];
+  let challengeProgress: ChallengeProgressRow[] = [];
   let accountIdentities: AccountIdentity[] = [];
   const configured = Boolean(supabase);
   let signedIn = false;
@@ -65,18 +67,20 @@ export default async function TeacherPage() {
 
       const studentIds = [...new Set(memberships.map((item) => item.user_id))];
       if (studentIds.length > 0) {
-        const [profileResult, sessionResult, conceptResult, eventResult, wrongAnswerResult] = await Promise.all([
+        const [profileResult, sessionResult, conceptResult, eventResult, wrongAnswerResult, challengeProgressResult] = await Promise.all([
           supabase.from("profiles").select("user_id,display_alias").in("user_id", studentIds),
           supabase.from("learning_sessions").select("id,user_id,activity_type,status,updated_at").in("user_id", studentIds).order("updated_at", { ascending: false }),
           supabase.from("concept_states").select("user_id,concept_code,scaffold_level,evidence_count,independent_success_count").in("user_id", studentIds),
           supabase.from("learning_events").select("user_id,session_id,event_type,concept_code,metadata,created_at").in("user_id", studentIds).order("created_at", { ascending: false }).limit(1000),
-          supabase.from("wrong_answers").select("user_id,source,source_label,problem_title,attempt_count,resolved_at,updated_at").in("user_id", studentIds).order("updated_at", { ascending: false }).limit(1000)
+          supabase.from("wrong_answers").select("user_id,source,source_label,problem_title,question,submitted_answer,feedback_hint,attempt_count,resolved_at,updated_at").in("user_id", studentIds).order("updated_at", { ascending: false }).limit(1000),
+          supabase.from("challenge_progress").select("user_id,lesson_number,concept_completed,completed_activity_ids,updated_at").in("user_id", studentIds).eq("track_id", "grammar")
         ]);
         profiles = (profileResult.data ?? []) as ProfileRow[];
         sessions = (sessionResult.data ?? []) as SessionRow[];
         concepts = (conceptResult.data ?? []) as ConceptRow[];
         learningEvents = (eventResult.data ?? []) as LearningEventRow[];
         wrongAnswers = (wrongAnswerResult.data ?? []) as WrongAnswerRow[];
+        challengeProgress = (challengeProgressResult.data ?? []) as ChallengeProgressRow[];
 
         const admin = createAdminSupabaseClient();
         if (admin) {
@@ -140,8 +144,17 @@ export default async function TeacherPage() {
         source: item.source,
         sourceLabel: item.source_label,
         problemTitle: item.problem_title,
+        question: item.question,
+        submittedAnswer: item.submitted_answer,
+        feedbackHint: item.feedback_hint,
         attemptCount: item.attempt_count,
         resolvedAt: item.resolved_at,
+        updatedAt: item.updated_at
+      })),
+      challengeProgress: challengeProgress.filter((item) => item.user_id === userId).map((item) => ({
+        lessonNumber: item.lesson_number,
+        conceptCompleted: item.concept_completed,
+        completedActivityIds: item.completed_activity_ids,
         updatedAt: item.updated_at
       }))
     }));

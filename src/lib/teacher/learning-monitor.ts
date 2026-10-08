@@ -28,8 +28,18 @@ export type MonitorWrongAnswer = {
   source: "diagnosis" | "challenge" | "self-study";
   sourceLabel: string;
   problemTitle: string;
+  question: string;
+  submittedAnswer: string;
+  feedbackHint: string;
   attemptCount: number;
   resolvedAt: string | null;
+  updatedAt: string;
+};
+
+export type MonitorChallengeProgress = {
+  lessonNumber: number;
+  conceptCompleted: boolean;
+  completedActivityIds: string[];
   updatedAt: string;
 };
 
@@ -41,6 +51,7 @@ export type StudentMonitorInput = {
   concepts: MonitorConcept[];
   events: MonitorEvent[];
   wrongAnswers: MonitorWrongAnswer[];
+  challengeProgress: MonitorChallengeProgress[];
   now?: Date;
 };
 
@@ -52,6 +63,17 @@ export type AreaMonitor = {
   lastSeenAt: string | null;
   metrics: Array<{ label: string; value: string }>;
   detail: string;
+  progress: number;
+  progressLabel: string;
+};
+
+export type WrongAnswerDetail = MonitorWrongAnswer & { areaLabel: string };
+
+export type AiSupportUsage = {
+  areaLabel: string;
+  conceptLabel: string;
+  supportLabel: string;
+  createdAt: string;
 };
 
 export type StudentLearningMonitor = {
@@ -59,6 +81,8 @@ export type StudentLearningMonitor = {
   name: string;
   loginId: string;
   areas: AreaMonitor[];
+  wrongAnswers: WrongAnswerDetail[];
+  aiSupport: AiSupportUsage[];
   diagnosis: Array<{ level: "attention" | "watch" | "steady"; title: string; evidence: string }>;
 };
 
@@ -77,6 +101,12 @@ function metadataArea(metadata: unknown) {
   if (!metadata || typeof metadata !== "object") return null;
   const value = (metadata as Record<string, unknown>).learningArea;
   return value === "challenge" || value === "self-study" ? value : null;
+}
+
+function metadataNumber(metadata: unknown, key: string) {
+  if (!metadata || typeof metadata !== "object") return 0;
+  const value = (metadata as Record<string, unknown>)[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
 function newest(values: Array<string | null | undefined>) {
@@ -115,6 +145,10 @@ export function buildStudentLearningMonitor(input: StudentMonitorInput): Student
   const unresolvedSelfStudy = selfStudyWrong.filter((answer) => !answer.resolvedAt);
   const unresolvedAll = input.wrongAnswers.filter((answer) => !answer.resolvedAt);
   const resolvedAll = input.wrongAnswers.filter((answer) => answer.resolvedAt);
+  const completedChallengeLessons = new Set(
+    input.challengeProgress.filter((item) => item.conceptCompleted).map((item) => item.lessonNumber)
+  ).size;
+  const completedSelfStudyDays = Math.min(30, dailyCompletions.length);
 
   const challengeLastSeen = newest([
     ...challengeSessions.map((session) => session.updatedAt),
@@ -133,6 +167,29 @@ export function buildStudentLearningMonitor(input: StudentMonitorInput): Student
   const wrongNotesState = stateFrom(wrongNotesLastSeen, unresolvedAll.length > 0, now);
   const independentSuccesses = input.concepts.reduce((sum, concept) => sum + concept.independentSuccessCount, 0);
   const evidenceCount = input.concepts.reduce((sum, concept) => sum + concept.evidenceCount, 0);
+  const sessionArea = new Map<string, LearningArea>();
+  for (const event of areaStartEvents) {
+    const area = metadataArea(event.metadata);
+    if (area) sessionArea.set(event.sessionId, area);
+  }
+  const aiSupport = input.events
+    .filter((event) => metadataNumber(event.metadata, "scaffold_level") > 0)
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+    .slice(0, 8)
+    .map((event) => {
+      const area = sessionArea.get(event.sessionId) ?? "challenge";
+      const level = metadataNumber(event.metadata, "scaffold_level");
+      return {
+        areaLabel: area === "self-study" ? "스스로 유형학습" : "오늘의 챌린지",
+        conceptLabel: conceptLabels[event.conceptCode ?? ""] ?? event.conceptCode ?? "문장 탐구",
+        supportLabel: scaffoldLabel(level),
+        createdAt: event.createdAt
+      };
+    });
+  const wrongAnswerDetails = [...input.wrongAnswers]
+    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
+    .slice(0, 8)
+    .map((answer) => ({ ...answer, areaLabel: sourceLabel(answer.source) }));
 
   const diagnosis: StudentLearningMonitor["diagnosis"] = [];
   const repeatedWrong = [...unresolvedAll].sort((a, b) => b.attemptCount - a.attemptCount)[0];
@@ -182,11 +239,13 @@ export function buildStudentLearningMonitor(input: StudentMonitorInput): Student
         ...challengeState,
         lastSeenAt: challengeLastSeen,
         metrics: [
-          { label: "학습 세션", value: `${challengeSessions.length}개` },
+          { label: "완료 차시", value: `${completedChallengeLessons}/6` },
           { label: "독립 성공", value: `${independentSuccesses}/${evidenceCount}` },
           { label: "미해결 오답", value: `${unresolvedChallenge.length}개` }
         ],
-        detail: challengeSessions.length > 0 ? "문장 구조 학습과 AI 비계 사용 기록을 확인합니다." : "아직 오늘의 챌린지 학습 기록이 없습니다."
+        detail: challengeSessions.length > 0 ? "문장 구조 학습과 AI 비계 사용 기록을 확인합니다." : "아직 오늘의 챌린지 학습 기록이 없습니다.",
+        progress: Math.round((completedChallengeLessons / 6) * 100),
+        progressLabel: `6차시 중 ${completedChallengeLessons}차시 개념 완료`
       },
       {
         id: "self-study",
@@ -194,11 +253,13 @@ export function buildStudentLearningMonitor(input: StudentMonitorInput): Student
         ...selfStudyState,
         lastSeenAt: selfStudyLastSeen,
         metrics: [
-          { label: "완료한 하루", value: `${dailyCompletions.length}일` },
+          { label: "완료한 하루", value: `${completedSelfStudyDays}일` },
           { label: "학습 세션", value: `${selfStudySessions.length}개` },
           { label: "미해결 오답", value: `${unresolvedSelfStudy.length}개` }
         ],
-        detail: dailyCompletions.length > 0 ? "일일 학습 완료와 유형 활동 기록을 확인합니다." : "아직 완료한 스스로 유형학습이 없습니다."
+        detail: dailyCompletions.length > 0 ? "일일 학습 완료와 유형 활동 기록을 확인합니다." : "아직 완료한 스스로 유형학습이 없습니다.",
+        progress: Math.round((completedSelfStudyDays / 30) * 100),
+        progressLabel: `30일 중 ${completedSelfStudyDays}일 완료`
       },
       {
         id: "wrong-notes",
@@ -210,9 +271,15 @@ export function buildStudentLearningMonitor(input: StudentMonitorInput): Student
           { label: "다시 볼 문제", value: `${unresolvedAll.length}개` },
           { label: "다시 해결", value: `${resolvedAll.length}개` }
         ],
-        detail: unresolvedAll.length > 0 ? "반복 횟수가 높은 문제부터 다시 살펴볼 필요가 있습니다." : "현재 남아 있는 미해결 오답이 없습니다."
+        detail: unresolvedAll.length > 0 ? "반복 횟수가 높은 문제부터 다시 살펴볼 필요가 있습니다." : "현재 남아 있는 미해결 오답이 없습니다.",
+        progress: input.wrongAnswers.length === 0 ? 0 : Math.round((resolvedAll.length / input.wrongAnswers.length) * 100),
+        progressLabel: input.wrongAnswers.length === 0
+          ? "아직 기록된 오답이 없습니다"
+          : `${input.wrongAnswers.length}개 중 ${resolvedAll.length}개 다시 해결`
       }
     ],
+    wrongAnswers: wrongAnswerDetails,
+    aiSupport,
     diagnosis: diagnosis.slice(0, 3)
   };
 }
