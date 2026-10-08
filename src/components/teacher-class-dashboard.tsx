@@ -89,7 +89,7 @@ export function TeacherClassDashboard({ classes, canCreate }: { classes: Teacher
                 </ol>}
               </section>
 
-              <StudentLearningMonitor classId={selectedClass.id} students={selectedClass.monitors} />
+              <StudentLearningMonitor key={selectedClass.id} classId={selectedClass.id} students={selectedClass.monitors} />
               <InviteForm classId={selectedClass.id} />
             </article>
           )}

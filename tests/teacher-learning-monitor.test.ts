@@ -20,11 +20,11 @@ test("TEACHER: 학생별 현황은 세 학습 영역을 분리해 제공한다",
       { sessionId: "challenge-session", eventType: "area_started", conceptCode: "challenge", metadata: { learningArea: "challenge" }, createdAt: "2026-10-06T11:58:00+09:00" },
       { sessionId: "challenge-session", eventType: "scaffolded_success", conceptCode: "create", metadata: { scaffold_level: 2 }, createdAt: "2026-10-06T11:59:00+09:00" },
       { sessionId: "self-session", eventType: "area_started", conceptCode: "self-study", metadata: { learningArea: "self-study" }, createdAt: "2026-10-05T10:00:00+09:00" },
-      { sessionId: "self-session", eventType: "daily_practice_completed", conceptCode: "daily_practice", metadata: {}, createdAt: "2026-10-05T10:10:00+09:00" }
+      { sessionId: "self-session", eventType: "daily_practice_completed", conceptCode: "daily_practice", metadata: { practiceDate: "2026-10-05", practiceType: "error-correction", title: "틀린 문장 고치기" }, createdAt: "2026-10-05T10:10:00+09:00" }
     ],
     wrongAnswers: [],
     challengeProgress: [
-      { lessonNumber: 1, conceptCompleted: true, completedActivityIds: ["create"], updatedAt: "2026-10-06T11:59:00+09:00" }
+      { lessonNumber: 1, conceptCompleted: true, completedActivityIds: ["grammar-components", "grammar-component-cards", "grammar-simple-create", "grammar-simple-explain"], updatedAt: "2026-10-06T11:59:00+09:00" }
     ]
   });
 
@@ -35,6 +35,11 @@ test("TEACHER: 학생별 현황은 세 학습 영역을 분리해 제공한다",
   assert.equal(monitor.areas[1].metrics[0].value, "1일");
   assert.equal(monitor.aiSupport[0].supportLabel, "선택·대조");
   assert.equal(monitor.aiSupport[0].areaLabel, "오늘의 챌린지");
+  assert.equal(monitor.challengeActivities.length, 6);
+  assert.equal(monitor.challengeActivities[0].state, "completed");
+  assert.equal(monitor.selfStudyActivities.length, 30);
+  assert.equal(monitor.selfStudyActivities.find((activity) => activity.state === "completed")?.typeLabel, "틀린 문장 고치기");
+  assert.equal(monitor.analysis.hintCount, 1);
 });
 
 test("P1·P5: 반복 오답과 높은 비계 사용을 정체 근거로 진단한다", () => {
@@ -64,6 +69,8 @@ test("P1·P5: 반복 오답과 높은 비계 사용을 정체 근거로 진단�
   assert.ok(monitor.diagnosis.some((item) => item.evidence.includes("부분 구조")));
   assert.equal(monitor.areas[0].state, "needs-review");
   assert.equal(monitor.wrongAnswers[0].submittedAnswer, "이어진문장");
+  assert.deepEqual(monitor.analysis.wrongByType[0], { label: "안은문장", count: 1, attempts: 3 });
+  assert.match(monitor.analysis.recommendations[0].evidence, /3회 시도/);
 });
 
 test("TEACHER·PRIVACY: 교사 모니터는 담당 학생 데이터와 자동 갱신을 사용한다", () => {
@@ -91,11 +98,15 @@ test("TEACHER·PRIVACY: 교사 모니터는 담당 학생 데이터와 자동 �
   assert.match(classRoute, /profile\?\.role !== "teacher"/);
   assert.match(classRoute, /teacher_id: auth\.user\.id/);
   assert.match(classRoute, /role: "teacher"/);
-  assert.match(component, /aria-orientation="vertical"/);
-  assert.match(component, /student\.areas\.map/);
-  assert.match(component, /무엇을 틀렸나요/);
-  assert.match(component, /어디에서 도움을 받았나요/);
-  assert.match(component, /student\.wrongAnswers/);
+  assert.match(component, /학습 현황/);
+  assert.match(component, /학습 분석/);
+  assert.match(component, /item\.challengeActivities/);
+  assert.match(component, /item\.selfStudyActivities/);
+  assert.match(component, /setDetail/);
+  assert.match(component, /student\.analysis\.hintCount/);
+  assert.match(component, /student\.analysis\.wrongByType/);
+  assert.match(component, /student\.analysis\.recommendations/);
+  assert.match(component, /detailStudent\.wrongAnswers/);
   assert.match(component, /student\.aiSupport/);
   assert.match(component, /15_000/);
   assert.match(component, /router\.refresh\(\)/);
@@ -113,4 +124,6 @@ test("RESPONSIVE: 교사 학습 현황은 태블릿과 모바일에서 열 수�
   assert.match(styles, /@media \(max-width: 640px\)[\s\S]*\.teacher-monitor-layout \{ display: block; min-height: 0; \}/);
   assert.match(styles, /@media \(max-width: 640px\)[\s\S]*\.teacher-class-heading \{ align-items: stretch; display: grid/);
   assert.match(styles, /\.teacher-class-tabs[\s\S]*overflow-x: auto/);
+  assert.match(styles, /\.teacher-activity-table-wrap \{[^}]*overflow-x: auto;/s);
+  assert.match(styles, /@media \(max-width: 640px\)[\s\S]*\.teacher-analysis-summary-grid,[\s\S]*grid-template-columns: 1fr;/);
 });

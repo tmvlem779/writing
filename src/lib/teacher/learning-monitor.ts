@@ -1,4 +1,6 @@
 import { scaffoldLabel } from "../agent/state-machine.ts";
+import { grammarSixLessonCourse } from "../curriculum/five-lesson-course.ts";
+import { buildDailyRoadmap, getKoreanDate } from "../learning/daily-practice.ts";
 
 export type LearningArea = "challenge" | "self-study" | "wrong-notes";
 
@@ -76,6 +78,34 @@ export type AiSupportUsage = {
   createdAt: string;
 };
 
+export type ChallengeActivityStatus = {
+  lessonNumber: number;
+  title: string;
+  state: "completed" | "partial" | "not-started";
+  conceptCompleted: boolean;
+  completedActivities: string[];
+  totalActivities: number;
+  updatedAt: string | null;
+};
+
+export type SelfStudyActivityStatus = {
+  sequence: number;
+  state: "completed" | "not-completed";
+  typeLabel: string;
+  title: string;
+  completedAt: string | null;
+};
+
+export type LearningAnalysis = {
+  hintCount: number;
+  hintByArea: Array<{ label: string; count: number }>;
+  hintByConcept: Array<{ label: string; count: number }>;
+  wrongByType: Array<{ label: string; count: number; attempts: number }>;
+  independentSuccesses: number;
+  evidenceCount: number;
+  recommendations: Array<{ title: string; evidence: string }>;
+};
+
 export type StudentLearningMonitor = {
   userId: string;
   name: string;
@@ -84,6 +114,10 @@ export type StudentLearningMonitor = {
   wrongAnswers: WrongAnswerDetail[];
   aiSupport: AiSupportUsage[];
   diagnosis: Array<{ level: "attention" | "watch" | "steady"; title: string; evidence: string }>;
+  challengeActivities: ChallengeActivityStatus[];
+  selfStudyActivities: SelfStudyActivityStatus[];
+  wrongNoteSummary: { total: number; unresolved: number; resolved: number };
+  analysis: LearningAnalysis;
 };
 
 const conceptLabels: Record<string, string> = {
@@ -107,6 +141,18 @@ function metadataNumber(metadata: unknown, key: string) {
   if (!metadata || typeof metadata !== "object") return 0;
   const value = (metadata as Record<string, unknown>)[key];
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function metadataString(metadata: unknown, key: string) {
+  if (!metadata || typeof metadata !== "object") return null;
+  const value = (metadata as Record<string, unknown>)[key];
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function countLabels(values: string[]) {
+  const counts = new Map<string, number>();
+  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
+  return [...counts.entries()].map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, "ko"));
 }
 
 function newest(values: Array<string | null | undefined>) {
@@ -172,11 +218,10 @@ export function buildStudentLearningMonitor(input: StudentMonitorInput): Student
     const area = metadataArea(event.metadata);
     if (area) sessionArea.set(event.sessionId, area);
   }
-  const aiSupport = input.events
+  const scaffoldEvents = input.events
     .filter((event) => metadataNumber(event.metadata, "scaffold_level") > 0)
-    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-    .slice(0, 8)
-    .map((event) => {
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  const aiSupport = scaffoldEvents.slice(0, 8).map((event) => {
       const area = sessionArea.get(event.sessionId) ?? "challenge";
       const level = metadataNumber(event.metadata, "scaffold_level");
       return {
@@ -225,6 +270,82 @@ export function buildStudentLearningMonitor(input: StudentMonitorInput): Student
       evidence: input.sessions.length === 0 && input.wrongAnswers.length === 0
         ? "학생이 활동을 시작하면 오답과 도움 사용 기록을 바탕으로 진단합니다."
         : "반복 오답과 높은 단계의 비계 사용이 확인되지 않았습니다."
+    });
+  }
+
+  const challengeActivities: ChallengeActivityStatus[] = grammarSixLessonCourse.map((lesson) => {
+    const progress = input.challengeProgress.find((item) => item.lessonNumber === lesson.number);
+    const completedIds = new Set(progress?.completedActivityIds ?? []);
+    const completedActivities = lesson.practiceActivities.filter((activity) => completedIds.has(activity.id)).map((activity) => activity.label);
+    const hasProgress = Boolean(progress?.conceptCompleted || completedActivities.length > 0);
+    const state = progress?.conceptCompleted && completedActivities.length >= lesson.practiceActivities.length
+      ? "completed" as const
+      : hasProgress
+        ? "partial" as const
+        : "not-started" as const;
+    return {
+      lessonNumber: lesson.number,
+      title: lesson.title,
+      state,
+      conceptCompleted: progress?.conceptCompleted ?? false,
+      completedActivities,
+      totalActivities: lesson.practiceActivities.length,
+      updatedAt: progress?.updatedAt ?? null
+    };
+  });
+  const practiceTypeLabels: Record<string, string> = {
+    literature: "문학 작품",
+    authentic: "실생활 자료",
+    "sentence-making": "문장 만들기",
+    "concept-learning": "개념학습",
+    "error-correction": "틀린 문장 고치기"
+  };
+  const uniqueDailyCompletions = new Map<string, MonitorEvent>();
+  for (const event of [...dailyCompletions].sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))) {
+    uniqueDailyCompletions.set(metadataString(event.metadata, "practiceDate") ?? event.createdAt, event);
+  }
+  const roadmap = buildDailyRoadmap(getKoreanDate(now), uniqueDailyCompletions.keys());
+  const selfStudyActivities: SelfStudyActivityStatus[] = roadmap.map((day, index) => {
+    const event = uniqueDailyCompletions.get(day.date);
+    const practiceType = event ? metadataString(event.metadata, "practiceType") : null;
+    return {
+      sequence: index + 1,
+      state: event ? "completed" as const : "not-completed" as const,
+      typeLabel: practiceType ? practiceTypeLabels[practiceType] ?? practiceType : day.typeLabel,
+      title: event ? metadataString(event.metadata, "title") ?? day.title : day.title,
+      completedAt: event?.createdAt ?? null
+    };
+  });
+  const hintByArea = countLabels(scaffoldEvents.map((event) => {
+    const area = sessionArea.get(event.sessionId) ?? "challenge";
+    return area === "self-study" ? "스스로 유형학습" : "오늘의 챌린지";
+  }));
+  const hintByConcept = countLabels(scaffoldEvents.map((event) => conceptLabels[event.conceptCode ?? ""] ?? event.conceptCode ?? "문장 탐구"));
+  const wrongGroups = new Map<string, { count: number; attempts: number }>();
+  for (const answer of input.wrongAnswers) {
+    const current = wrongGroups.get(answer.problemTitle) ?? { count: 0, attempts: 0 };
+    wrongGroups.set(answer.problemTitle, { count: current.count + 1, attempts: current.attempts + answer.attemptCount });
+  }
+  const wrongByType = [...wrongGroups.entries()]
+    .map(([label, value]) => ({ label, ...value }))
+    .sort((a, b) => b.count - a.count || b.attempts - a.attempts || a.label.localeCompare(b.label, "ko"));
+  const recommendations: LearningAnalysis["recommendations"] = [];
+  if (wrongByType[0]) {
+    recommendations.push({
+      title: `오답노트에서 ‘${wrongByType[0].label}’ 다시 해결하기`,
+      evidence: `${wrongByType[0].count}개 오답에서 총 ${wrongByType[0].attempts}회 시도한 기록이 있습니다.`
+    });
+  }
+  if (hintByConcept[0]) {
+    recommendations.push({
+      title: `‘${hintByConcept[0].label}’ 개념을 힌트 없이 한 번 더 설명하기`,
+      evidence: `이 개념에서 AI 힌트를 ${hintByConcept[0].count}회 사용했습니다.`
+    });
+  }
+  if (recommendations.length === 0) {
+    recommendations.push({
+      title: input.sessions.length === 0 ? "첫 학습 활동 시작하기" : "다음 미완료 활동 이어서 학습하기",
+      evidence: input.sessions.length === 0 ? "아직 분석할 학습 기록이 없습니다." : "반복 오답이나 AI 힌트 사용이 확인되지 않았습니다."
     });
   }
 
@@ -280,6 +401,18 @@ export function buildStudentLearningMonitor(input: StudentMonitorInput): Student
     ],
     wrongAnswers: wrongAnswerDetails,
     aiSupport,
-    diagnosis: diagnosis.slice(0, 3)
+    diagnosis: diagnosis.slice(0, 3),
+    challengeActivities,
+    selfStudyActivities,
+    wrongNoteSummary: { total: input.wrongAnswers.length, unresolved: unresolvedAll.length, resolved: resolvedAll.length },
+    analysis: {
+      hintCount: scaffoldEvents.length,
+      hintByArea,
+      hintByConcept,
+      wrongByType,
+      independentSuccesses,
+      evidenceCount,
+      recommendations: recommendations.slice(0, 2)
+    }
   };
 }

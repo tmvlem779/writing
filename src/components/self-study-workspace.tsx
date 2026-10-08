@@ -85,11 +85,11 @@ export function SelfStudyWorkspace() {
           const isAvailable = day.status !== "locked";
           const offset = pathOffsets[index % pathOffsets.length];
           const nextOffset = pathOffsets[(index + 1) % pathOffsets.length];
-          const nodeLabel = `${day.dateLabel} ${day.title} ${isToday ? day.status === "completed" ? "완료한 오늘 학습 다시 열기" : "오늘 학습 시작" : isAvailable ? "지난 학습 다시 열기" : "잠김"}`;
+          const nodeLabel = `${index + 1}번 활동 ${day.title} ${isToday ? day.status === "completed" ? "완료한 오늘 학습 다시 열기" : "오늘 학습 시작" : isAvailable ? "지난 학습 다시 열기" : "잠김"}`;
           return (
             <div className={`daily-path-step offset-${offset} to-${nextOffset} status-${day.status} ${isToday ? "is-today" : ""} ${isAvailable ? "is-available" : ""}`} key={day.date}>
               <div className="daily-path-copy">
-                <span>{day.dayLabel} · {day.dateLabel}</span>
+                <span>{index + 1} / 30</span>
                 <strong>{day.title}</strong>
                 <small>{day.status === "completed" ? isToday ? "완료했어요 · 다시 학습할 수 있어요" : "완료했어요 · 다시 학습할 수 있어요" : day.status === "today" ? `${day.description} 눌러서 시작해요.` : day.status === "missed" ? "지난 학습 · 연속 학습 기록에는 포함되지 않아요" : "차례가 되면 열려요"}</small>
               </div>
