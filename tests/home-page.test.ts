@@ -42,27 +42,31 @@ test("한국어 편집 디자인은 산세리프 제목과 서로 다른 장면 
   assert.doesNotMatch(styles, /content: "한글로 생각하고, 문장으로 쓰다"/);
 });
 
-test("브랜드 전체는 로딩 모션의 자연색을 공통 토큰으로 사용한다", () => {
-  assert.match(styles, /--motion-pine: #245b43/);
-  assert.match(styles, /--motion-clay: #d66a3f/);
-  assert.match(styles, /--motion-leaf: #789321/);
-  assert.match(styles, /--motion-slate: #667b8c/);
+test("브랜드 전체는 로딩 모션의 저채도 하늘색 팔레트를 공통 토큰으로 사용한다", () => {
+  assert.match(styles, /--motion-deep: #315d72/);
+  assert.match(styles, /--motion-lavender: #8f86ad/);
+  assert.match(styles, /--motion-sky: #78aec6/);
+  assert.match(styles, /--motion-slate: #637787/);
   assert.match(
     styles,
-    /\.auth-intro \{[\s\S]*?radial-gradient\(circle at 82% 18%, rgba\(214,106,63,\.16\)[\s\S]*?linear-gradient\(145deg, #edf4e7, #d8e8db\)/,
+    /\.auth-intro \{[\s\S]*?radial-gradient\(circle at 82% 18%, rgba\(143,134,173,\.14\)[\s\S]*?linear-gradient\(145deg, #edf6fa, #dcecf3\)/,
   );
   assert.match(
     styles,
-    /\.student-dashboard-card\.dashboard-card-1 \{ background: linear-gradient\(145deg, #245b43, #3e7459\); \}/,
+    /\.student-dashboard-card\.dashboard-card-1 \{ background: linear-gradient\(145deg, #3f7894, #315d72\); \}/,
   );
   assert.match(
     styles,
-    /\.teacher-learning-dashboard-header \{ background: linear-gradient\(115deg, #245b43, #3f7358\) !important; \}/,
+    /\.teacher-learning-dashboard-header \{ background: linear-gradient\(115deg, #315d72, #5b94ae\) !important; \}/,
   );
   assert.match(
     styles,
-    /\.course-map \.lesson-activity-summary \{ background: var\(--palette-pink-soft\); color: #61301f; \}/,
+    /\.course-map \.lesson-activity-summary \{ background: var\(--palette-pink-soft\); color: #453f63; \}/,
   );
+  assert.match(styles, /\.student-learning-nav \.student-learning-tabs a strong \{ font-size: 15px;/);
+  assert.match(styles, /\.course-map \.lesson-tab strong \{ color: var\(--ink\); font-size: 15px;/);
+  assert.match(styles, /\.course-map \.lesson-activity-summary li \{ font-size: 14px; line-height: 1\.55; \}/);
+  assert.match(styles, /\.course-feature-art > i \{ color: #edf6fa; font-size: clamp\(30px, 3vw, 46px\); \}/);
   assert.match(styles, /\.mondeuk-loading-syllables i:nth-child\(4\) \{ color: var\(--motion-slate\); \}/);
 });
 
