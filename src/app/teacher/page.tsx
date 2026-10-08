@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { InviteForm } from "@/components/invite-form";
-import { StudentLearningMonitor } from "@/components/student-learning-monitor";
+import { TeacherClassDashboard, type TeacherClassView } from "@/components/teacher-class-dashboard";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { buildStudentLearningMonitor, type StudentLearningMonitor as StudentLearningMonitorData } from "@/lib/teacher/learning-monitor";
@@ -14,22 +13,8 @@ type LearningEventRow = { user_id: string; session_id: string; event_type: strin
 type WrongAnswerRow = { user_id: string; source: "diagnosis" | "challenge" | "self-study"; source_label: string; problem_title: string; question: string; submitted_answer: string; feedback_hint: string; attempt_count: number; resolved_at: string | null; updated_at: string };
 type ChallengeProgressRow = { user_id: string; lesson_number: number; concept_completed: boolean; completed_activity_ids: string[]; updated_at: string };
 type AccountIdentity = { userId: string; loginId: string };
-type StudentSummary = {
-  userId: string;
-  alias: string;
-  sessionCount: number;
-  lastActivity: string | null;
-  lastSeenAt: string | null;
-  maxScaffoldLevel: number;
-  evidenceCount: number;
-  independentSuccessCount: number;
-};
 
 export const dynamic = "force-dynamic";
-
-function formatRegistrationDate(value: string) {
-  return new Intl.DateTimeFormat("ko-KR", { year: "numeric", month: "short", day: "numeric" }).format(new Date(value));
-}
 
 export default async function TeacherPage() {
   const supabase = await createServerSupabaseClient();
@@ -51,10 +36,16 @@ export default async function TeacherPage() {
     if (auth.user) {
       const { data: classMemberships } = await supabase.from("class_memberships").select("classes(id,name)")
         .eq("user_id", auth.user.id).eq("role", "teacher").eq("status", "active");
-      classes = (classMemberships ?? []).flatMap((row) => {
+      const visibleClasses: ClassRow[] = (classMemberships ?? []).flatMap((row: { classes: unknown }) => {
         const value = row.classes as unknown;
         if (!value) return [];
         return Array.isArray(value) ? (value as ClassRow[]) : [value as ClassRow];
+      });
+      classes = visibleClasses.sort((a: ClassRow, b: ClassRow) => {
+        if (a.name === b.name) return 0;
+        if (a.name === "문법학급") return -1;
+        if (b.name === "문법학급") return 1;
+        return a.name.localeCompare(b.name, "ko");
       });
 
       const classIds = classes.map((item) => item.id);
@@ -98,22 +89,6 @@ export default async function TeacherPage() {
 
   const aliasByUser = new Map(profiles.map((item) => [item.user_id, item.display_alias]));
   const loginIdByUser = new Map(accountIdentities.map((item) => [item.userId, item.loginId]));
-  const summaryByUser = new Map<string, StudentSummary>();
-  for (const membership of memberships) {
-    const studentSessions = sessions.filter((item) => item.user_id === membership.user_id);
-    const studentConcepts = concepts.filter((item) => item.user_id === membership.user_id);
-    const latest = studentSessions[0];
-    summaryByUser.set(membership.user_id, {
-      userId: membership.user_id,
-      alias: aliasByUser.get(membership.user_id) ?? "학생",
-      sessionCount: studentSessions.length,
-      lastActivity: latest?.activity_type ?? null,
-      lastSeenAt: latest?.updated_at ?? null,
-      maxScaffoldLevel: studentConcepts.reduce((max, item) => Math.max(max, item.scaffold_level), 0),
-      evidenceCount: studentConcepts.reduce((sum, item) => sum + item.evidence_count, 0),
-      independentSuccessCount: studentConcepts.reduce((sum, item) => sum + item.independent_success_count, 0)
-    });
-  }
   const monitorByUser = new Map<string, StudentLearningMonitorData>();
   for (const membership of memberships) {
     const userId = membership.user_id;
@@ -159,11 +134,23 @@ export default async function TeacherPage() {
       }))
     }));
   }
-  const summaries = [...summaryByUser.values()];
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayActivities = sessions.filter((item) => new Date(item.updated_at) >= today).length;
-  const studentsNeedingHelp = summaries.filter((item) => item.maxScaffoldLevel >= 3).length;
+  const classViews: TeacherClassView[] = classes.map((item) => {
+    const studentMemberships = memberships.filter((membership) => membership.class_id === item.id);
+    return {
+      id: item.id,
+      name: item.name,
+      students: studentMemberships.map((membership) => ({
+        userId: membership.user_id,
+        alias: aliasByUser.get(membership.user_id) ?? "학생",
+        loginId: loginIdByUser.get(membership.user_id) ?? "아이디 미확인",
+        status: membership.status,
+        createdAt: membership.created_at
+      })),
+      monitors: studentMemberships
+        .map((membership) => monitorByUser.get(membership.user_id))
+        .filter((monitor): monitor is StudentLearningMonitorData => Boolean(monitor))
+    };
+  });
 
   return (
     <section className="teacher-shell">
@@ -175,47 +162,7 @@ export default async function TeacherPage() {
       {!configured && <div className="notice-card"><strong>개발 환경 안내</strong><p>Supabase 환경 변수를 연결하면 실제 학급과 학생 기록이 표시됩니다.</p></div>}
       {configured && !signedIn && <div className="notice-card"><p>교사 계정 로그인이 필요합니다.</p><Link href="/login">로그인하기</Link></div>}
 
-      <div className="metric-grid">
-        <article><span>등록 학급</span><strong>{classes.length}</strong><small>담당 중인 수업</small></article>
-        <article><span>오늘 활동</span><strong>{configured && signedIn ? todayActivities : "—"}</strong><small>오늘 갱신된 세션</small></article>
-        <article><span>도움 필요</span><strong>{configured && signedIn ? studentsNeedingHelp : "—"}</strong><small>부분 구조 이상 비계 사용</small></article>
-      </div>
-
-      <section className="teacher-section">
-        <div className="section-title-row"><div><span>내 학급</span><h2>수업별 학습 현황</h2></div></div>
-        {classes.length === 0 ? (
-          <div className="empty-state"><strong>표시할 학급이 없습니다.</strong><p>Supabase에서 교사 계정과 학급을 연결하면 여기에 나타납니다.</p></div>
-        ) : (
-          <div className="class-grid">
-            {classes.map((item) => {
-              const studentMemberships = memberships.filter((membership) => membership.class_id === item.id);
-              const students = studentMemberships
-                .map((membership) => summaryByUser.get(membership.user_id)).filter((summary): summary is StudentSummary => Boolean(summary));
-              const studentMonitors = studentMemberships
-                .map((membership) => monitorByUser.get(membership.user_id)).filter((monitor): monitor is StudentLearningMonitorData => Boolean(monitor));
-              return <article className="class-card" key={item.id}>
-                <span>진행 중 · 학생 {students.length}명</span><h3>{item.name}</h3>
-                <section className="student-account-section" aria-labelledby={`student-accounts-${item.id}`}>
-                  <div className="student-account-heading">
-                    <div><span>계정 관리</span><h4 id={`student-accounts-${item.id}`}>학생 계정 목록</h4></div>
-                    <strong>{studentMemberships.length}명</strong>
-                  </div>
-                  {studentMemberships.length === 0 ? <p className="student-account-empty">아직 만든 학생 계정이 없습니다.</p> : <ol className="student-account-list">
-                    {studentMemberships.map((membership, index) => <li key={membership.user_id}>
-                      <span className="student-account-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                      <div><strong>{aliasByUser.get(membership.user_id) ?? "학생"}</strong><small>{loginIdByUser.get(membership.user_id) ?? "아이디 미확인"}</small></div>
-                      <span className={`student-account-status ${membership.status}`}>{membership.status === "active" ? "사용 중" : "초대 중"}</span>
-                      <time dateTime={membership.created_at}>{formatRegistrationDate(membership.created_at)} 등록</time>
-                    </li>)}
-                  </ol>}
-                </section>
-                <StudentLearningMonitor classId={item.id} students={studentMonitors} />
-                <InviteForm classId={item.id} />
-              </article>;
-            })}
-          </div>
-        )}
-      </section>
+      <TeacherClassDashboard canCreate={configured && signedIn} classes={classViews} />
     </section>
   );
 }

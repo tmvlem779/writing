@@ -69,6 +69,8 @@ test("P1·P5: 반복 오답과 높은 비계 사용을 정체 근거로 진단�
 test("TEACHER·PRIVACY: 교사 모니터는 담당 학생 데이터와 자동 갱신을 사용한다", () => {
   const page = read("src/app/teacher/page.tsx");
   const component = read("src/components/student-learning-monitor.tsx");
+  const classDashboard = read("src/components/teacher-class-dashboard.tsx");
+  const classRoute = read("src/app/api/teacher/classes/route.ts");
   const sessionRoute = read("src/app/api/sessions/route.ts");
   const practice = read("src/components/practice-chapter.tsx");
   const dailyConcept = read("src/components/concept-learning-activity.tsx");
@@ -78,6 +80,17 @@ test("TEACHER·PRIVACY: 교사 모니터는 담당 학생 데이터와 자동 �
   assert.match(page, /getUserById\(userId\)/);
   assert.match(page, /challenge_progress/);
   assert.match(page, /question,submitted_answer,feedback_hint/);
+  assert.doesNotMatch(page, /오늘 활동/);
+  assert.doesNotMatch(page, /도움 필요/);
+  assert.match(page, /a\.name === "문법학급"/);
+  assert.match(classDashboard, /role="tablist"/);
+  assert.match(classDashboard, /학급별 학생 진도 현황/);
+  assert.match(classDashboard, /setSelectedClassId/);
+  assert.match(classDashboard, /ClassCreateForm/);
+  assert.match(classRoute, /auth\.getUser\(\)/);
+  assert.match(classRoute, /profile\?\.role !== "teacher"/);
+  assert.match(classRoute, /teacher_id: auth\.user\.id/);
+  assert.match(classRoute, /role: "teacher"/);
   assert.match(component, /aria-orientation="vertical"/);
   assert.match(component, /student\.areas\.map/);
   assert.match(component, /무엇을 틀렸나요/);
@@ -98,4 +111,6 @@ test("RESPONSIVE: 교사 학습 현황은 태블릿과 모바일에서 열 수�
   assert.match(styles, /@media \(min-width: 641px\) and \(max-width: 1024px\)[\s\S]*\.metric-grid \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(styles, /@media \(min-width: 641px\) and \(max-width: 1024px\)[\s\S]*\.teacher-monitor-layout \{ grid-template-columns: 180px minmax\(0, 1fr\); \}/);
   assert.match(styles, /@media \(max-width: 640px\)[\s\S]*\.teacher-monitor-layout \{ display: block; min-height: 0; \}/);
+  assert.match(styles, /@media \(max-width: 640px\)[\s\S]*\.teacher-class-heading \{ align-items: stretch; display: grid/);
+  assert.match(styles, /\.teacher-class-tabs[\s\S]*overflow-x: auto/);
 });

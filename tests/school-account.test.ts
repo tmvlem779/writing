@@ -35,10 +35,11 @@ test("AUTH: 교사는 이메일 초대 대신 아이디와 초기 비밀번호�
 
 test("AUTH·PRIVACY: 교사는 담당 학급의 학생 계정 목록을 보고 생성 직후 갱신한다", () => {
   const page = fs.readFileSync("src/app/teacher/page.tsx", "utf8");
+  const dashboard = fs.readFileSync("src/components/teacher-class-dashboard.tsx", "utf8");
   const form = fs.readFileSync("src/components/invite-form.tsx", "utf8");
   const styles = fs.readFileSync("src/app/globals.css", "utf8");
-  assert.match(page, /학생 계정 목록/);
-  assert.match(page, /student-account-list/);
+  assert.match(dashboard, /학생 계정 목록/);
+  assert.match(dashboard, /student-account-list/);
   assert.match(page, /class_id,user_id,status,created_at/);
   assert.match(page, /\.eq\("user_id", auth\.user\.id\)\.eq\("role", "teacher"\)\.eq\("status", "active"\)/);
   assert.match(page, /memberships\.filter\(\(membership\) => membership\.class_id === item\.id\)/);

@@ -2644,3 +2644,140 @@ textarea, input {
   .teacher-ai-usage-list li { grid-template-columns: auto minmax(0, 1fr); }
   .teacher-ai-usage-list time { grid-column: 2; }
 }
+
+/* 교사 대시보드: 학급 등록과 학급별 전환 */
+.teacher-class-dashboard { margin-top: 52px; }
+.teacher-class-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+.teacher-class-heading h2 { margin: 5px 0 0; }
+.teacher-class-actions { display: flex; align-items: center; gap: 12px; }
+.teacher-class-actions > p {
+  margin: 0;
+  padding: 10px 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  border: 1px solid #dce1ec;
+  border-radius: 12px;
+  background: rgba(255,255,255,.72);
+  color: #737c92;
+}
+.teacher-class-actions > p strong { color: #46577f; font-size: 21px; }
+.teacher-class-actions > p span { font-size: 10px; }
+.class-create-control { position: relative; }
+.class-create-button {
+  min-height: 44px;
+  padding: 0 17px;
+  border: 1px solid #7184bc;
+  border-radius: 12px;
+  background: #7184bc;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(75,94,148,.16);
+}
+.class-create-button:hover { background: #6174aa; }
+.class-create-button:focus-visible,
+.teacher-class-tabs button:focus-visible { outline: 3px solid rgba(113,132,188,.28); outline-offset: 2px; }
+.class-create-form {
+  position: absolute;
+  z-index: 12;
+  top: calc(100% + 9px);
+  right: 0;
+  width: min(390px, calc(100vw - 28px));
+  padding: 18px;
+  border: 1px solid #d8deeb;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 18px 46px rgba(42,52,80,.16);
+}
+.class-create-form > label { display: block; margin-bottom: 8px; color: #46516b; font-size: 11px; font-weight: 800; }
+.class-create-form > div { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 7px; }
+.class-create-form input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 11px;
+  border: 1px solid #cfd6e5;
+  border-radius: 9px;
+  background: #fbfcff;
+}
+.class-create-form button { min-height: 42px; padding-inline: 12px; border: 0; border-radius: 9px; cursor: pointer; font-weight: 800; }
+.class-create-form button[type="submit"] { background: #5e73ae; color: #fff; }
+.class-create-form button[type="button"] { background: #eef0f6; color: #667087; }
+.class-create-form button:disabled { cursor: wait; opacity: .62; }
+.class-create-message { position: absolute; top: calc(100% + 7px); right: 0; width: max-content; max-width: 300px; margin: 0; color: #53679e; font-size: 10px; text-align: right; }
+.teacher-class-tabs {
+  padding: 9px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  border: 1px solid #dce1ec;
+  border-radius: 16px 16px 0 0;
+  background: #eef2f9;
+  scrollbar-width: thin;
+}
+.teacher-class-tabs button {
+  flex: 0 0 min(250px, 28vw);
+  min-width: 190px;
+  padding: 14px 15px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: #65708a;
+  cursor: pointer;
+  text-align: left;
+}
+.teacher-class-tabs button > span { color: #9199ac; font-size: 10px; font-weight: 850; }
+.teacher-class-tabs button > strong { overflow: hidden; color: #3b455e; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.teacher-class-tabs button > small { color: #8b93a6; font-size: 9px; white-space: nowrap; }
+.teacher-class-tabs button.active { border-color: #8797c3; background: #fff; box-shadow: 0 7px 18px rgba(67,82,126,.09); }
+.teacher-class-tabs button.active > span,
+.teacher-class-tabs button.active > strong { color: #53679e; }
+.teacher-class-panel {
+  padding: 26px;
+  border: 1px solid #dce1ec;
+  border-top: 0;
+  border-radius: 0 0 20px 20px;
+  background: #fff;
+  box-shadow: 0 16px 44px rgba(50,61,91,.06);
+}
+.teacher-class-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.teacher-class-panel-heading > div { display: grid; gap: 3px; }
+.teacher-class-panel-heading span { color: #7684a8; font-size: 9px; font-weight: 850; letter-spacing: .08em; }
+.teacher-class-panel-heading h3 { margin: 0; color: #29344f; font-size: 26px; }
+.teacher-class-panel-heading > strong { padding: 7px 11px; border-radius: 999px; background: #eef1fa; color: #586b9f; font-size: 10px; }
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .teacher-class-dashboard { margin-top: 42px; }
+  .teacher-class-heading { align-items: center; }
+  .teacher-class-tabs button { flex-basis: 220px; }
+  .teacher-class-panel { padding: 20px; }
+}
+
+@media (max-width: 640px) {
+  .teacher-class-dashboard { margin-top: 34px; }
+  .teacher-class-heading { align-items: stretch; display: grid; gap: 14px; }
+  .teacher-class-heading h2 { font-size: 28px; }
+  .teacher-class-actions { justify-content: space-between; }
+  .class-create-button { min-height: 46px; }
+  .class-create-form { position: fixed; top: 50%; right: 14px; left: 14px; width: auto; max-height: 80vh; margin: 0; overflow-y: auto; transform: translateY(-50%); }
+  .class-create-form > div { grid-template-columns: 1fr 1fr; }
+  .class-create-form input { grid-column: 1 / -1; }
+  .class-create-message { position: static; max-width: none; margin-top: 7px; text-align: left; }
+  .teacher-class-tabs { margin-inline: -1px; border-radius: 14px 14px 0 0; }
+  .teacher-class-tabs button { flex-basis: 180px; min-width: 180px; }
+  .teacher-class-panel { padding: 14px; border-radius: 0 0 16px 16px; }
+  .teacher-class-panel-heading { align-items: flex-start; }
+  .teacher-class-panel-heading h3 { font-size: 23px; }
+}
