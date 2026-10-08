@@ -42,6 +42,29 @@ test("한국어 편집 디자인은 산세리프 제목과 서로 다른 장면 
   assert.doesNotMatch(styles, /content: "한글로 생각하고, 문장으로 쓰다"/);
 });
 
+test("브랜드 전체는 참고 이미지의 네 색 팔레트를 공통 토큰으로 사용한다", () => {
+  assert.match(styles, /--palette-pale: #fff6fd/);
+  assert.match(styles, /--palette-pink: #ff8eac/);
+  assert.match(styles, /--palette-blue: #086995/);
+  assert.match(styles, /--palette-navy: #07385d/);
+  assert.match(
+    styles,
+    /\.auth-intro \{[\s\S]*?var\(--palette-pale\)[\s\S]*?var\(--palette-pink\)[\s\S]*?var\(--palette-blue\)[\s\S]*?var\(--palette-navy\)/,
+  );
+  assert.match(
+    styles,
+    /\.student-dashboard-card\.dashboard-card-1 \{ background: linear-gradient\(145deg, var\(--palette-navy\), var\(--palette-blue\)\); \}/,
+  );
+  assert.match(
+    styles,
+    /\.teacher-learning-dashboard-header \{ background: linear-gradient\(115deg, var\(--palette-navy\), var\(--palette-blue\)\) !important; \}/,
+  );
+  assert.match(
+    styles,
+    /\.course-map \.lesson-activity-summary \{ background: var\(--palette-pink\); color: var\(--palette-navy\); \}/,
+  );
+});
+
 test("로그인 화면 상단에는 브랜드만 남기고 공통 메뉴를 제거한다", () => {
   assert.doesNotMatch(layout, /<nav/);
   assert.doesNotMatch(layout, /학습하기|나의 기록|교사 화면|개인정보 안내/);

@@ -2941,3 +2941,237 @@ textarea, input {
   .teacher-class-panel-heading { align-items: flex-start; }
   .teacher-class-panel-heading h3 { font-size: 23px; }
 }
+
+/* 문득문득 ver.3.8: 옅은 분홍 · 분홍 · 파랑 · 남색 통합 팔레트 */
+:root {
+  --palette-pale: #fff6fd;
+  --palette-pink: #ff8eac;
+  --palette-pink-soft: #ffe2ec;
+  --palette-blue: #086995;
+  --palette-blue-soft: #dceff7;
+  --palette-navy: #07385d;
+  --ink: var(--palette-navy);
+  --muted: #587187;
+  --paper: var(--palette-pale);
+  --surface: #fffafd;
+  --green: var(--palette-blue);
+  --green-dark: var(--palette-navy);
+  --green-soft: var(--palette-blue-soft);
+  --lime: #b9dce9;
+  --orange: #e85580;
+  --line: #d5e0ea;
+  --shadow: 0 22px 55px rgba(7, 56, 93, .1);
+  --seal: #e85580;
+  --blue: var(--palette-blue);
+  --blue-dark: var(--palette-navy);
+  --blue-soft: var(--palette-blue-soft);
+  --plum: #d94f78;
+  --plum-soft: var(--palette-pink-soft);
+  --sand: #77a9c1;
+  --sand-soft: #e6f3f8;
+  --slate: #587187;
+}
+
+body {
+  background-color: var(--palette-pale);
+  background-image:
+    radial-gradient(circle at 14% 22%, rgba(255,142,172,.055) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 74% 66%, rgba(8,105,149,.04) 0 1px, transparent 1.5px);
+}
+:focus-visible { outline-color: var(--palette-pink); }
+
+.site-header {
+  border-top-color: var(--palette-pink);
+  border-bottom-color: rgba(8,105,149,.16);
+  background: rgba(255,250,253,.96);
+}
+.brand-logo-type { color: var(--palette-navy); }
+.brand-logo-mark {
+  border-color: #c8476d;
+  background: var(--palette-pink);
+  color: var(--palette-navy);
+  box-shadow: 3px 3px 0 rgba(7,56,93,.14);
+}
+.brand-logo-mark b { border-color: var(--palette-pale); background: var(--palette-navy); color: #fff; }
+.site-footer { border-top-color: var(--palette-pink); background: var(--palette-navy); }
+.primary-button { background: var(--palette-navy); color: #fff; }
+.primary-button:hover:not(:disabled) { background: var(--palette-blue); }
+.secondary-button { border-color: var(--palette-blue); color: var(--palette-navy); background: #fffafd; }
+
+/* 로그인 */
+.auth-shell {
+  background:
+    linear-gradient(180deg, rgba(255,246,253,.94), rgba(255,246,253,.94)),
+    linear-gradient(90deg, var(--palette-pink) 0 50%, var(--palette-blue-soft) 50%);
+}
+.auth-intro {
+  background:
+    radial-gradient(circle at 78% 20%, rgba(255,255,255,.52), transparent 20%),
+    linear-gradient(150deg, var(--palette-pale) 0 46%, var(--palette-pink) 46% 61%, var(--palette-blue) 61% 78%, var(--palette-navy) 78%);
+}
+.auth-intro h1 { color: var(--palette-navy); text-shadow: 0 5px 0 rgba(255,255,255,.55); }
+.auth-card { border-color: #d6e2ee; background: rgba(255,250,253,.98); box-shadow: 18px 22px 0 #dceff7, 0 24px 70px rgba(7,56,93,.14); }
+.auth-card h2 { color: var(--palette-navy); }
+.auth-card > p { color: var(--muted); }
+.auth-form input, .invite-form input { border-color: #bcd3e0; background: #fff; }
+.auth-form input:focus, .invite-form input:focus { border-color: var(--palette-blue); outline: 3px solid rgba(8,105,149,.15); }
+.auth-form .primary-button { background: var(--palette-navy); }
+.auth-form .primary-button:hover:not(:disabled) { background: var(--palette-blue); }
+
+/* 학생 홈과 공통 학습 내비게이션 */
+.student-dashboard,
+.learning-book-shell,
+.student-activity-page,
+.learning-studio,
+.daily-activity-page {
+  background-color: var(--palette-pale);
+}
+.learning-book-shell { background: var(--palette-pale); }
+.learning-book-shell > .student-dashboard {
+  background:
+    linear-gradient(90deg, rgba(255,142,172,.05) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255,250,253,.96), rgba(236,246,251,.92));
+}
+.learning-book-shell > .student-activity-page { background: rgba(255,246,253,.92); }
+.student-dashboard {
+  background:
+    linear-gradient(90deg, rgba(255,142,172,.05) 1px, transparent 1px),
+    linear-gradient(180deg, #fffafd 0%, #edf7fb 100%);
+}
+.student-dashboard-header { border-bottom-color: var(--palette-navy); }
+.student-dashboard-header::after { background: var(--palette-pink); }
+.student-dashboard-header > div > span { background: var(--palette-pink-soft); color: var(--palette-navy); }
+.student-dashboard-intro::before { color: rgba(232,85,128,.72); }
+.student-dashboard-intro p { color: var(--muted); }
+.student-dashboard-card.dashboard-card-1 { background: linear-gradient(145deg, var(--palette-navy), var(--palette-blue)); }
+.student-dashboard-card.dashboard-card-2 { background: linear-gradient(135deg, #fff0f5, var(--palette-pink-soft)); color: #9e3155; }
+.student-dashboard-card.dashboard-card-3 { background: linear-gradient(135deg, #eaf6fb, #cfeaf5); color: var(--palette-blue); }
+.student-dashboard-card.dashboard-card-2 .dashboard-card-mark { background: rgba(232,85,128,.12); color: #c13e68; }
+.student-dashboard-card.dashboard-card-3 .dashboard-card-mark { background: rgba(8,105,149,.11); color: var(--palette-blue); }
+.dashboard-progress { border-color: #cbdde8; background: repeating-linear-gradient(0deg, transparent 0 35px, rgba(8,105,149,.035) 36px), #fffafd; box-shadow: 12px 14px 0 rgba(7,56,93,.055); }
+.learning-status-item { border-color: #d6e2ea; background: #fff; }
+
+.student-learning-nav { border-top-color: var(--palette-pink); border-bottom-color: #c8d9e4; background: rgba(255,250,253,.98); }
+.student-learning-brand > span { border-left-color: #bdd3e0; color: var(--muted); }
+.student-learning-nav .student-learning-tabs a { border-color: #d8e2ea; color: var(--muted); }
+.student-learning-nav .student-learning-tabs a strong { color: var(--palette-navy); }
+.student-learning-nav .student-learning-tabs a:nth-child(1) { --tab-color: var(--palette-blue); }
+.student-learning-nav .student-learning-tabs a:nth-child(2) { --tab-color: #d94f78; }
+.student-learning-nav .student-learning-tabs a:nth-child(3) { --tab-color: var(--palette-navy); }
+
+/* 오늘의 챌린지와 학습 카드 */
+.course-map { background: var(--palette-pale); color: var(--palette-navy); }
+.course-map-feature { border-bottom-color: #c7dbe6; }
+.course-map-feature > header { background: #fffafd; }
+.course-map-feature > header::after { background: var(--palette-pink); }
+.course-map-feature > header > span { color: #d94f78; }
+.course-feature-art { background: linear-gradient(135deg, var(--palette-blue), var(--palette-navy)); }
+.course-feature-art > i { color: var(--palette-pink-soft); }
+.course-key-question { border-left-color: var(--palette-pink); background: rgba(7,44,73,.87); }
+.course-key-question strong { color: #ffb9ca; }
+.course-map-index { border-bottom-color: #c8d9e4; background: #fffafd; }
+.course-map .lesson-tab { border-color: #d8e3ea; color: var(--muted); }
+.course-map .lesson-tab.active { border-color: var(--palette-navy); background: var(--palette-navy); }
+.course-map .lesson-tab.active span { color: #ffb9ca; }
+.course-map .lesson-activity-summary { background: var(--palette-pink); color: var(--palette-navy); }
+.course-map .lesson-activity-summary > span,
+.course-map .lesson-activity-summary li,
+.course-map .lesson-activity-summary li::before { color: var(--palette-navy); }
+.chapter-switcher, .chapter-switcher.two-chapters { border-bottom-color: #cbdce6; background: #f7fbfd; }
+.chapter-tab { color: var(--muted); }
+.chapter-tab strong { color: var(--palette-navy); }
+.chapter-tab.active { border-color: #d94f78; color: #a93459; }
+.chapter-tab.active strong, .chapter-tab.active > span { color: #b63860; }
+.concept-sidebar, .material-sidebar { background: var(--palette-navy); }
+.activity-sidebar { background: var(--palette-blue); }
+.concept-progress, .transfer-panel { background: var(--palette-blue-soft); }
+
+.inquiry-card, .concept-summary-card, .concept-check,
+.summary-notebook, .real-material-card, .diagnostic-question-card,
+.diagnostic-result, .daily-concept-card, .situation-prompt,
+.task-card, .lesson-question-card, .real-life-task {
+  border-color: #ccdde7;
+  background-color: #fffafd;
+  box-shadow: 9px 11px 0 rgba(7,56,93,.055);
+}
+.lesson-question-card, .task-card, .real-life-task { border-left-color: var(--palette-pink); }
+.concept-summary-card, .analysis-guide { background: var(--palette-blue-soft); }
+.coach-card { border-color: #bcd9e6; background: #e8f5fa; }
+.coach-label { color: var(--palette-blue); }
+.coach-question { background: rgba(255,250,253,.84); }
+.coach-question span, .task-card > span, .real-life-task span { color: #d94f78; }
+.practice-mode.active { border-color: var(--palette-blue); background: var(--palette-blue); }
+.check-option.selected { border-color: var(--palette-pink); background: var(--palette-pink-soft); }
+
+/* 스스로 유형학습과 오답노트 */
+.self-study-heading { background: linear-gradient(110deg, var(--palette-blue), var(--palette-navy)); }
+.self-study-heading > span { color: #ffb8ca; }
+.self-study-group-tabs { background: var(--palette-pink-soft); }
+.daily-roadmap-shell { background: linear-gradient(180deg, #fffafd, #e9f5fa); }
+.daily-roadmap-summary { border-color: #c9dce7; background: #fffafd; box-shadow: 10px 12px 0 rgba(7,56,93,.055); }
+.daily-path-step::after { border-color: #a9cad9; }
+.daily-path-node { background: #c8dce6; box-shadow: 0 7px 0 #94b8ca; }
+.daily-path-step.status-completed .daily-path-node { background: var(--palette-blue); box-shadow: 0 7px 0 var(--palette-navy); }
+.daily-path-step.status-today .daily-path-node { background: var(--palette-pink); color: var(--palette-navy); box-shadow: 0 8px 0 #cc4f74, 0 0 0 8px rgba(255,142,172,.2); }
+.daily-activity-heading { background: #fffafd; }
+.daily-activity-heading > strong.active { background: var(--palette-pink-soft); color: #ae3158; }
+.daily-activity-heading > strong.complete { background: var(--palette-blue-soft); color: var(--palette-navy); }
+.daily-activity-heading > strong.review { background: #edf4f8; color: var(--palette-blue); }
+.wrong-notes-page > header > strong { background: var(--palette-navy); color: #fff; }
+.wrong-note-card { border-left-color: var(--palette-pink); background: #fffafd; }
+
+/* 교사 화면 */
+.teacher-shell { background: transparent; }
+.teacher-header h1, .teacher-class-heading h2 { color: var(--palette-navy); }
+.teacher-card, .teacher-class-panel, .student-account-section { border-color: #ccdde7; background: #fffafd; }
+.student-account-heading { background: var(--palette-blue-soft); }
+.student-account-heading span, .teacher-class-panel-heading span { color: #c43f67; }
+.student-account-heading > strong { color: var(--palette-blue); }
+.student-account-status.active { background: var(--palette-blue-soft); color: var(--palette-navy); }
+.teacher-class-actions > p { border-color: #cbdde7; background: rgba(255,250,253,.85); color: var(--muted); }
+.teacher-class-actions > p strong { color: var(--palette-blue); }
+.class-create-button, .class-create-form button[type="submit"] { border-color: var(--palette-blue); background: var(--palette-blue); }
+.class-create-button:hover { background: var(--palette-navy); }
+.class-create-button:focus-visible, .teacher-class-tabs button:focus-visible { outline-color: rgba(255,142,172,.5); }
+.class-create-form { border-color: #c9dce7; background: #fffafd; box-shadow: 0 18px 46px rgba(7,56,93,.16); }
+.teacher-class-tabs { border-color: #cbdde7; background: var(--palette-blue-soft); }
+.teacher-class-tabs button.active { border-color: var(--palette-blue); background: #fffafd; box-shadow: 0 7px 18px rgba(7,56,93,.1); }
+.teacher-class-tabs button.active > span, .teacher-class-tabs button.active > strong { color: var(--palette-blue); }
+.teacher-class-panel { box-shadow: 0 16px 44px rgba(7,56,93,.07); }
+.teacher-class-panel-heading h3 { color: var(--palette-navy); }
+.teacher-class-panel-heading > strong { background: var(--palette-pink-soft); color: #aa3156; }
+.teacher-learning-dashboard-header { background: linear-gradient(115deg, var(--palette-navy), var(--palette-blue)) !important; }
+.teacher-monitor-mode-tabs button.active { color: var(--palette-navy); background: #fffafd; }
+.teacher-status-view, .teacher-analysis-view { background: #f3f9fc; }
+.teacher-activity-table-wrap, .teacher-activity-detail,
+.teacher-analysis-summary-grid article, .teacher-analysis-panel { border-color: #cbdde7; background: #fffafd; }
+.teacher-activity-table thead th { background: var(--palette-blue-soft); color: var(--palette-navy); }
+.teacher-activity-table tbody th { background: #fffafd; }
+.teacher-challenge-cells button.completed, .teacher-self-study-cells button.completed { border-color: var(--palette-blue); background: var(--palette-blue); }
+.teacher-challenge-cells button.partial { border-color: var(--palette-pink); background: var(--palette-pink-soft); color: #9f2e53; }
+.teacher-analysis-bars i b { background: var(--palette-blue); }
+.teacher-analysis-bars.wrong i b { background: var(--palette-pink); }
+.teacher-recommendation-panel { border-color: #bcd9e6; background: #e9f6fa; }
+.teacher-recommendation-panel li { background: #fffafd; }
+.teacher-recommendation-panel li > span, .teacher-recommendation-panel li strong { color: var(--palette-blue); }
+.teacher-student-rail { border-color: #cbdde7; background: var(--palette-blue-soft); }
+.teacher-student-list button.active { border-color: var(--palette-blue); color: var(--palette-navy); }
+.teacher-student-list button > i { background: var(--palette-pink); box-shadow: 0 0 0 3px rgba(255,142,172,.2); }
+
+/* 남아 있는 첫 장 자산도 같은 네 색으로 연결한다. */
+.v3-book-stage, body:has(.v3-home) { background: var(--palette-navy); }
+.v3-book-stage > .v3-book-cover { background: linear-gradient(90deg, var(--palette-navy) 0 50%, var(--palette-pale) 50% 100%); }
+.fill-green { fill: var(--palette-blue); }
+.fill-lime { fill: var(--palette-pink); }
+.fill-lime-soft, .fill-orange-soft { fill: var(--palette-pink-soft); }
+.fill-orange { fill: #e85580; }
+.stroke-green, .stroke-green-heavy, .stroke-ink { stroke: var(--palette-navy); }
+.v3-cover-title > i, .v3-cover-rule { border-color: var(--palette-pink); background: var(--palette-pink); color: var(--palette-navy); }
+.v3-progress span.active { color: var(--palette-pink); }
+
+@media (max-width: 620px) {
+  .auth-shell { background: var(--palette-pale); }
+  .auth-intro { background: linear-gradient(145deg, var(--palette-pale) 0 58%, var(--palette-pink) 58% 72%, var(--palette-blue) 72% 86%, var(--palette-navy) 86%); }
+  .auth-card { box-shadow: 8px 10px 0 var(--palette-blue-soft); }
+  .v3-book-stage > .v3-book-cover { background: linear-gradient(180deg, var(--palette-navy) 0 53%, var(--palette-pale) 53% 100%); }
+}
