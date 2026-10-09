@@ -199,11 +199,6 @@ export function PracticeChapter({
           {demo && <span className="demo-badge">개발용 데모</span>}
         </header>
 
-        <section className="lesson-question-card compact" aria-label={`${lessonNumber}차시 핵심 질문`}>
-          <span>핵심 질문</span>
-          <strong>{lesson.keyQuestion}</strong>
-        </section>
-
         <div className="task-card">
           <span>이번 과제</span>
           <p>{selected.prompt}</p>

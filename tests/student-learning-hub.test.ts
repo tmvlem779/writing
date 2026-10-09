@@ -315,6 +315,13 @@ test("학생 학습 정보 구조는 비대칭 홈과 번호형 상단 탭, 편�
   assert.match(styles, /\.course-feature-art \{[^}]*min-height: 260px;/s);
 });
 
+test("오늘의 챌린지 활동 화면은 중복 핵심 질문 카드를 표시하지 않는다", () => {
+  assert.doesNotMatch(conceptChapter, /lesson-question-card/);
+  assert.doesNotMatch(practiceChapter, /lesson-question-card/);
+  assert.doesNotMatch(realLifeChapter, /lesson-question-card/);
+  assert.match(writingStudio, /course-key-question/);
+});
+
 test("RESPONSIVE: 한국어는 어절 단위로 줄바꿈하고 모바일·태블릿을 별도 조판한다", () => {
   assert.match(styles, /word-break: keep-all;/);
   assert.match(styles, /overflow-wrap: break-word;/);

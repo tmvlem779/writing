@@ -179,11 +179,6 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onCompletionC
           <span className="concept-count">{lessonNumber} / {courseLessonCount}차시</span>
         </header>
 
-        <section className="lesson-question-card" aria-label={`${lessonNumber}차시 핵심 질문`}>
-          <span>핵심 질문</span>
-          <strong>{courseLesson.keyQuestion}</strong>
-        </section>
-
         <section className="inquiry-card" aria-labelledby="inquiry-heading">
           <span id="inquiry-heading">먼저 살펴보기</span>
           <h2>{lesson.inquiryQuestion}</h2>

@@ -340,13 +340,6 @@ export function RealLifeChapter({
           {demo && <span className="demo-badge">개발용 데모</span>}
         </header>
 
-        {!isLiterature && (
-          <section className="lesson-question-card compact" aria-label={`${lessonNumber}차시 핵심 질문`}>
-            <span>핵심 질문</span>
-            <strong>{courseLesson.keyQuestion}</strong>
-          </section>
-        )}
-
         <article className={`real-material-card material-${material.id} ${isLiterature ? `material-literature literature-${material.genre === "시" ? "poem" : "prose"}` : ""}`}>
           <div className="material-meta">
             <span>{isLiterature ? `${material.genre} · ${material.author}` : material.label}</span>

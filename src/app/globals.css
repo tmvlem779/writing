@@ -3247,3 +3247,69 @@ body {
   .course-map .lesson-activity-summary > span { font-size: 13px; }
   .course-map .lesson-activity-summary li { font-size: 13px; }
 }
+
+/* 문득문득 ver.4.2: 활동 화면 대비와 안내 글자 확대 */
+.student-learning-home .brand-logo-type { color: #171917; font-size: 20px; }
+.student-learning-brand > span { color: #171917; font-size: 13px; }
+.student-learning-nav .student-learning-tabs a small { color: #171917; font-size: 14px; }
+.student-learning-nav .student-learning-tabs a strong { color: #171917; font-size: 18px; }
+.student-learning-nav .student-learning-tabs a span { color: #171917; font-size: 12px; }
+.student-learning-nav .student-learning-tabs a.active small,
+.student-learning-nav .student-learning-tabs a.active strong,
+.student-learning-nav .student-learning-tabs a.active span { color: #171917; }
+.student-learning-index { color: #171917; font-size: 14px; }
+
+.course-map-feature > header > span { font-size: 16px; }
+.course-map-feature h1 { color: #171917; font-size: clamp(44px, 4.2vw, 64px); }
+.course-map-feature > header > p { color: #252825; font-size: 16px; }
+.course-feature-art > i { font-size: 38px; }
+.course-key-question { font-size: 16px; }
+.course-key-question strong { font-size: 13px; }
+.course-map .lesson-tab span { font-size: 13px; }
+.course-map .lesson-tab strong { color: #171917; font-size: 17px; }
+.course-map .lesson-tab.active strong { color: #fff; }
+.course-map .lesson-activity-summary > span { color: #171917; font-size: 15px; }
+.course-map .lesson-activity-summary li,
+.course-map .lesson-activity-summary li::before { color: #171917; font-size: 15px; }
+
+.practice-studio-shell .activity-sidebar { background: #176b57; }
+.practice-studio-shell .activity-button.active { background: rgba(255,255,255,.16); }
+.practice-studio-shell .workspace-header h1,
+.practice-studio-shell .workspace-header .eyebrow,
+.practice-studio-shell .task-card p,
+.practice-studio-shell .previous-answer-reference > span,
+.practice-studio-shell .previous-answer-reference blockquote,
+.practice-studio-shell .previous-answer-reference p,
+.practice-studio-shell .draft-label,
+.practice-studio-shell .workspace textarea { color: #171917; }
+.practice-studio-shell .workspace-header h1 { font-size: 42px; }
+.practice-studio-shell .task-card p { font-size: 17px; line-height: 1.75; }
+
+@media (max-width: 1024px) {
+  .student-learning-home .brand-logo-type { font-size: 19px; }
+  .student-learning-nav .student-learning-tabs a strong { font-size: 17px; }
+  .student-learning-nav .student-learning-tabs a span { font-size: 11px; }
+  .course-feature-art > i { font-size: 36px; }
+  .practice-studio-shell .workspace-header h1 { font-size: 38px; }
+}
+
+@media (max-width: 640px) {
+  .student-learning-home .brand-logo-type { font-size: 17px; }
+  .student-learning-brand > span { font-size: 12px; }
+  .student-learning-nav .student-learning-tabs a { flex-basis: 164px; min-width: 164px; }
+  .student-learning-nav .student-learning-tabs a small { font-size: 12px; }
+  .student-learning-nav .student-learning-tabs a strong { font-size: 15px; }
+  .student-learning-nav .student-learning-tabs a span { font-size: 11px; }
+  .course-map-feature > header > span { font-size: 14px; }
+  .course-map-feature > header > p { font-size: 15px; }
+  .course-feature-art > i { font-size: 32px; }
+  .course-key-question { font-size: 15px; }
+  .course-key-question strong { font-size: 12px; }
+  .course-map .lesson-tab span { font-size: 13px; }
+  .course-map .lesson-tab strong { font-size: 15px; }
+  .course-map .lesson-activity-summary > span { font-size: 14px; }
+  .course-map .lesson-activity-summary li,
+  .course-map .lesson-activity-summary li::before { font-size: 14px; }
+  .practice-studio-shell .workspace-header h1 { font-size: 34px; }
+  .practice-studio-shell .task-card p { font-size: 16px; }
+}
