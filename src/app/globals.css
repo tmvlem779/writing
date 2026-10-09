@@ -3437,3 +3437,111 @@ body {
   .auth-intro h1 { letter-spacing: .025em; }
   .auth-intro .auth-slogan { margin-top: 12px; font-size: 17px; }
 }
+
+/* 문득문득 ver.5.3: 압축형 챌린지 표지와 한 화면 모바일 탭 */
+.course-map-feature {
+  min-height: 150px;
+  grid-template-columns: minmax(300px, .72fr) minmax(440px, 1.28fr);
+}
+.course-map-feature > header {
+  min-height: 150px;
+  padding: 16px clamp(28px, 4vw, 58px);
+}
+.course-map-feature > header::after {
+  left: clamp(28px, 4vw, 58px);
+  bottom: 15px;
+}
+.course-map-feature h1 {
+  margin: 4px 0 5px;
+  font-size: clamp(36px, 3.2vw, 46px);
+  line-height: 1.06;
+}
+.course-map-feature h1 br { display: none; }
+.course-map-feature > header > p {
+  max-width: 460px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.course-feature-art { min-height: 150px; }
+.course-feature-art::before { width: 220px; height: 220px; top: -92px; }
+.course-feature-art::after { width: 150px; height: 150px; bottom: -84px; }
+.course-feature-art > span { top: -22%; font-size: clamp(96px, 12vw, 164px); }
+.course-feature-art > i { top: 13%; font-size: 30px; }
+.course-key-question {
+  width: min(520px, 72%);
+  padding: 10px 14px;
+  right: 4%;
+  bottom: 13px;
+  font-size: 12px;
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .course-map-feature {
+    min-height: 148px;
+    grid-template-columns: minmax(270px, .82fr) minmax(360px, 1.18fr);
+  }
+  .course-map-feature > header { min-height: 148px; padding: 16px 24px; }
+  .course-map-feature > header::after { left: 24px; bottom: 14px; }
+  .course-map-feature h1 { font-size: clamp(34px, 4.8vw, 42px); }
+  .course-feature-art { min-height: 148px; }
+  .course-key-question { width: calc(100% - 36px); right: 18px; bottom: 12px; }
+}
+
+@media (max-width: 640px) {
+  .student-learning-nav { padding: 12px 12px 0; }
+  .student-learning-brand { margin-bottom: 10px; }
+  .student-learning-nav .student-learning-tabs {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+  .student-learning-nav .student-learning-tabs a,
+  .student-learning-nav .student-learning-tabs a:last-child {
+    min-width: 0;
+    min-height: 64px;
+    padding: 10px 6px 9px;
+    grid-template-columns: 16px minmax(0, 1fr);
+    column-gap: 3px;
+  }
+  .student-learning-nav .student-learning-tabs a small { font-size: 9px; }
+  .student-learning-nav .student-learning-tabs a strong { font-size: 11px; line-height: 1.25; }
+  .student-learning-nav .student-learning-tabs a span { font-size: 9px; line-height: 1.2; }
+
+  .course-map-feature {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow: hidden;
+  }
+  .course-map-feature > header {
+    min-height: 0;
+    padding: 14px 16px 17px;
+  }
+  .course-map-feature > header::after { left: 16px; bottom: 10px; }
+  .course-map-feature > header > span { font-size: 12px; }
+  .course-map-feature h1 { margin: 2px 0 4px; font-size: 30px; }
+  .course-map-feature > header > p { max-width: none; font-size: 12px; line-height: 1.4; }
+  .course-feature-art { min-height: 116px; }
+  .course-feature-art > span { top: -26%; font-size: 112px; }
+  .course-feature-art > i { left: 7%; top: 12%; font-size: 25px; }
+  .course-key-question {
+    width: calc(100% - 24px);
+    margin: 48px 12px 12px;
+    padding: 9px 12px;
+    position: relative;
+    right: auto;
+    bottom: auto;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 360px) {
+  .student-learning-nav .student-learning-tabs a,
+  .student-learning-nav .student-learning-tabs a:last-child { min-width: 0; padding-inline: 4px; }
+  .student-learning-nav .student-learning-tabs a strong { font-size: 10px; }
+}

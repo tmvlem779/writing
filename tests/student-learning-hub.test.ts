@@ -305,6 +305,7 @@ test("학생 학습 정보 구조는 비대칭 홈과 번호형 상단 탭, 편�
   assert.doesNotMatch(writingStudio, /<strong>\{lessonKeywords/);
   assert.doesNotMatch(writingStudio, /기본|연결|확장|표현|변형|활용/);
   assert.match(writingStudio, /<strong>핵심 질문<\/strong>/);
+  assert.match(writingStudio, /<div className="course-feature-art">[\s\S]*?<p className="course-key-question">/);
   assert.doesNotMatch(writingStudio, /<strong>\{lessonNumber\}차시 핵심 질문<\/strong>/);
   assert.match(writingStudio, /course-map-index/);
   assert.match(styles, /--blue: #405965/);
@@ -313,6 +314,9 @@ test("학생 학습 정보 구조는 비대칭 홈과 번호형 상단 탭, 편�
   assert.match(styles, /\.course-map-feature \{[^}]*grid-template-columns: minmax\(330px, \.78fr\) minmax\(540px, 1\.22fr\)/s);
   assert.match(styles, /\.course-map-feature \{[^}]*min-height: 260px;/s);
   assert.match(styles, /\.course-feature-art \{[^}]*min-height: 260px;/s);
+  assert.match(styles, /문득문득 ver\.5\.3: 압축형 챌린지 표지와 한 화면 모바일 탭/);
+  assert.match(styles, /\.course-map-feature \{\s*min-height: 150px;[\s\S]*?grid-template-columns: minmax\(300px, \.72fr\) minmax\(440px, 1\.28fr\);/);
+  assert.match(styles, /\.course-feature-art \{ min-height: 150px; \}/);
 });
 
 test("오늘의 챌린지 활동 화면은 중복 핵심 질문 카드를 표시하지 않는다", () => {
@@ -331,7 +335,8 @@ test("RESPONSIVE: 한국어는 어절 단위로 줄바꿈하고 모바일·태�
   assert.match(styles, /@media \(max-width: 640px\)[\s\S]*text-wrap: pretty;/);
   assert.match(styles, /\.daily-path-step\.offset-0 \{ --node-x: 12% !important; \}/);
   assert.match(styles, /\.daily-path-step\.offset-2 \{ --node-x: 88% !important; \}/);
-  assert.match(styles, /@media \(max-width: 640px\)[\s\S]*\.student-learning-nav \.student-learning-tabs \{[\s\S]*display: flex;[\s\S]*overflow-x: auto;/);
+  assert.match(styles, /문득문득 ver\.5\.3[\s\S]*@media \(max-width: 640px\)[\s\S]*\.student-learning-nav \.student-learning-tabs \{[^}]*display: grid;[^}]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);[^}]*overflow: visible;/);
+  assert.match(styles, /@media \(max-width: 640px\)[\s\S]*\.course-map-feature \{[\s\S]*grid-template-columns: 1fr;[\s\S]*overflow: hidden;/);
   assert.match(styles, /\.story-step-0 \.v3-story-panel\.panel-1 \{ color: var\(--ink\); \}/);
 });
 
