@@ -14,6 +14,11 @@ test("첫 화면은 책 모션 없이 로그인 화면으로 바로 이동한다
   assert.doesNotMatch(page, /BookJourney/);
   assert.match(loginPage, /<LoginForm \/>/);
   assert.match(loginPage, /<h1>문득문득<\/h1>/);
+  assert.match(loginPage, /className="auth-slogan"/);
+  assert.match(loginPage, /slogan-question">질문/);
+  assert.match(loginPage, /slogan-discover">깨닫/);
+  assert.match(loginPage, /slogan-sentence">문장/);
+  assert.match(loginPage, /slogan-gain">얻/);
   assert.match(loginPage, /로그인/);
   assert.doesNotMatch(loginPage, /학교 수업 전용|수업 계정으로|학생 데이터 안내 보기/);
 });
@@ -65,6 +70,11 @@ test("브랜드 전체는 흰 바탕과 블루 계열, 코랄 포인트 토큰�
   );
   assert.match(styles, /\.mondeuk-loading-syllables i:nth-child\(4\) \{ color: var\(--motion-pine\); \}/);
   assert.match(styles, /body \{[\s\S]*?background-color: #fff;[\s\S]*?background-image: none;/);
+  assert.match(styles, /\.auth-intro::before \{[\s\S]*?hunminjeongeum-glyphs\.png[\s\S]*?opacity: \.055;/);
+  assert.match(styles, /\.auth-intro h1 \{\s*letter-spacing: \.04em;/);
+  assert.match(styles, /\.check-feedback\.correct,[\s\S]*?background: #e4f6f8;/);
+  assert.match(styles, /\.daily-roadmap-summary dl div \{ background: #eef9fb; \}/);
+  assert.match(styles, /\.task-card \{[\s\S]*?box-shadow: 0 18px 38px rgba\(17,19,63,\.13\)/);
 });
 
 test("로그인 화면 상단에는 브랜드만 남기고 공통 메뉴를 제거한다", () => {

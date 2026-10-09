@@ -3341,3 +3341,99 @@ body {
 .literature-sentence:focus-visible { outline-color: rgba(54,84,134,.3); }
 .novel-sentence-progress-list button.current { border-color: var(--motion-pine); background: #eef9fb; box-shadow: 0 8px 20px rgba(54,84,134,.09); }
 .literature-followup-panel { border-color: #cde8ee; background: #f5fbfc; box-shadow: 0 12px 28px rgba(17,19,63,.07); }
+
+/* 문득문득 ver.5.2: 남은 초록 상태색 제거와 로그인 브랜드 보강 */
+.check-feedback.correct,
+.daily-concept-feedback.correct,
+.diagnostic-feedback.correct,
+.error-correction-feedback.success {
+  background: #e4f6f8;
+  color: var(--palette-navy);
+}
+.check-result-summary {
+  border-color: #cde8ee;
+  background: #f7fbfd;
+}
+.check-result-summary > div strong { color: var(--palette-navy); }
+.check-result-summary li {
+  background: #eef9fb;
+  color: var(--palette-navy);
+}
+.check-result-summary li.correct strong { color: var(--motion-pine); }
+.check-result-summary li.incorrect { background: var(--palette-pink-soft); }
+.check-result-summary li.incorrect strong { color: #c64060; }
+.summary-blank-row.correct { background: #eef9fb; }
+.daily-roadmap-summary dl div { background: #eef9fb; }
+.daily-roadmap-summary dd { color: var(--palette-navy); }
+.teacher-wrong-answer-list summary > span.resolved {
+  background: #e4f6f8;
+  color: var(--palette-navy);
+}
+.student-dashboard-card.green .dashboard-card-mark,
+.student-dashboard-card.lime .dashboard-card-mark,
+.status-next > .learning-mark,
+.next-activity-chip,
+.status-tags span {
+  background: #e4f6f8;
+  color: var(--motion-pine);
+}
+.student-dashboard-card.green { border-top-color: var(--motion-pine); color: var(--palette-navy); }
+.student-dashboard-card.lime { border-top-color: var(--motion-leaf); color: var(--palette-navy); }
+.novel-sentence-progress-list button.complete {
+  border-color: #cde8ee;
+  background: #eef9fb;
+}
+.novel-sentence-progress-list button.complete > span {
+  background: #d8f0f4;
+  color: var(--palette-navy);
+}
+.novel-sentence-progress-list button.complete > small { color: var(--motion-pine); }
+.novel-token:hover,
+.novel-token:focus-visible { background: #eef9fb; }
+
+.task-card {
+  border: 1px solid #dfe7ee;
+  border-left: 4px solid var(--motion-clay);
+  box-shadow: 0 18px 38px rgba(17,19,63,.13), 0 4px 10px rgba(54,84,134,.08);
+}
+
+.auth-intro {
+  isolation: isolate;
+}
+.auth-intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("/images/hunminjeongeum-glyphs.png") center / 72% auto no-repeat;
+  opacity: .055;
+  pointer-events: none;
+}
+.auth-intro-copy {
+  position: relative;
+  z-index: 1;
+}
+.auth-intro h1 {
+  letter-spacing: .04em;
+}
+.auth-intro .auth-slogan {
+  max-width: none;
+  margin: 22px 0 0;
+  color: var(--palette-navy);
+  font-size: clamp(18px, 2vw, 27px);
+  font-weight: 800;
+  line-height: 1.55;
+  letter-spacing: -.025em;
+  word-break: keep-all;
+}
+.auth-slogan strong { font-weight: 900; }
+.auth-slogan .slogan-question { color: #d84f70; }
+.auth-slogan .slogan-discover { color: #365486; }
+.auth-slogan .slogan-sentence { color: #13758c; }
+.auth-slogan .slogan-gain { color: #6b5aa6; }
+
+@media (max-width: 640px) {
+  .auth-intro::before { background-size: 92% auto; opacity: .045; }
+  .auth-intro h1 { letter-spacing: .025em; }
+  .auth-intro .auth-slogan { margin-top: 12px; font-size: 17px; }
+}
