@@ -42,28 +42,29 @@ test("한국어 편집 디자인은 산세리프 제목과 서로 다른 장면 
   assert.doesNotMatch(styles, /content: "한글로 생각하고, 문장으로 쓰다"/);
 });
 
-test("브랜드 전체는 로딩 모션의 자연색을 공통 토큰으로 사용한다", () => {
-  assert.match(styles, /--motion-pine: #245b43/);
-  assert.match(styles, /--motion-clay: #d66a3f/);
-  assert.match(styles, /--motion-leaf: #789321/);
-  assert.match(styles, /--motion-slate: #667b8c/);
+test("브랜드 전체는 흰 바탕과 블루 계열, 코랄 포인트 토큰을 사용한다", () => {
+  assert.match(styles, /--motion-pine: #365486/);
+  assert.match(styles, /--motion-clay: #ef6f8a/);
+  assert.match(styles, /--motion-leaf: #79c2d6/);
+  assert.match(styles, /--palette-navy: #11133f/);
   assert.match(
     styles,
-    /\.auth-intro \{[\s\S]*?radial-gradient\(circle at 82% 18%, rgba\(214,106,63,\.16\)[\s\S]*?linear-gradient\(145deg, #edf4e7, #d8e8db\)/,
+    /\.auth-intro \{[\s\S]*?background: #e4f6f8;/,
   );
   assert.match(
     styles,
-    /\.student-dashboard-card\.dashboard-card-1 \{ background: linear-gradient\(145deg, #245b43, #3e7459\); \}/,
+    /\.student-dashboard-card\.dashboard-card-1 \{ background: var\(--motion-pine\); \}/,
   );
   assert.match(
     styles,
-    /\.teacher-learning-dashboard-header \{ background: linear-gradient\(115deg, #245b43, #3f7358\) !important; \}/,
+    /\.teacher-learning-dashboard-header \{ background: var\(--motion-pine\) !important; \}/,
   );
   assert.match(
     styles,
-    /\.course-map \.lesson-activity-summary \{ background: var\(--palette-pink-soft\); color: #61301f; \}/,
+    /\.course-map \.lesson-activity-summary \{ background: var\(--palette-blue-soft\); color: var\(--palette-navy\); \}/,
   );
-  assert.match(styles, /\.mondeuk-loading-syllables i:nth-child\(4\) \{ color: var\(--motion-slate\); \}/);
+  assert.match(styles, /\.mondeuk-loading-syllables i:nth-child\(4\) \{ color: var\(--motion-pine\); \}/);
+  assert.match(styles, /body \{[\s\S]*?background-color: #fff;[\s\S]*?background-image: none;/);
 });
 
 test("로그인 화면 상단에는 브랜드만 남기고 공통 메뉴를 제거한다", () => {
@@ -71,13 +72,13 @@ test("로그인 화면 상단에는 브랜드만 남기고 공통 메뉴를 제�
   assert.doesNotMatch(layout, /학습하기|나의 기록|교사 화면|개인정보 안내/);
 });
 
-test("오늘의 챌린지는 큰 안내 글자와 단색 초록 표지를 사용한다", () => {
+test("오늘의 챌린지는 큰 안내 글자와 단색 블루 표지를 사용한다", () => {
   assert.match(styles, /\.student-learning-nav \.student-learning-tabs a strong \{ color: #171917; font-size: 18px;/);
   assert.match(styles, /\.course-map-feature > header > span \{ font-size: 16px; \}/);
-  assert.match(styles, /\.course-feature-art \{ background: #2f735e; \}/);
+  assert.match(styles, /\.course-feature-art \{ background: var\(--motion-pine\); \}/);
   assert.match(styles, /\.course-feature-art > i \{ font-size: 38px; \}/);
   assert.match(styles, /\.course-key-question \{ font-size: 16px; \}/);
   assert.match(styles, /\.course-map \.lesson-tab strong \{ color: #171917; font-size: 17px;/);
-  assert.match(styles, /\.practice-studio-shell \.activity-sidebar \{ background: #176b57; \}/);
+  assert.match(styles, /\.practice-studio-shell \.activity-sidebar \{ background: var\(--motion-pine\); \}/);
   assert.match(styles, /\.practice-studio-shell \.task-card p \{ font-size: 17px; line-height: 1\.75; \}/);
 });
