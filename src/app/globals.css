@@ -3194,3 +3194,56 @@ body {
   .auth-card { box-shadow: 0 14px 38px rgba(36,91,67,.11); }
   .v3-book-stage > .v3-book-cover { background: linear-gradient(180deg, var(--palette-navy) 0 53%, var(--palette-pale) 53% 100%); }
 }
+
+/* 문득문득 ver.4.1: 챌린지 표지 가독성과 단색 초록 장면 */
+.student-learning-home .brand-logo-type { font-size: 18px; font-weight: 800; }
+.student-learning-brand > span { font-size: 12px; }
+.student-learning-nav .student-learning-tabs a small { font-size: 12px; }
+.student-learning-nav .student-learning-tabs a strong { font-size: 16px; line-height: 1.4; font-weight: 800; }
+.student-learning-nav .student-learning-tabs a span { font-size: 11px; line-height: 1.35; }
+.student-learning-index { font-size: 13px; }
+
+.course-map-feature > header > span { font-size: 14px; }
+.course-map-feature h1 { font-size: clamp(40px, 4vw, 60px); }
+.course-map-feature > header > p { font-size: 15px; line-height: 1.55; }
+.course-feature-art { background: #2f735e; }
+.course-feature-art > i {
+  width: auto;
+  height: auto;
+  display: block;
+  border: 0;
+  background: transparent;
+  color: #fff8ed;
+  font-size: 34px;
+}
+.course-key-question { font-size: 15px; line-height: 1.55; }
+.course-key-question strong { font-size: 12px; }
+.course-map .lesson-tab span { font-size: 12px; }
+.course-map .lesson-tab strong { font-size: 15px; line-height: 1.45; font-weight: 800; }
+.course-map .lesson-activity-summary > span { font-size: 14px; font-weight: 850; }
+.course-map .lesson-activity-summary li { font-size: 14px; line-height: 1.55; }
+
+@media (max-width: 1024px) {
+  .student-learning-home .brand-logo-type { font-size: 17px; }
+  .student-learning-nav .student-learning-tabs a strong { font-size: 15px; }
+  .student-learning-nav .student-learning-tabs a span { font-size: 10px; }
+  .course-feature-art > i { font-size: 32px; }
+}
+
+@media (max-width: 640px) {
+  .student-learning-home .brand-logo-type { font-size: 16px; }
+  .student-learning-brand > span { font-size: 11px; }
+  .student-learning-nav .student-learning-tabs a { flex-basis: 156px; min-width: 156px; }
+  .student-learning-nav .student-learning-tabs a small { font-size: 11px; }
+  .student-learning-nav .student-learning-tabs a strong { font-size: 14px; }
+  .student-learning-nav .student-learning-tabs a span { font-size: 10px; }
+  .course-map-feature > header > span { font-size: 13px; }
+  .course-map-feature > header > p { font-size: 14px; }
+  .course-feature-art > i { font-size: 30px; }
+  .course-key-question { font-size: 14px; }
+  .course-key-question strong { font-size: 11px; }
+  .course-map .lesson-tab span { font-size: 12px; }
+  .course-map .lesson-tab strong { font-size: 14px; }
+  .course-map .lesson-activity-summary > span { font-size: 13px; }
+  .course-map .lesson-activity-summary li { font-size: 13px; }
+}

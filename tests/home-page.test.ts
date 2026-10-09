@@ -70,3 +70,13 @@ test("로그인 화면 상단에는 브랜드만 남기고 공통 메뉴를 제�
   assert.doesNotMatch(layout, /<nav/);
   assert.doesNotMatch(layout, /학습하기|나의 기록|교사 화면|개인정보 안내/);
 });
+
+test("오늘의 챌린지는 큰 안내 글자와 단색 초록 표지를 사용한다", () => {
+  assert.match(styles, /\.student-learning-nav \.student-learning-tabs a strong \{ font-size: 16px;/);
+  assert.match(styles, /\.course-map-feature > header > span \{ font-size: 14px; \}/);
+  assert.match(styles, /\.course-feature-art \{ background: #2f735e; \}/);
+  assert.match(styles, /\.course-feature-art > i \{[\s\S]*?border: 0;[\s\S]*?font-size: 34px;/);
+  assert.match(styles, /\.course-key-question \{ font-size: 15px; line-height: 1\.55; \}/);
+  assert.match(styles, /\.course-map \.lesson-tab strong \{ font-size: 15px;/);
+  assert.match(styles, /\.course-map \.lesson-activity-summary li \{ font-size: 14px; line-height: 1\.55; \}/);
+});
