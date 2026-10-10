@@ -61,7 +61,7 @@ export function PracticeChapter({
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [response, setResponse] = useState<AgentResponse | null>(null);
   const [activityAnswers, setActivityAnswers] = useState<Record<string, string>>({});
-  const [lastSubmittedAnswer, setLastSubmittedAnswer] = useState("");
+  const [revealedAnswer, setRevealedAnswer] = useState<string | null>(null);
   const [history, setHistory] = useState<Message[]>([]);
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
@@ -131,12 +131,14 @@ export function PracticeChapter({
       const next = body as AgentResponse & { demo?: boolean };
       if (submittedDraft) {
         setActivityAnswers((answers) => ({ ...answers, [selected.id]: submittedDraft }));
-        setLastSubmittedAnswer(submittedDraft);
       }
+      const nextAttemptCount = attemptCount + 1;
+      const shouldRevealAnswer = !next.activityComplete && nextAttemptCount >= 3 && Boolean(selected.modelAnswer);
       setResponse(next);
       setDemo((current) => current || Boolean(next.demo));
       setScaffoldLevel(next.scaffoldLevel);
-      if (supportMode === "submit") setAttemptCount((count) => count + 1);
+      setAttemptCount(nextAttemptCount);
+      setRevealedAnswer(shouldRevealAnswer ? selected.modelAnswer ?? null : null);
       if (next.activityComplete) {
         const nextCompleted = completedActivityIds.includes(selected.id)
           ? completedActivityIds
@@ -165,7 +167,7 @@ export function PracticeChapter({
     setAttemptCount(0);
     setScaffoldLevel(0);
     setDraft("");
-    setLastSubmittedAnswer(activityAnswers[nextId] ?? "");
+    setRevealedAnswer(null);
     onProgressChange?.(completedActivityIds, nextId);
   }
 
@@ -217,25 +219,33 @@ export function PracticeChapter({
         {response && (
           <article className="coach-card" aria-live="polite">
             <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
-            {lastSubmittedAnswer && (
+            {sourceActivity && sourceAnswer && (
               <div className="coach-answer-reference">
-                <span>AI가 참고한 내 답</span>
-                <blockquote>“{previewAnswer(lastSubmittedAnswer)}”</blockquote>
+                <span>AI가 참고한 앞 활동의 내 답</span>
+                <blockquote>“{previewAnswer(sourceAnswer)}”</blockquote>
               </div>
             )}
-            {!response.activityComplete && <p>{response.studentMessage}</p>}
-            {response.activityComplete ? (
+            {revealedAnswer ? (
+              <div className="activity-resolution-card">
+                <span>3회 생각 후 정답 확인</span>
+                <strong>{revealedAnswer}</strong>
+                <p>이번 활동은 학습 완료로 기록되지 않아요. 정답을 읽고 다음 활동으로 넘어가세요.</p>
+              </div>
+            ) : response.activityComplete ? (
               <div className="activity-completion-card">
                 <span>활동 완료</span>
                 <strong>이번 과제에서 확인할 내용을 모두 익혔어요.</strong>
               </div>
             ) : (
-              <div className="coach-question">
-                <span>다음 생각</span>
-                <strong>{response.question}</strong>
-              </div>
+              <>
+                <p>{response.studentMessage}</p>
+                <div className="coach-question">
+                  <span>다음 생각</span>
+                  <strong>{response.question}</strong>
+                </div>
+              </>
             )}
-            {response.focusConcepts.length > 0 && (
+            {!revealedAnswer && response.focusConcepts.length > 0 && (
               <div className="concept-tags" aria-label="학습 초점">
                 {response.focusConcepts.map((concept) => <span key={concept}>{concept}</span>)}
               </div>
@@ -243,7 +253,7 @@ export function PracticeChapter({
           </article>
         )}
 
-        {response?.activityComplete ? (
+        {response?.activityComplete || revealedAnswer ? (
           <div className="completion-actions">
             {activities.findIndex((item) => item.id === selected.id) < activities.length - 1 ? (
               <button
@@ -253,7 +263,7 @@ export function PracticeChapter({
               >
                 다음 활동으로
               </button>
-            ) : <strong>이 차시의 쓰기와 성찰 활동을 마쳤어요.</strong>}
+            ) : <strong>{revealedAnswer ? "정답을 확인했어요. 이 활동은 완료 처리되지 않았습니다." : "이 차시의 쓰기와 성찰 활동을 마쳤어요."}</strong>}
           </div>
         ) : (
           <>

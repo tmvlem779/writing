@@ -94,6 +94,7 @@ test("TEACHER·PRIVACY: 교사 모니터는 담당 학생 데이터와 자동 �
   assert.match(classDashboard, /학급별 학생 진도 현황/);
   assert.match(classDashboard, /setSelectedClassId/);
   assert.match(classDashboard, /ClassCreateForm/);
+  assert.ok(classDashboard.indexOf("<InviteForm") < classDashboard.indexOf('className="student-account-section"'));
   assert.match(classRoute, /auth\.getUser\(\)/);
   assert.match(classRoute, /profile\?\.role !== "teacher"/);
   assert.match(classRoute, /teacher_id: auth\.user\.id/);

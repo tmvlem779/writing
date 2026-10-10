@@ -124,6 +124,15 @@ test("P1·P3: 챕터 2는 불필요한 수치를 숨기고 숙달되면 질문�
   assert.match(practiceChapter, /\[활동 완료 기준\]/);
 });
 
+test("P1: 챕터 2는 힌트와 제출을 합쳐 3회 미해결이면 정답을 보여 주되 완료로 기록하지 않는다", () => {
+  assert.match(practiceChapter, /const nextAttemptCount = attemptCount \+ 1/);
+  assert.match(practiceChapter, /!next\.activityComplete && nextAttemptCount >= 3/);
+  assert.match(practiceChapter, /setRevealedAnswer/);
+  assert.match(practiceChapter, /3회 생각 후 정답 확인/);
+  assert.match(practiceChapter, /이번 활동은 학습 완료로 기록되지 않아요/);
+  assert.match(practiceChapter, /if \(next\.activityComplete\) \{/);
+});
+
 test("P1·DATA: 오늘의 챌린지 진행을 계정별로 복원하고 완료 활동도 다시 풀 수 있다", () => {
   assert.match(writingStudio, /fetch\("\/api\/challenge-progress"/);
   assert.match(writingStudio, /progressHydrated/);
@@ -138,7 +147,8 @@ test("P1·DATA: 오늘의 챌린지 진행을 계정별로 복원하고 완료 �
 });
 
 test("P3: 완료된 AI 활동에서는 다음 과제를 요구하는 윗문장을 숨긴다", () => {
-  assert.match(practiceChapter, /!response\.activityComplete && <p>\{response\.studentMessage\}<\/p>/);
+  assert.match(practiceChapter, /response\.activityComplete \? \(/);
+  assert.match(practiceChapter, /<p>\{response\.studentMessage\}<\/p>/);
 });
 
 test("P2·P3: 챕터 2는 참고 중인 학생 문장을 밝히고 생성 뒤 같은 분석을 반복하지 않는다", () => {
@@ -147,7 +157,9 @@ test("P2·P3: 챕터 2는 참고 중인 학생 문장을 밝히고 생성 뒤 �
   const explanation = firstLesson.practiceActivities.find((activity) => activity.id === "grammar-simple-explain");
   assert.match(creation?.completionCriterion ?? "", /문장 성분 분석은 다음 활동/);
   assert.equal(explanation?.usesAnswerFrom, "grammar-simple-create");
-  assert.match(practiceChapter, /AI가 참고한 내 답/);
+  assert.match(practiceChapter, /sourceActivity && sourceAnswer/);
+  assert.match(practiceChapter, /AI가 참고한 앞 활동의 내 답/);
+  assert.doesNotMatch(practiceChapter, /lastSubmittedAnswer/);
   assert.match(practiceChapter, /앞 활동에서 만든 문장/);
   assert.match(practiceChapter, /sourceAnswer/);
   assert.match(practiceChapter, /Chapter 02 · \{lessonNumber\}\/\{lessonCount\}/);

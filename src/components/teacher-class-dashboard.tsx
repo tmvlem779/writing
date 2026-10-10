@@ -74,6 +74,8 @@ export function TeacherClassDashboard({ classes, canCreate }: { classes: Teacher
                 <strong>학생 {selectedClass.students.length}명</strong>
               </header>
 
+              <InviteForm classId={selectedClass.id} />
+
               <section className="student-account-section" aria-labelledby={`student-accounts-${selectedClass.id}`}>
                 <div className="student-account-heading">
                   <div><span>계정 관리</span><h4 id={`student-accounts-${selectedClass.id}`}>학생 계정 목록</h4></div>
@@ -90,7 +92,6 @@ export function TeacherClassDashboard({ classes, canCreate }: { classes: Teacher
               </section>
 
               <StudentLearningMonitor key={selectedClass.id} classId={selectedClass.id} students={selectedClass.monitors} />
-              <InviteForm classId={selectedClass.id} />
             </article>
           )}
         </>

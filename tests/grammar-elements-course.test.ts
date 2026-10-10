@@ -40,6 +40,15 @@ test("CURRICULUM: 새 수업안은 요청한 여섯 차시를 순서대로 제�
   assert.ok(grammarSixLessonCourse.every((lesson) => lesson.practiceActivities.length >= 4));
 });
 
+test("P1·P3: 챕터 2 문항은 단일 초점으로 낮추고 3회 미해결용 예시 답을 갖는다", () => {
+  const activities = grammarSixLessonCourse.flatMap((lesson) => lesson.practiceActivities);
+  assert.ok(activities.every((activity) => Boolean(activity.modelAnswer?.trim())));
+  assert.ok(activities.every((activity) => !/3~5문장|세 문장|두 가지를 골라 각각/.test(activity.prompt)));
+  assert.match(getCourseLesson(2, "grammar").practiceActivities[1].prompt, /‘-고’ 또는 ‘-아서\/어서’ 중 하나/);
+  assert.match(getCourseLesson(3, "grammar").practiceActivities[2].prompt, /문장 한 개/);
+  assert.match(getCourseLesson(6, "grammar").practiceActivities[1].prompt, /중 하나/);
+});
+
 test("P3·P4: 교과서 범위와 문법 요소를 개념 학습에 반영한다", () => {
   assert.equal(grammarElementsSource.section, "문장의 구조와 문법 요소");
   assert.equal(grammarElementsSource.pages, "86~111쪽");
@@ -79,7 +88,7 @@ test("P3: 문법 요소 개념 확인도 오답에서 정답을 먼저 공개하
   assert.equal(incorrect?.reflection, correct?.reflection);
 });
 
-test("P4·P6: 4·5차시는 문법 요소를 나누고 6차시는 생성·변형·설명을 요구한다", () => {
+test("P4·P6: 4·5차시는 문법 요소를 나누고 6차시는 쉬운 생성·변형·설명을 요구한다", () => {
   const fourth = getCourseLesson(4, "grammar");
   const fourthLabels = fourth.practiceActivities.map((activity) => activity.label).join(" ");
   for (const element of ["종결", "높임", "시간"]) {
@@ -90,9 +99,9 @@ test("P4·P6: 4·5차시는 문법 요소를 나누고 6차시는 생성·변형
     assert.match(fifthLabels, new RegExp(element));
   }
   const finalPrompts = getCourseLesson(6, "grammar").practiceActivities.map((activity) => activity.prompt).join(" ");
-  assert.match(finalPrompts, /친구 대화용/);
-  assert.match(finalPrompts, /학교 공식 안내용/);
-  assert.match(finalPrompts, /선택 이유/);
+  assert.match(finalPrompts, /학교 행사 안내/);
+  assert.match(finalPrompts, /친구에게 말하는 표현/);
+  assert.match(finalPrompts, /왜 바꾸었는지/);
 });
 
 test("P6·PRIVACY: 6차시 챕터 3은 숨기되 실생활 자료는 나중의 재사용을 위해 보존한다", () => {
