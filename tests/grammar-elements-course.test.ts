@@ -40,9 +40,8 @@ test("CURRICULUM: 새 수업안은 요청한 여섯 차시를 순서대로 제�
   assert.ok(grammarSixLessonCourse.every((lesson) => lesson.practiceActivities.length >= 4));
 });
 
-test("P1·P3: 챕터 2 문항은 단일 초점으로 낮추고 3회 미해결용 예시 답을 갖는다", () => {
+test("P1·P3: 챕터 2 문항은 한 번에 한 가지 판단에 집중한다", () => {
   const activities = grammarSixLessonCourse.flatMap((lesson) => lesson.practiceActivities);
-  assert.ok(activities.every((activity) => Boolean(activity.modelAnswer?.trim())));
   assert.ok(activities.every((activity) => !/3~5문장|세 문장|두 가지를 골라 각각/.test(activity.prompt)));
   assert.match(getCourseLesson(2, "grammar").practiceActivities[1].prompt, /‘-고’ 또는 ‘-아서\/어서’ 중 하나/);
   assert.match(getCourseLesson(3, "grammar").practiceActivities[2].prompt, /문장 한 개/);

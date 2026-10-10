@@ -4,7 +4,18 @@ import { buildFallbackResponse } from "../src/lib/agent/fallback.ts";
 import type { Activity, TurnRequest } from "../src/lib/agent/schema.ts";
 
 function request(activity: Activity, message = "학생이 쓴 문장입니다."): TurnRequest {
-  return { sessionId: "demo-test", activity, message, supportMode: "submit", scaffoldLevel: 0, attemptCount: 0, history: [] };
+  return {
+    sessionId: "demo-test",
+    activity,
+    message,
+    supportMode: "submit",
+    scaffoldLevel: 0,
+    attemptCount: 0,
+    currentQuestion: "현재 질문",
+    questionAttemptCount: 0,
+    questionHintCount: 0,
+    history: []
+  };
 }
 
 test("P1: 명시적인 힌트 요청은 도움 단계로 처리한다", () => {

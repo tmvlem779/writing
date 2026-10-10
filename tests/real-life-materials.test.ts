@@ -82,6 +82,9 @@ test("P6: 실생활 자료 활동은 서버 입력 스키마와 비계 응답에
     supportMode: "submit",
     scaffoldLevel: 0,
     attemptCount: 0,
+    currentQuestion: "기사 문장은 어떤 효과를 내나요?",
+    questionAttemptCount: 0,
+    questionHintCount: 0,
     history: []
   });
   assert.match(response.question, /목적과 독자|효과/);
@@ -96,6 +99,9 @@ test("P3·P5: 소설 전체 문장 표시는 짧은 확인 뒤 다음 문장으�
     supportMode: "submit",
     scaffoldLevel: 0,
     attemptCount: 0,
+    currentQuestion: "이 문장에는 몇 가지 내용이 담겨 있나요?",
+    questionAttemptCount: 0,
+    questionHintCount: 0,
     history: []
   });
   assert.match(response.studentMessage, /둘 이상의 내용/);
@@ -112,6 +118,9 @@ test("P3·P4: 시의 선택은 문법 형태와 표현 효과 질문으로 이�
     supportMode: "submit",
     scaffoldLevel: 0,
     attemptCount: 0,
+    currentQuestion: "고른 구절에서 어떤 문법 형태가 보이나요?",
+    questionAttemptCount: 0,
+    questionHintCount: 0,
     history: []
   });
 

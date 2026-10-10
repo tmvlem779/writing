@@ -67,11 +67,31 @@ export function applyTutorResponsePolicy(request: TurnRequest, response: AgentRe
     return {
       ...response,
       answerStatus: "met",
+      questionResolution: "complete",
+      resolvedQuestionAnswer: "",
       studentMessage: response.studentMessage.slice(0, 180),
       question: "",
       nextAction: "complete",
       activityComplete: true,
       masteryEvidence
+    };
+  }
+
+  const shouldRevealAfterHints = request.supportMode === "hint" && request.questionHintCount >= 2;
+  const shouldRevealAfterAnswers = request.supportMode === "submit"
+    && request.questionAttemptCount >= 2
+    && (response.answerStatus === "incorrect" || response.answerStatus === "partial")
+    && response.questionResolution !== "advance";
+  if (shouldRevealAfterHints || shouldRevealAfterAnswers) {
+    const resolvedQuestionAnswer = response.resolvedQuestionAnswer.trim() || response.studentMessage.trim();
+    return {
+      ...response,
+      mode: "model",
+      studentMessage: "이 질문은 정답을 확인하고 다음 질문으로 넘어갈게요.",
+      questionResolution: "reveal_and_advance",
+      resolvedQuestionAnswer,
+      activityComplete: false,
+      masteryEvidence: []
     };
   }
 
@@ -82,6 +102,8 @@ export function applyTutorResponsePolicy(request: TurnRequest, response: AgentRe
   return {
     ...response,
     answerStatus: response.answerStatus === "met" ? "partial" : response.answerStatus,
+    questionResolution: response.questionResolution === "complete" ? "advance" : response.questionResolution,
+    resolvedQuestionAnswer: "",
     studentMessage: response.studentMessage.slice(0, 220),
     question,
     activityComplete: false,

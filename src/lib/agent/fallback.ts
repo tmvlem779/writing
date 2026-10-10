@@ -34,6 +34,9 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
     attemptCount: request.attemptCount,
     askedForHelp: asksForHelp
   });
+  const shouldRevealQuestion = request.supportMode === "hint"
+    ? request.questionHintCount >= 2
+    : request.questionAttemptCount >= 2;
 
   const lead = [
     "좋아요. 먼저 문장 안에서 눈에 보이는 단서를 찾아봅시다.",
@@ -60,6 +63,8 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
   return {
     mode: request.activity === "error" ? "revise" : request.activity === "compare" ? "compare" : level === 4 ? "model" : level > 0 ? "hint" : "question",
     answerStatus: request.supportMode === "hint" ? "not_answered" : "partial",
+    questionResolution: shouldRevealQuestion ? "reveal_and_advance" : "continue",
+    resolvedQuestionAnswer: shouldRevealQuestion ? "개발용 응답에서는 현재 질문의 답을 수업 자료에서 확인해 주세요." : "",
     scaffoldLevel: level,
     studentMessage: isNovelSentenceMarking
       ? `답을 확인했어요. 밑줄 친 단서와 ‘${/\[학생이 고른 문장 구조\] ([^\n]+)/.exec(request.message)?.[1] ?? "구조 선택"}’을 연결해 생각한 과정이 기록됐습니다.`

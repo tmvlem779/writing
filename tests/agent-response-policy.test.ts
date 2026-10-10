@@ -12,6 +12,9 @@ function request(overrides: Partial<TurnRequest> = {}): TurnRequest {
     supportMode: "submit",
     scaffoldLevel: 0,
     attemptCount: 0,
+    currentQuestion: "주어와 서술어를 찾아 보세요.",
+    questionAttemptCount: 0,
+    questionHintCount: 0,
     history: [],
     ...overrides
   };
@@ -21,6 +24,8 @@ function response(overrides: Partial<AgentResponse> = {}): AgentResponse {
   return {
     mode: "question",
     answerStatus: "partial",
+    questionResolution: "continue",
+    resolvedQuestionAnswer: "",
     scaffoldLevel: 0,
     studentMessage: "답을 살펴봤어요.",
     question: "근거를 하나 적어 보세요.",
@@ -70,13 +75,58 @@ test("P1: 누적 답이 완료 기준을 충족했다는 판정은 꼬리질문�
   assert.ok(result.masteryEvidence.length > 0);
 });
 
-test("P1: 세 번째 상호작용이어도 부분 충족이면 완료로 올리지 않는다", () => {
+test("P1: 세 번째 학습 질문이어도 부분 충족이라는 이유만으로 활동을 끝내지 않는다", () => {
   const result = applyTutorResponsePolicy(
     request({ attemptCount: 2 }),
     response({ answerStatus: "partial", activityComplete: false, masteryEvidence: [] })
   );
 
   assert.equal(result.answerStatus, "partial");
+  assert.equal(result.activityComplete, false);
+});
+
+test("P1: 같은 질문에서 세 번째 힌트를 쓰면 그 질문의 답만 공개하고 다음 질문으로 간다", () => {
+  const result = applyTutorResponsePolicy(
+    request({ supportMode: "hint", questionHintCount: 2 }),
+    response({
+      answerStatus: "not_answered",
+      questionResolution: "reveal_and_advance",
+      resolvedQuestionAnswer: "주어는 ‘학생들이’, 서술어는 ‘찬다’입니다.",
+      question: "두 말이 문장의 중심이라고 판단한 근거는 무엇인가요?"
+    })
+  );
+
+  assert.equal(result.questionResolution, "reveal_and_advance");
+  assert.match(result.resolvedQuestionAnswer, /학생들이/);
+  assert.match(result.question, /근거/);
+  assert.equal(result.activityComplete, false);
+});
+
+test("P1: 같은 질문의 세 번째 부적절한 답은 정답 공개 뒤 다음 질문으로 이어진다", () => {
+  const result = applyTutorResponsePolicy(
+    request({ questionAttemptCount: 2 }),
+    response({
+      answerStatus: "incorrect",
+      questionResolution: "continue",
+      resolvedQuestionAnswer: "주어는 ‘학생들이’, 서술어는 ‘찬다’입니다.",
+      question: "이제 왜 홑문장인지 한 가지 근거를 적어 보세요."
+    })
+  );
+
+  assert.equal(result.questionResolution, "reveal_and_advance");
+  assert.match(result.resolvedQuestionAnswer, /찬다/);
+  assert.match(result.question, /홑문장/);
+  assert.equal(result.activityComplete, false);
+});
+
+test("P1·P3: 현재 질문을 충분히 답해 다음 질문으로 간 경우 실패 횟수로 처리하지 않는다", () => {
+  const result = applyTutorResponsePolicy(
+    request({ questionAttemptCount: 2 }),
+    response({ answerStatus: "partial", questionResolution: "advance", question: "다음 근거를 적어 보세요." })
+  );
+
+  assert.equal(result.questionResolution, "advance");
+  assert.equal(result.resolvedQuestionAnswer, "");
   assert.equal(result.activityComplete, false);
 });
 
@@ -124,4 +174,10 @@ test("DATA: 누적 답 숙달 판정과 3회 종료 규칙은 프롬프트 v18�
   const migration = readFileSync(new URL("../supabase/migrations/202610100001_add_cumulative_mastery_prompt.sql", import.meta.url), "utf8");
   assert.match(migration, /writing-tutor-v18/);
   assert.match(migration, /cumulative-mastery-before-three-turn-resolution/);
+});
+
+test("DATA: 질문별 세 번 지원 뒤 계속 학습하는 규칙은 프롬프트 v19로 추적한다", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/202610100002_add_per_question_resolution_prompt.sql", import.meta.url), "utf8");
+  assert.match(migration, /writing-tutor-v19/);
+  assert.match(migration, /per-question-three-support-then-continue/);
 });

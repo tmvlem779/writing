@@ -18,6 +18,9 @@ export const turnRequestSchema = z.object({
   supportMode: z.enum(["submit", "hint"]).default("submit"),
   scaffoldLevel: z.number().int().min(0).max(4).default(0),
   attemptCount: z.number().int().min(0).max(20).default(0),
+  currentQuestion: z.string().max(500).default(""),
+  questionAttemptCount: z.number().int().min(0).max(20).default(0),
+  questionHintCount: z.number().int().min(0).max(20).default(0),
   history: z
     .array(
       z.object({
@@ -32,6 +35,8 @@ export const turnRequestSchema = z.object({
 export const agentResponseSchema = z.object({
   mode: z.enum(["diagnose", "question", "hint", "compare", "revise", "model", "reflect"]),
   answerStatus: z.enum(["not_answered", "incorrect", "partial", "met"]),
+  questionResolution: z.enum(["continue", "advance", "reveal_and_advance", "complete"]),
+  resolvedQuestionAnswer: z.string().max(360),
   scaffoldLevel: z.number().int().min(0).max(4),
   studentMessage: z.string().min(1).max(360),
   question: z.string().max(180),
@@ -56,6 +61,8 @@ export const agentResponseJsonSchema = {
   required: [
     "mode",
     "answerStatus",
+    "questionResolution",
+    "resolvedQuestionAnswer",
     "scaffoldLevel",
     "studentMessage",
     "question",
@@ -69,6 +76,8 @@ export const agentResponseJsonSchema = {
   properties: {
     mode: { type: "string", enum: ["diagnose", "question", "hint", "compare", "revise", "model", "reflect"] },
     answerStatus: { type: "string", enum: ["not_answered", "incorrect", "partial", "met"] },
+    questionResolution: { type: "string", enum: ["continue", "advance", "reveal_and_advance", "complete"] },
+    resolvedQuestionAnswer: { type: "string", maxLength: 360 },
     scaffoldLevel: { type: "integer", minimum: 0, maximum: 4 },
     studentMessage: { type: "string", maxLength: 360 },
     question: { type: "string", maxLength: 180 },

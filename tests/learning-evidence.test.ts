@@ -7,6 +7,8 @@ function response(overrides: Partial<AgentResponse> = {}): AgentResponse {
   return {
     mode: "question",
     answerStatus: "partial",
+    questionResolution: "continue",
+    resolvedQuestionAnswer: "",
     scaffoldLevel: 0,
     studentMessage: "좋아요.",
     question: "근거를 설명해 볼까요?",
