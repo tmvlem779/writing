@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-import { buildStudentLearningMonitor } from "../src/lib/teacher/learning-monitor.ts";
+import { buildClassLearningAnalysis, buildStudentLearningMonitor } from "../src/lib/teacher/learning-monitor.ts";
 
 const read = (path: string) => fs.readFileSync(path, "utf8");
 
@@ -73,6 +73,31 @@ test("P1·P5: 반복 오답과 높은 비계 사용을 정체 근거로 진단�
   assert.match(monitor.analysis.recommendations[0].evidence, /3회 시도/);
 });
 
+test("P1·P5: 학급 분석은 공통 오답과 힌트 근거로 보충 활동을 제안한다", () => {
+  const student = buildStudentLearningMonitor({
+    userId: "student-class-analysis",
+    name: "김분석",
+    loginId: "analysis01",
+    sessions: [{ id: "session", activityType: "expand", status: "active", updatedAt: "2026-10-06T09:00:00+09:00" }],
+    concepts: [{ conceptCode: "expand", scaffoldLevel: 3, evidenceCount: 4, independentSuccessCount: 1 }],
+    events: [{ sessionId: "session", eventType: "scaffolded_success", conceptCode: "expand", metadata: { scaffold_level: 3 }, createdAt: "2026-10-06T09:05:00+09:00" }],
+    wrongAnswers: [{
+      source: "challenge", sourceLabel: "오늘의 챌린지", problemTitle: "안은문장", question: "안긴절을 찾아보세요.",
+      submittedAnswer: "이어진문장", feedbackHint: "성분 역할을 살펴보세요.", attemptCount: 3, resolvedAt: null, updatedAt: "2026-10-06T09:10:00+09:00"
+    }],
+    challengeProgress: []
+  });
+  const analysis = buildClassLearningAnalysis([student]);
+
+  assert.equal(analysis.activeStudentCount, 1);
+  assert.equal(analysis.hintCount, 1);
+  assert.equal(analysis.unresolvedWrongCount, 1);
+  assert.match(analysis.priorities[0].title, /안은문장/);
+  assert.match(analysis.priorities[0].evidence, /1명의 학생/);
+  assert.match(analysis.priorities[0].supplement, /고쳐 쓰기/);
+  assert.ok(analysis.priorities.some((item) => /문장 확대/.test(item.title)));
+});
+
 test("TEACHER·PRIVACY: 교사 모니터는 담당 학생 데이터와 자동 갱신을 사용한다", () => {
   const page = read("src/app/teacher/page.tsx");
   const component = read("src/components/student-learning-monitor.tsx");
@@ -107,6 +132,9 @@ test("TEACHER·PRIVACY: 교사 모니터는 담당 학생 데이터와 자동 �
   assert.match(component, /student\.analysis\.hintCount/);
   assert.match(component, /student\.analysis\.wrongByType/);
   assert.match(component, /student\.analysis\.recommendations/);
+  assert.match(component, /buildClassLearningAnalysis/);
+  assert.match(component, /우리 학급이 보충할 부분/);
+  assert.match(component, /보충 제안/);
   assert.match(component, /detailStudent\.wrongAnswers/);
   assert.match(component, /student\.aiSupport/);
   assert.match(component, /15_000/);
@@ -127,4 +155,7 @@ test("RESPONSIVE: 교사 학습 현황은 태블릿과 모바일에서 열 수�
   assert.match(styles, /\.teacher-class-tabs[\s\S]*overflow-x: auto/);
   assert.match(styles, /\.teacher-activity-table-wrap \{[^}]*overflow-x: auto;/s);
   assert.match(styles, /@media \(max-width: 640px\)[\s\S]*\.teacher-analysis-summary-grid,[\s\S]*grid-template-columns: 1fr;/);
+  assert.match(styles, /\.student-account-list \{[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);[\s\S]*grid-auto-rows: var\(--account-row-height\);/);
+  assert.match(styles, /max-height: calc\(var\(--account-row-height\) \* 5/);
+  assert.match(styles, /\.teacher-learning-dashboard-header h4 \{ font-size: 23px !important; \}/);
 });

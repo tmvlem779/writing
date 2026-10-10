@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { StudentLearningMonitor } from "@/lib/teacher/learning-monitor";
+import { buildClassLearningAnalysis, type StudentLearningMonitor } from "@/lib/teacher/learning-monitor";
 
 type StudentLearningMonitorProps = {
   classId: string;
@@ -45,6 +45,7 @@ export function StudentLearningMonitor({ classId, students }: StudentLearningMon
     [effectiveStudentId, students]
   );
   const detailStudent = detail ? students.find((item) => item.userId === detail.studentId) : null;
+  const classAnalysis = useMemo(() => buildClassLearningAnalysis(students), [students]);
 
   if (!student) return <p className="student-monitor-empty">학생이 학습을 시작하면 진도와 학습 근거가 표시됩니다.</p>;
 
@@ -123,6 +124,25 @@ export function StudentLearningMonitor({ classId, students }: StudentLearningMon
         </div>
       ) : (
         <div className="teacher-monitor-layout teacher-analysis-view" role="tabpanel">
+          <section className="teacher-class-analysis" aria-labelledby={`class-analysis-${classId}`}>
+            <header>
+              <div><span>학급 공통 분석</span><h5 id={`class-analysis-${classId}`}>우리 학급이 보충할 부분</h5></div>
+              <p>오답, AI 힌트, 독립 성공 기록을 합쳐 공통 경향을 보여 줍니다.</p>
+            </header>
+            <div className="teacher-class-analysis-summary">
+              <article><span>학습 기록 학생</span><strong>{classAnalysis.activeStudentCount}<small>/{classAnalysis.studentCount}명</small></strong></article>
+              <article><span>AI 힌트 사용</span><strong>{classAnalysis.hintCount}<small>회</small></strong></article>
+              <article><span>미해결 오답</span><strong>{classAnalysis.unresolvedWrongCount}<small>개</small></strong></article>
+              <article><span>독립 성공</span><strong>{classAnalysis.independentSuccesses}<small>/{classAnalysis.evidenceCount}</small></strong></article>
+            </div>
+            <ol className="teacher-class-priority-list">
+              {classAnalysis.priorities.map((priority, index) => <li key={priority.title}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div><strong>{priority.title}</strong><p>{priority.evidence}</p><small><b>보충 제안</b>{priority.supplement}</small></div>
+              </li>)}
+            </ol>
+          </section>
+
           <aside className="teacher-student-rail" aria-label="학생 목록">
             <div><strong>학생 목록</strong><span>{students.length}명</span></div>
             <div className="teacher-student-list" role="tablist" aria-orientation="vertical">

@@ -120,6 +120,22 @@ export type StudentLearningMonitor = {
   analysis: LearningAnalysis;
 };
 
+export type ClassLearningPriority = {
+  title: string;
+  evidence: string;
+  supplement: string;
+};
+
+export type ClassLearningAnalysis = {
+  studentCount: number;
+  activeStudentCount: number;
+  hintCount: number;
+  unresolvedWrongCount: number;
+  independentSuccesses: number;
+  evidenceCount: number;
+  priorities: ClassLearningPriority[];
+};
+
 const conceptLabels: Record<string, string> = {
   diagnose: "문장 기초",
   create: "문장 만들기",
@@ -414,5 +430,91 @@ export function buildStudentLearningMonitor(input: StudentMonitorInput): Student
       evidenceCount,
       recommendations: recommendations.slice(0, 2)
     }
+  };
+}
+
+export function buildClassLearningAnalysis(students: StudentLearningMonitor[]): ClassLearningAnalysis {
+  const wrongByType = new Map<string, { count: number; attempts: number; students: Set<string> }>();
+  const hintByConcept = new Map<string, { count: number; students: Set<string> }>();
+  let hintCount = 0;
+  let unresolvedWrongCount = 0;
+  let independentSuccesses = 0;
+  let evidenceCount = 0;
+  let activeStudentCount = 0;
+
+  for (const student of students) {
+    const hasActivity = student.analysis.evidenceCount > 0
+      || student.analysis.hintCount > 0
+      || student.wrongNoteSummary.total > 0
+      || student.challengeActivities.some((activity) => activity.state !== "not-started")
+      || student.selfStudyActivities.some((activity) => activity.state === "completed");
+    if (hasActivity) activeStudentCount += 1;
+    hintCount += student.analysis.hintCount;
+    unresolvedWrongCount += student.wrongNoteSummary.unresolved;
+    independentSuccesses += student.analysis.independentSuccesses;
+    evidenceCount += student.analysis.evidenceCount;
+
+    for (const item of student.analysis.wrongByType) {
+      const current = wrongByType.get(item.label) ?? { count: 0, attempts: 0, students: new Set<string>() };
+      current.count += item.count;
+      current.attempts += item.attempts;
+      current.students.add(student.userId);
+      wrongByType.set(item.label, current);
+    }
+    for (const item of student.analysis.hintByConcept) {
+      const current = hintByConcept.get(item.label) ?? { count: 0, students: new Set<string>() };
+      current.count += item.count;
+      current.students.add(student.userId);
+      hintByConcept.set(item.label, current);
+    }
+  }
+
+  const topWrong = [...wrongByType.entries()]
+    .sort((a, b) => b[1].count - a[1].count || b[1].attempts - a[1].attempts || a[0].localeCompare(b[0], "ko"))[0];
+  const topHint = [...hintByConcept.entries()]
+    .sort((a, b) => b[1].count - a[1].count || a[0].localeCompare(b[0], "ko"))[0];
+  const priorities: ClassLearningPriority[] = [];
+
+  if (topWrong) {
+    priorities.push({
+      title: `‘${topWrong[0]}’ 오답 유형 보충`,
+      evidence: `${topWrong[1].students.size}명의 학생에게서 ${topWrong[1].count}개 오답과 총 ${topWrong[1].attempts}회 시도가 확인됐습니다.`,
+      supplement: "공통 예문 한 개를 함께 분석한 뒤, 틀린 부분 찾기 → 고쳐 쓰기 → 고친 이유 설명 순서로 짧게 다시 연습하세요."
+    });
+  }
+  if (topHint) {
+    priorities.push({
+      title: `‘${topHint[0]}’ 독립 설명 연습`,
+      evidence: `${topHint[1].students.size}명의 학생이 이 개념에서 AI 힌트를 ${topHint[1].count}회 사용했습니다.`,
+      supplement: "교사가 첫 단서만 제시하고, 학생이 근거를 표시한 뒤 개념을 자기 말로 설명하는 무힌트 활동을 한 번 더 진행하세요."
+    });
+  }
+  if (unresolvedWrongCount > 0) {
+    priorities.push({
+      title: "미해결 오답 다시 풀기",
+      evidence: `학급에 아직 해결되지 않은 오답이 ${unresolvedWrongCount}개 남아 있습니다.`,
+      supplement: "오답노트 시간을 따로 두고 같은 유형의 쉬운 문제부터 다시 해결한 뒤 원래 문제로 돌아오게 하세요."
+    });
+  }
+  if (priorities.length === 0) {
+    priorities.push({
+      title: activeStudentCount === 0 ? "학습 기록을 먼저 모아 주세요" : "현재 공통 취약 신호가 뚜렷하지 않아요",
+      evidence: activeStudentCount === 0
+        ? "아직 학급 공통 경향을 판단할 학생 활동 기록이 없습니다."
+        : "반복 오답과 AI 힌트 사용이 학급 공통 유형으로 모이지 않았습니다.",
+      supplement: activeStudentCount === 0
+        ? "오늘의 챌린지 한 차시를 진행한 뒤 오답과 힌트 사용 기록을 다시 확인하세요."
+        : "현재 진도를 이어 가되, 학생별 분석에서 표시된 개별 취약 지점을 짧게 보충하세요."
+    });
+  }
+
+  return {
+    studentCount: students.length,
+    activeStudentCount,
+    hintCount,
+    unresolvedWrongCount,
+    independentSuccesses,
+    evidenceCount,
+    priorities: priorities.slice(0, 3)
   };
 }
