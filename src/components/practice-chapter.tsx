@@ -12,6 +12,7 @@ import {
   type CoursePracticeActivity,
   type CourseTrackId
 } from "@/lib/curriculum/five-lesson-course";
+import { rememberPrimaryActivityAnswer } from "@/lib/learning/primary-activity-answer";
 
 type Message = { role: "student" | "assistant"; content: string };
 type SupportMode = "submit" | "hint";
@@ -60,7 +61,7 @@ export function PracticeChapter({
   const [draft, setDraft] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [response, setResponse] = useState<AgentResponse | null>(null);
-  const [activityAnswers, setActivityAnswers] = useState<Record<string, string>>({});
+  const [primaryActivityAnswers, setPrimaryActivityAnswers] = useState<Record<string, string>>({});
   const [history, setHistory] = useState<Message[]>([]);
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [questionAttemptCount, setQuestionAttemptCount] = useState(0);
@@ -76,7 +77,7 @@ export function PracticeChapter({
   const sourceActivity = selected.usesAnswerFrom
     ? activities.find((item) => item.id === selected.usesAnswerFrom)
     : undefined;
-  const sourceAnswer = selected.usesAnswerFrom ? activityAnswers[selected.usesAnswerFrom] ?? "" : "";
+  const sourceAnswer = selected.usesAnswerFrom ? primaryActivityAnswers[selected.usesAnswerFrom] ?? "" : "";
 
   async function ensureSession() {
     if (sessionId) return sessionId;
@@ -132,8 +133,8 @@ export function PracticeChapter({
       const body = await result.json();
       if (!result.ok) throw new Error(body.error ?? "응답을 불러오지 못했습니다.");
       const next = body as AgentResponse & { demo?: boolean };
-      if (submittedDraft) {
-        setActivityAnswers((answers) => ({ ...answers, [selected.id]: submittedDraft }));
+      if (supportMode === "submit" && submittedDraft) {
+        setPrimaryActivityAnswers((answers) => rememberPrimaryActivityAnswer(answers, selected.id, submittedDraft));
       }
       setResponse(next);
       setDemo((current) => current || Boolean(next.demo));

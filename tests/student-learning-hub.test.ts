@@ -165,6 +165,8 @@ test("P2·P3: 챕터 2는 참고 중인 학생 문장을 밝히고 생성 뒤 �
   assert.match(practiceChapter, /sourceActivity && sourceAnswer/);
   assert.match(practiceChapter, /AI가 참고한 앞 활동의 내 답/);
   assert.doesNotMatch(practiceChapter, /lastSubmittedAnswer/);
+  assert.match(practiceChapter, /rememberPrimaryActivityAnswer/);
+  assert.match(practiceChapter, /primaryActivityAnswers/);
   assert.match(practiceChapter, /앞 활동에서 만든 문장/);
   assert.match(practiceChapter, /sourceAnswer/);
   assert.match(practiceChapter, /Chapter 02 · \{lessonNumber\}\/\{lessonCount\}/);
