@@ -1,37 +1,45 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { calculateDailyStreak, getDailyPracticePlan, getKoreanDate } from "@/lib/learning/daily-practice";
+import { calculateDailyStreak, getDailyPracticePlan, getKoreanDate, getSelectablePracticeDate } from "@/lib/learning/daily-practice";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const completionSchema = z.object({
-  sessionId: z.string().min(1).max(100)
+  sessionId: z.string().min(1).max(100),
+  practiceDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
 });
 
-type LearningEventRow = { metadata: unknown };
+type LearningEventRow = { metadata: unknown; created_at: string };
 
 function isProduction() {
   return process.env.APP_ENV === "production" || process.env.VERCEL === "1";
 }
 
-function completionDatesFrom(rows: LearningEventRow[] | null | undefined) {
-  const dates = (rows ?? []).flatMap((row) => {
-    if (!row.metadata || typeof row.metadata !== "object") return [];
+function completionProgressFrom(rows: LearningEventRow[] | null | undefined) {
+  const byDate = new Map<string, { completedOnTime: boolean }>();
+  for (const row of rows ?? []) {
+    if (!row.metadata || typeof row.metadata !== "object") continue;
     const practiceDate = (row.metadata as Record<string, unknown>).practiceDate;
-    return typeof practiceDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(practiceDate) ? [practiceDate] : [];
-  });
-  return [...new Set(dates)].sort();
+    if (typeof practiceDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(practiceDate)) continue;
+    const completedDate = getKoreanDate(new Date(row.created_at));
+    const previous = byDate.get(practiceDate);
+    byDate.set(practiceDate, { completedOnTime: previous?.completedOnTime === true || completedDate <= practiceDate });
+  }
+  const completionDates = [...byDate.keys()].sort();
+  const lateCompletionDates = completionDates.filter((date) => !byDate.get(date)?.completedOnTime);
+  const onTimeCompletionDates = completionDates.filter((date) => byDate.get(date)?.completedOnTime);
+  return { completionDates, lateCompletionDates, onTimeCompletionDates };
 }
 
-async function readCompletionDates(supabase: NonNullable<Awaited<ReturnType<typeof createServerSupabaseClient>>>, userId: string) {
+async function readCompletionProgress(supabase: NonNullable<Awaited<ReturnType<typeof createServerSupabaseClient>>>, userId: string) {
   const { data, error } = await supabase
     .from("learning_events")
-    .select("metadata")
+    .select("metadata, created_at")
     .eq("user_id", userId)
     .eq("event_type", "daily_practice_completed")
     .order("created_at", { ascending: false })
     .limit(400);
   if (error) throw new Error("일일 학습 기록을 불러오지 못했습니다.");
-  return completionDatesFrom(data);
+  return completionProgressFrom(data);
 }
 
 export async function GET() {
@@ -39,18 +47,19 @@ export async function GET() {
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
     if (isProduction()) return NextResponse.json({ error: "서버 설정이 완료되지 않았습니다." }, { status: 503 });
-    return NextResponse.json({ demo: true, today, completionDates: [], streak: 0, todayCompleted: false });
+    return NextResponse.json({ demo: true, today, completionDates: [], lateCompletionDates: [], streak: 0, todayCompleted: false });
   }
 
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
 
   try {
-    const completionDates = await readCompletionDates(supabase, auth.user.id);
+    const { completionDates, lateCompletionDates, onTimeCompletionDates } = await readCompletionProgress(supabase, auth.user.id);
     return NextResponse.json({
       today,
       completionDates,
-      streak: calculateDailyStreak(completionDates, today),
+      lateCompletionDates,
+      streak: calculateDailyStreak(onTimeCompletionDates, today),
       todayCompleted: completionDates.includes(today)
     });
   } catch (error) {
@@ -63,19 +72,31 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: "학습 완료 정보가 올바르지 않습니다." }, { status: 400 });
 
   const today = getKoreanDate();
-  const plan = getDailyPracticePlan(today);
+  const practiceDate = parsed.data.practiceDate ?? today;
+  if (practiceDate !== getSelectablePracticeDate(practiceDate, today)) {
+    return NextResponse.json({ error: "학습할 수 있는 날짜가 아닙니다." }, { status: 400 });
+  }
+  const plan = getDailyPracticePlan(practiceDate);
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
     if (isProduction()) return NextResponse.json({ error: "서버 설정이 완료되지 않았습니다." }, { status: 503 });
-    return NextResponse.json({ demo: true, today, completionDates: [today], streak: 1, todayCompleted: true });
+    return NextResponse.json({
+      demo: true,
+      today,
+      completionDates: [practiceDate],
+      lateCompletionDates: practiceDate < today ? [practiceDate] : [],
+      streak: practiceDate === today ? 1 : 0,
+      todayCompleted: practiceDate === today
+    });
   }
 
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
 
   try {
-    const existingDates = await readCompletionDates(supabase, auth.user.id);
-    if (!existingDates.includes(today)) {
+    const existing = await readCompletionProgress(supabase, auth.user.id);
+    const alreadyCompleted = existing.completionDates.includes(practiceDate);
+    if (!alreadyCompleted) {
       const { data: session } = await supabase
         .from("learning_sessions")
         .select("id")
@@ -90,21 +111,27 @@ export async function POST(request: Request) {
         event_type: "daily_practice_completed",
         concept_code: "daily_practice",
         metadata: {
-          practiceDate: today,
+          practiceDate,
           practiceType: plan.type,
           materialId: plan.materialId,
           title: plan.title
         }
       });
-      if (error) return NextResponse.json({ error: "오늘의 학습 완료 기록을 저장하지 못했습니다." }, { status: 500 });
+      if (error) return NextResponse.json({ error: "학습 완료 기록을 저장하지 못했습니다." }, { status: 500 });
     }
 
-    const completionDates = [...new Set([...existingDates, today])].sort();
+    const completionDates = [...new Set([...existing.completionDates, practiceDate])].sort();
+    const lateCompletionDates = [...new Set([
+      ...existing.lateCompletionDates,
+      ...(!alreadyCompleted && practiceDate < today ? [practiceDate] : [])
+    ])].sort();
+    const onTimeCompletionDates = completionDates.filter((date) => !lateCompletionDates.includes(date));
     return NextResponse.json({
       today,
       completionDates,
-      streak: calculateDailyStreak(completionDates, today),
-      todayCompleted: true
+      lateCompletionDates,
+      streak: calculateDailyStreak(onTimeCompletionDates, today),
+      todayCompleted: completionDates.includes(today)
     });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "학습 완료를 기록하지 못했습니다." }, { status: 500 });

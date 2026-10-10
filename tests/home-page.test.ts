@@ -73,7 +73,7 @@ test("브랜드 전체는 흰 바탕과 블루 계열, 코랄 포인트 토큰�
   assert.match(styles, /\.auth-intro::before \{[\s\S]*?hunminjeongeum-glyphs\.png[\s\S]*?opacity: \.055;/);
   assert.match(styles, /\.auth-intro h1 \{\s*letter-spacing: \.04em;/);
   assert.match(styles, /\.check-feedback\.correct,[\s\S]*?background: #e4f6f8;/);
-  assert.match(styles, /\.daily-roadmap-summary dl div \{ background: #eef9fb; \}/);
+  assert.match(styles, /\.self-study-heading-stats > div \{[\s\S]*?background: #eef9fb;/);
   assert.match(styles, /\.task-card \{[\s\S]*?box-shadow: 0 18px 38px rgba\(17,19,63,\.13\)/);
 });
 

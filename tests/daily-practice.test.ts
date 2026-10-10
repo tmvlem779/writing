@@ -32,12 +32,12 @@ test("P1·P3·P6: 다섯 유형은 5일마다 모두 나오되 날짜 기반 복
 });
 
 test("P2·P4: 30일 로드맵은 지난 14일·오늘·앞으로 15일을 구분한다", () => {
-  const roadmap = buildDailyRoadmap("2026-10-05", ["2026-10-03", "2026-10-04"]);
+  const roadmap = buildDailyRoadmap("2026-10-05", ["2026-10-03", "2026-10-04"], ["2026-10-03"]);
   assert.equal(roadmap.length, 30);
   assert.equal(roadmap[0].date, "2026-09-21");
   assert.equal(roadmap[14].status, "today");
   assert.equal(roadmap[29].date, "2026-10-20");
-  assert.deepEqual(roadmap.slice(12, 16).map((day) => day.status), ["completed", "completed", "today", "locked"]);
+  assert.deepEqual(roadmap.slice(12, 16).map((day) => day.status), ["completed-late", "completed", "today", "locked"]);
   assert.equal(getSelectablePracticeDate("2026-09-21", "2026-10-05"), "2026-09-21");
   assert.equal(getSelectablePracticeDate("2026-10-06", "2026-10-05"), "2026-10-05");
   assert.equal(getSelectablePracticeDate("2026-09-20", "2026-10-05"), "2026-10-05");
@@ -57,6 +57,9 @@ test("DATA·PRIVACY: 완료 API는 로그인 사용자와 소유 세션을 확�
   assert.match(route, /\.eq\("user_id", auth\.user\.id\)/);
   assert.match(route, /본인의 학습 세션만 완료 처리할 수 있습니다/);
   assert.match(route, /event_type: "daily_practice_completed"/);
+  assert.match(route, /practiceDate < today/);
+  assert.match(route, /calculateDailyStreak\(onTimeCompletionDates, today\)/);
+  assert.match(route, /\.select\("metadata, created_at"\)/);
   assert.doesNotMatch(route, /service_role|createAdmin/);
   assert.match(rls, /events_read_owner_or_teacher/);
   assert.match(rls, /events_insert_owner/);

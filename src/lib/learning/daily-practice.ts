@@ -18,7 +18,7 @@ export type DailyPracticePlan = {
 export type DailyRoadmapDay = DailyPracticePlan & {
   dayLabel: string;
   dateLabel: string;
-  status: "completed" | "today" | "missed" | "locked";
+  status: "completed" | "completed-late" | "today" | "missed" | "locked";
 };
 
 const DAILY_EPOCH = "2026-10-01";
@@ -144,14 +144,21 @@ function formatRoadmapDate(date: string) {
   };
 }
 
-export function buildDailyRoadmap(today: string, completedDates: Iterable<string>, daysBefore = 14, daysAfter = 15): DailyRoadmapDay[] {
+export function buildDailyRoadmap(
+  today: string,
+  completedDates: Iterable<string>,
+  lateCompletedDates: Iterable<string> = [],
+  daysBefore = 14,
+  daysAfter = 15
+): DailyRoadmapDay[] {
   const completed = new Set(completedDates);
+  const completedLate = new Set(lateCompletedDates);
   return Array.from({ length: daysBefore + daysAfter + 1 }, (_, index) => {
     const offset = index - daysBefore;
     const date = addCalendarDays(today, offset);
     const labels = formatRoadmapDate(date);
     const status = completed.has(date)
-      ? "completed"
+      ? completedLate.has(date) ? "completed-late" : "completed"
       : offset === 0
         ? "today"
         : offset < 0

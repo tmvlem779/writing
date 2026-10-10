@@ -13,6 +13,7 @@ import { getDailyPracticePlan, getKoreanDate, getRecentSevenDays, getSelectableP
 type ProgressResponse = {
   today: string;
   completionDates: string[];
+  lateCompletionDates: string[];
   streak: number;
   error?: string;
 };
@@ -44,6 +45,7 @@ export function DailyPracticeToday({ requestedDate }: DailyPracticeTodayProps) {
   const recentDays = useMemo(() => getRecentSevenDays(today, completionDates), [today, completionDates]);
   const todayCompleted = completionDates.includes(today);
   const isToday = practiceDate === today;
+  const practiceCompleted = completionDates.includes(practiceDate);
 
   useEffect(() => {
     let active = true;
@@ -67,24 +69,24 @@ export function DailyPracticeToday({ requestedDate }: DailyPracticeTodayProps) {
     return () => { active = false; };
   }, [requestedDate]);
 
-  async function completeToday(sessionId: string) {
-    if (!isToday || todayCompleted || completingRef.current) return;
+  async function completePractice(sessionId: string) {
+    if (practiceCompleted || completingRef.current) return;
     completingRef.current = true;
     setProgressError("");
     try {
       const response = await fetch("/api/daily-practice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId })
+        body: JSON.stringify({ sessionId, practiceDate })
       });
       const body = await response.json() as ProgressResponse;
-      if (!response.ok) throw new Error(body.error ?? "오늘의 완료 기록을 저장하지 못했습니다.");
+      if (!response.ok) throw new Error(body.error ?? "학습 완료 기록을 저장하지 못했습니다.");
       setToday(body.today);
       setCompletionDates(body.completionDates);
       setStreak(body.streak);
-      setShowCelebration(true);
+      setShowCelebration(isToday);
     } catch (error) {
-      setProgressError(error instanceof Error ? error.message : "오늘의 완료 기록을 저장하지 못했습니다.");
+      setProgressError(error instanceof Error ? error.message : "학습 완료 기록을 저장하지 못했습니다.");
     } finally {
       completingRef.current = false;
     }
@@ -97,13 +99,13 @@ export function DailyPracticeToday({ requestedDate }: DailyPracticeTodayProps) {
       <main className="daily-activity-page">
         <header className="daily-activity-heading">
           <div><span>{isToday ? "오늘의 학습" : "지난 학습 다시 보기"} · {practicePlan.typeLabel}</span><h1>{practicePlan.title}</h1><p>{practicePlan.description}</p></div>
-          <strong className={isToday && todayCompleted ? "complete" : isToday ? "active" : "review"}>{isToday ? todayCompleted ? "오늘 완료 ✓" : "오늘의 한 걸음" : "연속 학습 기록 제외"}</strong>
+          <strong className={practiceCompleted ? "complete" : isToday ? "active" : "review"}>{isToday ? todayCompleted ? "오늘 완료 ✓" : "오늘의 한 걸음" : practiceCompleted ? "보충 학습 완료 ✓" : "연속 학습 기록 제외"}</strong>
         </header>
         {progressError && <div className="error-panel daily-progress-error" role="alert">{progressError}</div>}
         {practicePlan.type === "concept-learning" ? (
           <ConceptLearningActivity
             key={practicePlan.date}
-            onDailyComplete={isToday ? completeToday : undefined}
+            onDailyComplete={completePractice}
             questionId={practicePlan.materialId}
           />
         ) : practicePlan.type === "sentence-making" ? (
@@ -111,13 +113,13 @@ export function DailyPracticeToday({ requestedDate }: DailyPracticeTodayProps) {
             dailyMode
             initialSceneId={practicePlan.materialId as SituationSceneId}
             key={practicePlan.date}
-            onDailyComplete={isToday ? completeToday : undefined}
+            onDailyComplete={completePractice}
           />
         ) : practicePlan.type === "error-correction" ? (
           <ErrorCorrectionActivity
             itemId={practicePlan.materialId}
             key={practicePlan.date}
-            onDailyComplete={isToday ? completeToday : undefined}
+            onDailyComplete={completePractice}
           />
         ) : (
           <RealLifeChapter
@@ -126,7 +128,7 @@ export function DailyPracticeToday({ requestedDate }: DailyPracticeTodayProps) {
             key={practicePlan.date}
             lessonNumber={6}
             materialGroup={practicePlan.type}
-            onDailyComplete={isToday ? completeToday : undefined}
+            onDailyComplete={completePractice}
             showOverview={false}
             trackId="grammar"
           />

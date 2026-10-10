@@ -84,10 +84,16 @@ test("오늘의 챌린지는 6차시 수업을, 스스로 유형 학습은 매�
   assert.match(dailyPracticeToday, /practicePlan\.type === "concept-learning"/);
   assert.match(dailyPracticeToday, /practicePlan\.type === "sentence-making"/);
   assert.match(dailyPracticeToday, /practicePlan\.type === "error-correction"/);
-  assert.match(dailyPracticeToday, /onDailyComplete=\{isToday \? completeToday : undefined\}/);
+  assert.match(dailyPracticeToday, /onDailyComplete=\{completePractice\}/);
+  assert.match(dailyPracticeToday, /body: JSON\.stringify\(\{ sessionId, practiceDate \}\)/);
+  assert.match(dailyPracticeToday, /보충 학습 완료/);
   assert.match(dailyPracticeToday, /showOverview=\{false\}/);
   assert.match(dailyPracticeToday, /일 연속 학습/);
-  assert.match(selfStudyPage, /하루 한 걸음, 문법 감각을 이어 가요/);
+  assert.match(selfStudyWorkspace, /매일 한 걸음, 30일 문법 루틴/);
+  assert.match(selfStudyWorkspace, /하루 한 걸음, 문법 감각을 이어 가요/);
+  assert.match(selfStudyWorkspace, /self-study-heading-stats/);
+  assert.doesNotMatch(selfStudyWorkspace, /daily-roadmap-summary/);
+  assert.match(selfStudyWorkspace, /completed-late/);
 });
 
 test("P3: 스스로 확인하기 질문은 선택지와 같은 카드 안에 표시된다", () => {
@@ -204,13 +210,16 @@ test("P1·P2·P3: 틀린 문장 고치기는 오류 표시, 수정, 이유 설�
   assert.match(errorCorrectionActivity, /if \(!acceptedCorrections\.includes/);
 });
 
-test("P4·P5: 지난 날짜는 다시 열리지만 연속 학습 완료 API에는 기록하지 않는다", () => {
+test("P4·P5: 지난 날짜의 보충 학습은 완료로 기록하되 연속 학습에서는 제외한다", () => {
   assert.match(selfStudyWorkspace, /isAvailable = day\.status !== "locked"/);
   assert.match(selfStudyWorkspace, /`\/learn\/self-study\/today\?date=\$\{day\.date\}`/);
   assert.match(selfStudyWorkspace, /연속 학습 기록에는 포함되지 않아요/);
   assert.match(todayPracticePage, /searchParams: Promise/);
   assert.match(dailyPracticeToday, /getSelectablePracticeDate/);
-  assert.match(dailyPracticeToday, /if \(!isToday \|\| todayCompleted/);
+  assert.match(dailyPracticeToday, /if \(practiceCompleted \|\| completingRef\.current\)/);
+  assert.match(dailyPracticeToday, /JSON\.stringify\(\{ sessionId, practiceDate \}\)/);
+  assert.match(selfStudyWorkspace, /status === "completed-late"/);
+  assert.match(selfStudyWorkspace, /보충 학습했어요/);
   assert.match(dailyPracticeToday, /연속 학습 기록 제외/);
 });
 

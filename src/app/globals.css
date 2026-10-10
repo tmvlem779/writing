@@ -3683,6 +3683,96 @@ body {
   .teacher-class-priority-list { grid-template-columns: 1fr; }
 }
 
+/* 문득문득 ver.5.4: 스스로 유형학습 상단 통합과 보충 완료 구분 */
+.self-study-heading {
+  min-height: 188px;
+  padding: 32px clamp(24px, 6vw, 90px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(430px, 520px);
+  align-items: center;
+  gap: clamp(28px, 5vw, 72px);
+  background: var(--motion-pine);
+}
+.self-study-heading-copy { min-width: 0; }
+.self-study-heading-copy > span {
+  color: #d8f3f7;
+  font-size: 13px;
+  font-weight: 850;
+  letter-spacing: .06em;
+}
+.self-study-heading-copy h1 {
+  margin: 8px 0 0;
+  color: #fff;
+  font-size: clamp(30px, 3vw, 42px);
+  line-height: 1.24;
+}
+.self-study-heading-stats {
+  min-width: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.self-study-heading-stats > div {
+  min-width: 0;
+  min-height: 80px;
+  padding: 14px 12px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  border: 1px solid rgba(255,255,255,.42);
+  border-radius: 16px;
+  background: #eef9fb;
+  text-align: center;
+}
+.self-study-heading-stats dt {
+  color: #465572;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.self-study-heading-stats dd {
+  max-width: 100%;
+  margin: 4px 0 0;
+  overflow-wrap: break-word;
+  word-break: keep-all;
+  color: var(--palette-navy);
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+.daily-roadmap-shell { padding-top: 26px; }
+.daily-path-step.status-completed-late .daily-path-node {
+  background: #f2c45f;
+  color: var(--palette-navy);
+  box-shadow: 0 6px 0 #c99a36, 0 12px 24px rgba(102,75,20,.16);
+}
+.daily-path-step.status-completed-late .daily-check {
+  background: #9b6f15;
+  border-color: #fff8df;
+}
+.daily-path-step.status-completed-late .daily-path-copy strong { color: #7b5710; }
+
+@media (max-width: 1024px) {
+  .self-study-heading {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .self-study-heading-stats { width: 100%; }
+}
+
+@media (max-width: 640px) {
+  .self-study-heading { padding: 26px 18px 24px; gap: 18px; }
+  .self-study-heading-copy > span { font-size: 12px; }
+  .self-study-heading-copy h1 { font-size: clamp(27px, 8vw, 32px); }
+  .self-study-heading-stats { gap: 6px; }
+  .self-study-heading-stats > div { min-height: 70px; padding: 10px 5px; border-radius: 12px; }
+  .self-study-heading-stats dt { font-size: 9px; }
+  .self-study-heading-stats dd { font-size: 14px; }
+  .daily-roadmap-shell { padding-top: 18px; }
+}
+
 @media (max-width: 640px) {
   .student-account-list { --account-row-height: 90px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .student-account-list li { grid-template-columns: auto minmax(0, 1fr); }

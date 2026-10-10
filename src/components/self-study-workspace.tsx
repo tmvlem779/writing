@@ -7,6 +7,7 @@ import { buildDailyRoadmap, getDailyPracticePlan, getKoreanDate } from "@/lib/le
 type ProgressResponse = {
   today: string;
   completionDates: string[];
+  lateCompletionDates: string[];
   streak: number;
   error?: string;
 };
@@ -32,13 +33,17 @@ function RoadmapIcon({ icon }: { icon: "book" | "news" | "pencil" | "concept" | 
 export function SelfStudyWorkspace() {
   const [today, setToday] = useState(getKoreanDate());
   const [completionDates, setCompletionDates] = useState<string[]>([]);
+  const [lateCompletionDates, setLateCompletionDates] = useState<string[]>([]);
   const [streak, setStreak] = useState(0);
   const [loading, setLoading] = useState(true);
   const [progressError, setProgressError] = useState("");
 
   const todayPlan = useMemo(() => getDailyPracticePlan(today), [today]);
-  const roadmap = useMemo(() => buildDailyRoadmap(today, completionDates), [today, completionDates]);
-  const roadmapCompleted = roadmap.filter((day) => day.status === "completed").length;
+  const roadmap = useMemo(
+    () => buildDailyRoadmap(today, completionDates, lateCompletionDates),
+    [today, completionDates, lateCompletionDates]
+  );
+  const roadmapCompleted = roadmap.filter((day) => day.status === "completed" || day.status === "completed-late").length;
 
   useEffect(() => {
     let active = true;
@@ -50,6 +55,7 @@ export function SelfStudyWorkspace() {
         if (!active) return;
         setToday(body.today);
         setCompletionDates(body.completionDates);
+        setLateCompletionDates(body.lateCompletionDates ?? []);
         setStreak(body.streak);
       } catch (error) {
         if (active) setProgressError(error instanceof Error ? error.message : "학습 기록을 불러오지 못했습니다.");
@@ -61,58 +67,62 @@ export function SelfStudyWorkspace() {
     return () => { active = false; };
   }, []);
 
-  if (loading) return <div className="daily-roadmap-loading"><MondeukLoading /></div>;
-
   return (
-    <section className="daily-roadmap-shell" aria-labelledby="daily-roadmap-title">
-      <header className="daily-roadmap-summary">
-        <div>
-          <span>매일 한 걸음 · 30일 문법 루틴</span>
-          <h2 id="daily-roadmap-title">오늘도 문장을 발견하러 가요</h2>
+    <>
+      <header className="self-study-heading">
+        <div className="self-study-heading-copy">
+          <span>매일 한 걸음, 30일 문법 루틴</span>
+          <h1 id="daily-roadmap-title">하루 한 걸음, 문법 감각을 이어 가요</h1>
         </div>
-        <dl>
-          <div><dt>🔥 연속 학습</dt><dd>{streak}일</dd></div>
-          <div><dt>✓ 이번 로드맵</dt><dd>{roadmapCompleted}/30</dd></div>
-          <div><dt>오늘 유형</dt><dd>{todayPlan.typeLabel}</dd></div>
+        <dl className="self-study-heading-stats" aria-label="30일 문법 루틴 현황">
+          <div><dt>🔥 연속 학습</dt><dd>{loading ? "-" : `${streak}일`}</dd></div>
+          <div><dt>✓ 이번 로드맵</dt><dd>{loading ? "-" : `${roadmapCompleted}/30`}</dd></div>
+          <div><dt>오늘 유형</dt><dd>{loading ? "불러오는 중" : todayPlan.typeLabel}</dd></div>
         </dl>
       </header>
 
-      {progressError && <div className="error-panel daily-progress-error" role="alert">{progressError}</div>}
+      <section className="daily-roadmap-shell" aria-labelledby="daily-roadmap-title" aria-busy={loading}>
+        {loading ? <div className="daily-roadmap-loading"><MondeukLoading /></div> : (
+          <>
+            {progressError && <div className="error-panel daily-progress-error" role="alert">{progressError}</div>}
 
-      <div className="daily-path" aria-label="30일 문법 학습 로드맵">
-        {roadmap.map((day, index) => {
-          const isToday = day.date === today;
-          const isAvailable = day.status !== "locked";
-          const offset = pathOffsets[index % pathOffsets.length];
-          const nextOffset = pathOffsets[(index + 1) % pathOffsets.length];
-          const nodeLabel = `${index + 1}번 활동 ${day.title} ${isToday ? day.status === "completed" ? "완료한 오늘 학습 다시 열기" : "오늘 학습 시작" : isAvailable ? "지난 학습 다시 열기" : "잠김"}`;
-          return (
-            <div className={`daily-path-step offset-${offset} to-${nextOffset} status-${day.status} ${isToday ? "is-today" : ""} ${isAvailable ? "is-available" : ""}`} key={day.date}>
-              <div className="daily-path-copy">
-                <span>{index + 1} / 30</span>
-                <strong>{day.title}</strong>
-                <small>{day.status === "completed" ? isToday ? "완료했어요 · 다시 학습할 수 있어요" : "완료했어요 · 다시 학습할 수 있어요" : day.status === "today" ? `${day.description} 눌러서 시작해요.` : day.status === "missed" ? "지난 학습 · 연속 학습 기록에는 포함되지 않아요" : "차례가 되면 열려요"}</small>
-              </div>
-              {isAvailable ? (
-                <a
-                  aria-label={nodeLabel}
-                  className="daily-path-node"
-                  href={isToday ? "/learn/self-study/today" : `/learn/self-study/today?date=${day.date}`}
-                >
-                  <RoadmapIcon icon={day.icon} />
-                  {day.status === "completed" && <span className="daily-check">✓</span>}
-                </a>
-              ) : (
-                <button aria-label={nodeLabel} className="daily-path-node" disabled type="button">
-                  <RoadmapIcon icon={day.icon} />
-                  {day.status === "completed" && <span className="daily-check">✓</span>}
-                  {day.status === "locked" && <span className="daily-lock">•</span>}
-                </button>
-              )}
+            <div className="daily-path" aria-label="30일 문법 학습 로드맵">
+              {roadmap.map((day, index) => {
+                const isToday = day.date === today;
+                const isCompleted = day.status === "completed" || day.status === "completed-late";
+                const isAvailable = day.status !== "locked";
+                const offset = pathOffsets[index % pathOffsets.length];
+                const nextOffset = pathOffsets[(index + 1) % pathOffsets.length];
+                const nodeLabel = `${index + 1}번 활동 ${day.title} ${isToday ? isCompleted ? "완료한 오늘 학습 다시 열기" : "오늘 학습 시작" : isAvailable ? "지난 학습 다시 열기" : "잠김"}`;
+                return (
+                  <div className={`daily-path-step offset-${offset} to-${nextOffset} status-${day.status} ${isToday ? "is-today" : ""} ${isAvailable ? "is-available" : ""}`} key={day.date}>
+                    <div className="daily-path-copy">
+                      <span>{index + 1} / 30</span>
+                      <strong>{day.title}</strong>
+                      <small>{day.status === "completed-late" ? "보충 학습했어요 · 연속 학습 기록에는 포함되지 않아요" : day.status === "completed" ? "제때 완료했어요 · 다시 학습할 수 있어요" : day.status === "today" ? `${day.description} 눌러서 시작해요.` : day.status === "missed" ? "지난 학습 · 연속 학습 기록에는 포함되지 않아요" : "차례가 되면 열려요"}</small>
+                    </div>
+                    {isAvailable ? (
+                      <a
+                        aria-label={nodeLabel}
+                        className="daily-path-node"
+                        href={isToday ? "/learn/self-study/today" : `/learn/self-study/today?date=${day.date}`}
+                      >
+                        <RoadmapIcon icon={day.icon} />
+                        {isCompleted && <span className="daily-check">✓</span>}
+                      </a>
+                    ) : (
+                      <button aria-label={nodeLabel} className="daily-path-node" disabled type="button">
+                        <RoadmapIcon icon={day.icon} />
+                        {day.status === "locked" && <span className="daily-lock">•</span>}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
-      </div>
-    </section>
+          </>
+        )}
+      </section>
+    </>
   );
 }
