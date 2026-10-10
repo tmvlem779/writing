@@ -31,6 +31,7 @@ export const turnRequestSchema = z.object({
 
 export const agentResponseSchema = z.object({
   mode: z.enum(["diagnose", "question", "hint", "compare", "revise", "model", "reflect"]),
+  answerStatus: z.enum(["not_answered", "incorrect", "partial", "met"]),
   scaffoldLevel: z.number().int().min(0).max(4),
   studentMessage: z.string().min(1).max(360),
   question: z.string().max(180),
@@ -54,6 +55,7 @@ export const agentResponseJsonSchema = {
   additionalProperties: false,
   required: [
     "mode",
+    "answerStatus",
     "scaffoldLevel",
     "studentMessage",
     "question",
@@ -66,6 +68,7 @@ export const agentResponseJsonSchema = {
   ],
   properties: {
     mode: { type: "string", enum: ["diagnose", "question", "hint", "compare", "revise", "model", "reflect"] },
+    answerStatus: { type: "string", enum: ["not_answered", "incorrect", "partial", "met"] },
     scaffoldLevel: { type: "integer", minimum: 0, maximum: 4 },
     studentMessage: { type: "string", maxLength: 360 },
     question: { type: "string", maxLength: 180 },

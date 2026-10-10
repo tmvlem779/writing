@@ -6,6 +6,7 @@ import type { AgentResponse } from "../src/lib/agent/schema.ts";
 function response(overrides: Partial<AgentResponse> = {}): AgentResponse {
   return {
     mode: "question",
+    answerStatus: "partial",
     scaffoldLevel: 0,
     studentMessage: "좋아요.",
     question: "근거를 설명해 볼까요?",

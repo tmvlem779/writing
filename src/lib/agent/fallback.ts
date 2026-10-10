@@ -59,6 +59,7 @@ export function buildFallbackResponse(request: TurnRequest): AgentResponse {
 
   return {
     mode: request.activity === "error" ? "revise" : request.activity === "compare" ? "compare" : level === 4 ? "model" : level > 0 ? "hint" : "question",
+    answerStatus: request.supportMode === "hint" ? "not_answered" : "partial",
     scaffoldLevel: level,
     studentMessage: isNovelSentenceMarking
       ? `답을 확인했어요. 밑줄 친 단서와 ‘${/\[학생이 고른 문장 구조\] ([^\n]+)/.exec(request.message)?.[1] ?? "구조 선택"}’을 연결해 생각한 과정이 기록됐습니다.`

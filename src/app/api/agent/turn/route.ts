@@ -91,6 +91,7 @@ export async function POST(request: Request) {
       });
       return NextResponse.json({
         mode: "question",
+        answerStatus: "not_answered",
         scaffoldLevel: parsed.data.scaffoldLevel,
         studentMessage: "이 요청에는 지금 바로 답하기 어려운 내용이 포함되어 있어요. 안전한 학습 주제로 바꾸거나 교사에게 도움을 요청해 주세요.",
         question: "문장의 구조와 확장에 관한 다른 문장으로 다시 시도해 볼까요?",

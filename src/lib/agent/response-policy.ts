@@ -55,14 +55,23 @@ function needsSimplifying(question: string) {
 
 export function applyTutorResponsePolicy(request: TurnRequest, response: AgentResponse): AgentResponse {
   const completionEnabled = request.message.includes("[활동 완료 기준]");
-  const activityComplete = completionEnabled && (response.activityComplete || response.masteryEvidence.length > 0);
+  const activityComplete = completionEnabled && (
+    response.answerStatus === "met"
+    || response.activityComplete
+    || response.masteryEvidence.length > 0
+  );
   if (activityComplete) {
+    const masteryEvidence = response.masteryEvidence.length > 0
+      ? response.masteryEvidence
+      : [response.observations[0] ?? "처음 답과 후속 설명을 합친 누적 답변이 활동 완료 기준을 충족함"];
     return {
       ...response,
+      answerStatus: "met",
       studentMessage: response.studentMessage.slice(0, 180),
       question: "",
       nextAction: "complete",
-      activityComplete: true
+      activityComplete: true,
+      masteryEvidence
     };
   }
 
@@ -72,6 +81,7 @@ export function applyTutorResponsePolicy(request: TurnRequest, response: AgentRe
 
   return {
     ...response,
+    answerStatus: response.answerStatus === "met" ? "partial" : response.answerStatus,
     studentMessage: response.studentMessage.slice(0, 220),
     question,
     activityComplete: false,

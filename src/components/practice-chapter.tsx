@@ -133,7 +133,10 @@ export function PracticeChapter({
         setActivityAnswers((answers) => ({ ...answers, [selected.id]: submittedDraft }));
       }
       const nextAttemptCount = attemptCount + 1;
-      const shouldRevealAnswer = !next.activityComplete && nextAttemptCount >= 3 && Boolean(selected.modelAnswer);
+      const shouldRevealAnswer = !next.activityComplete
+        && next.answerStatus !== "met"
+        && nextAttemptCount >= 3
+        && Boolean(selected.modelAnswer);
       setResponse(next);
       setDemo((current) => current || Boolean(next.demo));
       setScaffoldLevel(next.scaffoldLevel);

@@ -126,7 +126,7 @@ test("P1·P3: 챕터 2는 불필요한 수치를 숨기고 숙달되면 질문�
 
 test("P1: 챕터 2는 힌트와 제출을 합쳐 3회 미해결이면 정답을 보여 주되 완료로 기록하지 않는다", () => {
   assert.match(practiceChapter, /const nextAttemptCount = attemptCount \+ 1/);
-  assert.match(practiceChapter, /!next\.activityComplete && nextAttemptCount >= 3/);
+  assert.match(practiceChapter, /!next\.activityComplete[\s\S]*next\.answerStatus !== "met"[\s\S]*nextAttemptCount >= 3/);
   assert.match(practiceChapter, /setRevealedAnswer/);
   assert.match(practiceChapter, /3회 생각 후 정답 확인/);
   assert.match(practiceChapter, /이번 활동은 학습 완료로 기록되지 않아요/);

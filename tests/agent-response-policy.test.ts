@@ -20,6 +20,7 @@ function request(overrides: Partial<TurnRequest> = {}): TurnRequest {
 function response(overrides: Partial<AgentResponse> = {}): AgentResponse {
   return {
     mode: "question",
+    answerStatus: "partial",
     scaffoldLevel: 0,
     studentMessage: "답을 살펴봤어요.",
     question: "근거를 하나 적어 보세요.",
@@ -51,6 +52,32 @@ test("P1·P3: 성취 근거가 확인되면 같은 과제를 다시 묻지 않�
   assert.equal(result.activityComplete, true);
   assert.equal(result.nextAction, "complete");
   assert.equal(result.question, "");
+});
+
+test("P1: 누적 답이 완료 기준을 충족했다는 판정은 꼬리질문보다 우선한다", () => {
+  const result = applyTutorResponsePolicy(
+    request({ attemptCount: 2, history: [
+      { role: "student", content: "주어는 학생들이, 서술어는 찬다입니다." },
+      { role: "assistant", content: "왜 그렇게 판단했나요?" }
+    ] }),
+    response({ answerStatus: "met", studentMessage: "근거도 알맞게 설명했어요.", question: "다른 근거도 있나요?" })
+  );
+
+  assert.equal(result.answerStatus, "met");
+  assert.equal(result.activityComplete, true);
+  assert.equal(result.question, "");
+  assert.equal(result.nextAction, "complete");
+  assert.ok(result.masteryEvidence.length > 0);
+});
+
+test("P1: 세 번째 상호작용이어도 부분 충족이면 완료로 올리지 않는다", () => {
+  const result = applyTutorResponsePolicy(
+    request({ attemptCount: 2 }),
+    response({ answerStatus: "partial", activityComplete: false, masteryEvidence: [] })
+  );
+
+  assert.equal(result.answerStatus, "partial");
+  assert.equal(result.activityComplete, false);
 });
 
 test("P3: 두 개 이상의 질문을 한꺼번에 요구하지 않는다", () => {
@@ -91,4 +118,10 @@ test("DATA: 학생 문장 명시와 중복 분석 방지 규칙은 프롬프트 
   const migration = readFileSync(new URL("../supabase/migrations/202610060003_add_explicit_answer_reference_prompt.sql", import.meta.url), "utf8");
   assert.match(migration, /writing-tutor-v16/);
   assert.match(migration, /explicit-answer-reference-no-duplicate-analysis/);
+});
+
+test("DATA: 누적 답 숙달 판정과 3회 종료 규칙은 프롬프트 v18로 추적한다", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/202610100001_add_cumulative_mastery_prompt.sql", import.meta.url), "utf8");
+  assert.match(migration, /writing-tutor-v18/);
+  assert.match(migration, /cumulative-mastery-before-three-turn-resolution/);
 });
