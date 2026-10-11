@@ -327,13 +327,14 @@ test("학생 학습 정보 구조는 비대칭 홈과 번호형 상단 탭, 편�
   assert.match(nav, /note: "배우기"/);
   assert.match(writingStudio, /course-map-feature/);
   assert.match(writingStudio, /course-feature-art/);
-  assert.match(writingStudio, /오늘의<br \/>챌린지/);
+  assert.match(writingStudio, /오늘의 <br \/>챌린지/);
   assert.match(writingStudio, /\{lessonNumber\} \/ \{courseLessons\.length\}/);
   assert.doesNotMatch(writingStudio, /lessonKeywords/);
   assert.doesNotMatch(writingStudio, /<strong>\{lessonKeywords/);
   assert.doesNotMatch(writingStudio, /기본|연결|확장|표현|변형|활용/);
   assert.match(writingStudio, /<strong>핵심 질문<\/strong>/);
   assert.match(writingStudio, /<div className="course-feature-art">[\s\S]*?<p className="course-key-question">/);
+  assert.doesNotMatch(writingStudio, /aria-hidden="true">語/);
   assert.doesNotMatch(writingStudio, /<strong>\{lessonNumber\}차시 핵심 질문<\/strong>/);
   assert.match(writingStudio, /course-map-index/);
   assert.match(styles, /--blue: #405965/);

@@ -3683,6 +3683,55 @@ body {
   .teacher-class-priority-list { grid-template-columns: 1fr; }
 }
 
+/* 문득문득 ver.5.5: 오늘의 챌린지 단색 블루 표지 */
+.course-map-feature {
+  border-bottom-color: rgba(255,255,255,.18);
+  background: var(--motion-pine);
+  color: #fff;
+}
+.course-map-feature > header {
+  background: transparent;
+  color: #fff;
+}
+.course-map-feature > header > span { color: #d8f3f7; }
+.course-map-feature h1 { color: #fff; }
+.course-map-feature > header > p { color: rgba(255,255,255,.84); }
+.course-map-feature > header::after { background: var(--motion-clay); }
+.course-feature-art {
+  background: transparent;
+  color: #fff;
+}
+.course-feature-art > span { color: rgba(255,255,255,.1); }
+.course-key-question {
+  width: min(600px, 78%);
+  padding: 14px 18px;
+  border-left-color: var(--motion-clay);
+  background: var(--palette-navy);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+.course-key-question strong {
+  margin-bottom: 5px;
+  color: #f9b8c7;
+  font-size: 13px;
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .course-key-question { width: calc(100% - 36px); font-size: 16px; }
+}
+
+@media (max-width: 640px) {
+  .course-key-question {
+    width: calc(100% - 24px);
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .course-key-question strong { font-size: 11px; }
+}
+
 /* 문득문득 ver.5.4: 스스로 유형학습 상단 통합과 보충 완료 구분 */
 .self-study-heading {
   min-height: 188px;

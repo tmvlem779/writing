@@ -148,12 +148,11 @@ export function WritingStudio() {
         <div className="course-map-feature">
           <header>
             <span>{lessonNumber} / {courseLessons.length}</span>
-            <h1 id="course-map-title">오늘의<br />챌린지</h1>
+            <h1 id="course-map-title">오늘의 <br />챌린지</h1>
             <p>문장의 구조를 읽고, 표시하고, 직접 쓰는 여섯 번의 탐구</p>
           </header>
           <div className="course-feature-art">
             <span aria-hidden="true">{String(lessonNumber).padStart(2, "0")}</span>
-            <i aria-hidden="true">語</i>
             <p className="course-key-question">
               <strong>핵심 질문</strong>
               {lesson.keyQuestion}

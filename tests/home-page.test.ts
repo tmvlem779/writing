@@ -86,8 +86,10 @@ test("오늘의 챌린지는 큰 안내 글자와 단색 블루 표지를 사용
   assert.match(styles, /\.student-learning-nav \.student-learning-tabs a strong \{ color: #171917; font-size: 18px;/);
   assert.match(styles, /\.course-map-feature > header > span \{ font-size: 16px; \}/);
   assert.match(styles, /\.course-feature-art \{ background: var\(--motion-pine\); \}/);
-  assert.match(styles, /\.course-feature-art > i \{ font-size: 38px; \}/);
-  assert.match(styles, /\.course-key-question \{ font-size: 16px; \}/);
+  assert.match(styles, /문득문득 ver\.5\.5: 오늘의 챌린지 단색 블루 표지/);
+  assert.match(styles, /\.course-map-feature h1 \{ color: #fff; \}/);
+  assert.match(styles, /\.course-feature-art \{[\s\S]*?background: transparent;/);
+  assert.match(styles, /\.course-key-question \{[\s\S]*?font-size: 17px;/);
   assert.match(styles, /\.course-map \.lesson-tab strong \{ color: #171917; font-size: 17px;/);
   assert.match(styles, /\.practice-studio-shell \.activity-sidebar \{ background: var\(--motion-pine\); \}/);
   assert.match(styles, /\.practice-studio-shell \.task-card p \{ font-size: 17px; line-height: 1\.75; \}/);
