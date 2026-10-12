@@ -85,6 +85,35 @@ test("P1: 세 번째 학습 질문이어도 부분 충족이라는 이유만으�
   assert.equal(result.activityComplete, false);
 });
 
+test("P1: 힌트를 받은 것만으로 활동 완료가 되지 않는다", () => {
+  const result = applyTutorResponsePolicy(
+    request({ supportMode: "hint" }),
+    response({
+      answerStatus: "met",
+      activityComplete: true,
+      masteryEvidence: ["이전 답에서 완료 기준을 충족함"]
+    })
+  );
+
+  assert.equal(result.activityComplete, false);
+  assert.notEqual(result.questionResolution, "complete");
+  assert.equal(result.masteryEvidence.length, 0);
+});
+
+test("P1: 여러 문장을 모두 살펴보는 활동은 마지막 문장 전에는 완료하지 않는다", () => {
+  const incomplete = applyTutorResponsePolicy(
+    request({ message: "[현재 과제] 소설 문장 살펴보기\n[현재까지 답을 확인한 문장] 1/4\n[활동 완료 기준] 네 문장을 모두 설명했다.\n[학생 답] 근거를 설명했습니다." }),
+    response({ answerStatus: "met", activityComplete: true, masteryEvidence: ["현재 문장 근거 설명"] })
+  );
+  const finalSentence = applyTutorResponsePolicy(
+    request({ message: "[현재 과제] 소설 문장 살펴보기\n[현재까지 답을 확인한 문장] 3/4\n[활동 완료 기준] 네 문장을 모두 설명했다.\n[학생 답] 마지막 문장의 근거를 설명했습니다." }),
+    response({ answerStatus: "met", activityComplete: true, masteryEvidence: ["모든 문장 근거 설명"] })
+  );
+
+  assert.equal(incomplete.activityComplete, false);
+  assert.equal(finalSentence.activityComplete, true);
+});
+
 test("P1: 같은 질문에서 세 번째 힌트를 쓰면 그 질문의 답만 공개하고 다음 질문으로 간다", () => {
   const result = applyTutorResponsePolicy(
     request({ supportMode: "hint", questionHintCount: 2 }),

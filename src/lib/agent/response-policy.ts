@@ -53,9 +53,17 @@ function needsSimplifying(question: string) {
     || /각각.*주어.*서술어|주어.*(?:목적어|부사어).*서술어|[‘'][^’']+[’'](?:을|를)?\s*주어.*[‘'][^’']+[’'](?:을|를)?\s*서술어|누가 무엇을 하는가|판단.*뒷받침|한 문장으로 설명/.test(question);
 }
 
+function requiredSequenceComplete(request: TurnRequest) {
+  const progress = /\[현재까지 답을 확인한 문장\]\s*(\d+)\s*\/\s*(\d+)/.exec(request.message);
+  if (!progress) return true;
+  const completedBeforeCurrent = Number(progress[1]);
+  const total = Number(progress[2]);
+  return total > 0 && completedBeforeCurrent + 1 >= total;
+}
+
 export function applyTutorResponsePolicy(request: TurnRequest, response: AgentResponse): AgentResponse {
   const completionEnabled = request.message.includes("[활동 완료 기준]");
-  const activityComplete = completionEnabled && (
+  const activityComplete = completionEnabled && request.supportMode === "submit" && requiredSequenceComplete(request) && (
     response.answerStatus === "met"
     || response.activityComplete
     || response.masteryEvidence.length > 0

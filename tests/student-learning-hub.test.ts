@@ -249,11 +249,15 @@ test("P2·P3·P4: 그림 없이 글로 제시한 상황에서 학생이 먼저 �
   assert.match(situationWritingActivity, /className="situation-prompt"/);
   assert.match(situationWritingActivity, /\[스스로 유형 학습 · 상황으로 문장 만들기\]/);
   assert.match(situationWritingActivity, /내가 만든 문장/);
-  assert.match(situationWritingActivity, /문장 보내고 질문 받기/);
+  assert.match(situationWritingActivity, /sendTurn\("hint"\)/);
+  assert.match(situationWritingActivity, /sendTurn\("submit"\)/);
+  assert.match(situationWritingActivity, /"AI 힌트"/);
+  assert.match(situationWritingActivity, /: "제출"/);
   assert.match(situationWritingActivity, /activity: "create"/);
   assert.match(situationWritingActivity, /\[학생이 만든 문장\]/);
   assert.match(situationWritingActivity, /AI 학습 도우미/);
-  assert.match(situationWritingActivity, /고친 문장 다시 보내기/);
+  assert.match(situationWritingActivity, /\[활동 완료 기준\]/);
+  assert.match(situationWritingActivity, /supportMode === "submit" && next\.activityComplete/);
   assert.doesNotMatch(situationWritingActivity, /모범 답안|정답 문장:/);
   assert.ok(situationWritingActivity.indexOf('className="coach-card situation-coach"') < situationWritingActivity.indexOf('htmlFor="situation-sentence"'));
   assert.match(styles, /\.situation-writing-shell/);
@@ -288,7 +292,8 @@ test("P3·P4: 시는 문법 요소를 고르고 소설은 모든 문장에 직�
   assert.match(realLifeChapter, /selectNovelSentence/);
   assert.match(realLifeChapter, /novelSentenceWork/);
   assert.match(realLifeChapter, /표시 완료하고 질문 보기/);
-  assert.match(realLifeChapter, /답 보내고 이 문장 완료/);
+  assert.match(realLifeChapter, /submit\("hint"\)/);
+  assert.match(realLifeChapter, /submit\("submit"\)/);
   assert.match(realLifeChapter, /다음 문장으로/);
   assert.match(realLifeChapter, /모든 문장 활동을 마쳤어요/);
   assert.match(realLifeChapter, /모든 문장은 처음부터 열려 있습니다/);
@@ -305,6 +310,25 @@ test("P3·P4: 시는 문법 요소를 고르고 소설은 모든 문장에 직�
   assert.match(styles, /literature-poem \.literature-sentence-list \{ width: min\(100%, 720px\)/);
   assert.match(agentTurnApi, /grammarRealLifeMaterials/);
   assert.match(agentTurnApi, /removeTrustedCurriculumPassages/);
+});
+
+test("P1·P3: 스스로 유형학습 AI 활동은 과제 아래에서 힌트와 제출을 나누고 전체 완료 기준을 확인한다", () => {
+  const situationCoach = situationWritingActivity.indexOf('className="coach-card situation-coach"');
+  const situationTask = situationWritingActivity.indexOf('className="situation-condition"');
+  const situationDraft = situationWritingActivity.indexOf('htmlFor="situation-sentence"');
+  assert.ok(situationTask < situationCoach && situationCoach < situationDraft);
+  assert.match(situationWritingActivity, /next\.question !== currentQuestion \|\| next\.activityComplete/);
+  assert.match(situationWritingActivity, /if \(supportMode === "submit" && next\.activityComplete\) await onDailyComplete/);
+
+  const realLifeTask = realLifeChapter.indexOf('className="real-life-task"');
+  const realLifeCoach = realLifeChapter.indexOf('<AiCoach response={response} />', realLifeTask);
+  const realLifeDraft = realLifeChapter.indexOf('htmlFor="real-life-draft"', realLifeTask);
+  assert.ok(realLifeTask < realLifeCoach && realLifeCoach < realLifeDraft);
+  assert.match(realLifeChapter, /next\.question !== currentQuestion \|\| next\.activityComplete/);
+  assert.match(realLifeChapter, /supportMode === "submit" && next\.activityComplete/);
+  assert.match(realLifeChapter, /questionAttemptCount/);
+  assert.match(realLifeChapter, /questionHintCount/);
+  assert.doesNotMatch(realLifeChapter, /if \(!selectionTurn\) await onDailyComplete/);
 });
 
 test("학생 홈은 산세리프 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {

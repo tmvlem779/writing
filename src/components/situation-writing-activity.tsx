@@ -7,6 +7,7 @@ import { scaffoldLabel } from "@/lib/agent/state-machine";
 import { getSituationScene, situationScenes, type SituationSceneId } from "@/lib/curriculum/situation-writing";
 
 type Message = { role: "student" | "assistant"; content: string };
+type SupportMode = "submit" | "hint";
 
 type SituationWritingActivityProps = {
   initialSceneId?: SituationSceneId;
@@ -26,7 +27,9 @@ export function SituationWritingActivity({
   const [history, setHistory] = useState<Message[]>([]);
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
-  const [pending, setPending] = useState(false);
+  const [questionAttemptCount, setQuestionAttemptCount] = useState(0);
+  const [questionHintCount, setQuestionHintCount] = useState(0);
+  const [pendingAction, setPendingAction] = useState<SupportMode | null>(null);
   const [error, setError] = useState("");
   const scene = getSituationScene(sceneId);
 
@@ -43,13 +46,15 @@ export function SituationWritingActivity({
     return body.id as string;
   }
 
-  async function submit() {
-    if (!draft.trim() || pending) return;
-    setPending(true);
+  async function sendTurn(supportMode: SupportMode) {
+    if ((supportMode === "submit" && !draft.trim()) || pendingAction) return;
+    setPendingAction(supportMode);
     setError("");
 
     try {
       const id = await ensureSession();
+      const submittedDraft = draft.trim();
+      const currentQuestion = response?.question || scene.firstCondition;
       const studentMessage = [
         "[스스로 유형 학습 · 상황으로 문장 만들기]",
         `[활동] ${scene.title}`,
@@ -57,8 +62,11 @@ export function SituationWritingActivity({
         `[문장 조건] ${scene.firstCondition}`,
         `[활용할 수 있는 말] ${scene.wordHints.join(" / ")}`,
         `[학습 초점] ${scene.focusConcepts.join(", ")}`,
-        `[학생이 만든 문장]\n${draft}`
+        "[활동 완료 기준] 상황과 첫 문장 조건을 충족하는 문장을 직접 만들고, 처음 문장과 고친 문장에서 달라진 구조·의미·상황 적절성 중 한 가지를 비교하여 설명했다.",
+        `[요청 유형] ${supportMode === "hint" ? "AI 힌트" : "도움 없이 제출"}`,
+        `[학생이 만든 문장]\n${submittedDraft || "아직 답을 쓰지 않았습니다."}`
       ].join("\n\n");
+      const requestedScaffoldLevel = supportMode === "hint" ? Math.min(4, scaffoldLevel + 1) : scaffoldLevel;
       const result = await fetch("/api/agent/turn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,8 +74,12 @@ export function SituationWritingActivity({
           sessionId: id,
           activity: "create",
           message: studentMessage,
-          scaffoldLevel,
+          supportMode,
+          scaffoldLevel: requestedScaffoldLevel,
           attemptCount,
+          currentQuestion,
+          questionAttemptCount,
+          questionHintCount,
           history: history.slice(-6)
         })
       });
@@ -77,16 +89,26 @@ export function SituationWritingActivity({
       setResponse(next);
       setScaffoldLevel(next.scaffoldLevel);
       setAttemptCount((count) => count + 1);
+      if (next.questionResolution === "continue" && next.question === currentQuestion) {
+        if (supportMode === "hint") setQuestionHintCount((count) => count + 1);
+        if (supportMode === "submit" && (next.answerStatus === "incorrect" || next.answerStatus === "partial")) {
+          setQuestionAttemptCount((count) => count + 1);
+        }
+      } else {
+        setQuestionAttemptCount(0);
+        setQuestionHintCount(0);
+      }
       setHistory((items) => [
         ...items,
-        { role: "student", content: draft },
-        { role: "assistant", content: `${next.studentMessage} ${next.question}` }
+        { role: "student", content: supportMode === "hint" ? `힌트 요청: ${submittedDraft || "작성 전"}` : submittedDraft },
+        { role: "assistant", content: [next.studentMessage, next.resolvedQuestionAnswer, next.question].filter(Boolean).join(" ") }
       ]);
-      await onDailyComplete?.(id);
+      if (next.question !== currentQuestion || next.activityComplete) setDraft("");
+      if (supportMode === "submit" && next.activityComplete) await onDailyComplete?.(id);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "문제가 생겼습니다.");
     } finally {
-      setPending(false);
+      setPendingAction(null);
     }
   }
 
@@ -98,6 +120,8 @@ export function SituationWritingActivity({
     setHistory([]);
     setScaffoldLevel(0);
     setAttemptCount(0);
+    setQuestionAttemptCount(0);
+    setQuestionHintCount(0);
     setError("");
   }
 
@@ -120,7 +144,7 @@ export function SituationWritingActivity({
         <p>{dailyMode ? "오늘의 상황을 읽고 자신의 문장을 먼저 만든 뒤 질문을 받아요." : "정답 문장을 따라 쓰지 않고, 주어진 상황으로 자신의 문장을 먼저 만듭니다."}</p>
       </aside>
 
-      <div className="situation-writing-workspace" aria-busy={pending}>
+      <div className="situation-writing-workspace" aria-busy={pendingAction !== null}>
         <header>
           <div><span>상황 읽기 → 생성 → 질문 → 고쳐쓰기</span><h1 id="situation-writing-title">{scene.title}</h1></div>
           <strong>{attemptCount}회 생각 확장</strong>
@@ -140,25 +164,61 @@ export function SituationWritingActivity({
         {response && (
           <article className="coach-card situation-coach" aria-live="polite">
             <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
-            <p>{response.studentMessage}</p>
-            <div className="coach-question"><span>다음 생각</span><strong>{response.question}</strong></div>
+            {response.activityComplete ? (
+              <div className="activity-completion-card">
+                <span>활동 완료</span>
+                <strong>상황에 맞는 문장을 만들고 바뀐 점까지 설명했어요.</strong>
+              </div>
+            ) : (
+              <>
+                {response.questionResolution === "reveal_and_advance" ? (
+                  <div className="activity-resolution-card">
+                    <span>이 질문의 정답 확인</span>
+                    <strong>{response.resolvedQuestionAnswer}</strong>
+                    <p>이 질문은 여기서 마치고 다음 질문으로 이어갈게요.</p>
+                  </div>
+                ) : <p>{response.studentMessage}</p>}
+                <div className="coach-question"><span>다음 생각</span><strong>{response.question}</strong></div>
+              </>
+            )}
           </article>
         )}
 
-        <label className="draft-label" htmlFor="situation-sentence">내가 만든 문장</label>
-        <textarea
-          id="situation-sentence"
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="주어진 상황을 바탕으로 먼저 한 문장을 만들어 보세요."
-          maxLength={1000}
-        />
-        <div className="editor-footer">
-          <span>{draft.length.toLocaleString()} / 1,000자</span>
-          <button aria-busy={pending} className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
-            {pending ? <MondeukLoading compact /> : response ? "고친 문장 다시 보내기" : "문장 보내고 질문 받기"}
-          </button>
-        </div>
+        {!response?.activityComplete && (
+          <>
+            <label className="draft-label" htmlFor="situation-sentence">내가 만든 문장</label>
+            <textarea
+              id="situation-sentence"
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder={response ? "새 질문에 대한 문장이나 설명을 적어 보세요." : "주어진 상황을 바탕으로 먼저 한 문장을 만들어 보세요."}
+              maxLength={1000}
+            />
+            <div className="editor-footer">
+              <span>{draft.length.toLocaleString()} / 1,000자</span>
+              <div className="editor-actions" aria-label="답 제출과 도움 선택">
+                <button
+                  aria-busy={pendingAction === "hint"}
+                  className="secondary-button hint-button"
+                  disabled={pendingAction !== null}
+                  onClick={() => sendTurn("hint")}
+                  type="button"
+                >
+                  {pendingAction === "hint" ? <MondeukLoading compact /> : "AI 힌트"}
+                </button>
+                <button
+                  aria-busy={pendingAction === "submit"}
+                  className="primary-button"
+                  disabled={pendingAction !== null || !draft.trim()}
+                  onClick={() => sendTurn("submit")}
+                  type="button"
+                >
+                  {pendingAction === "submit" ? <MondeukLoading compact /> : "제출"}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
         {error && <div className="error-panel" role="alert">{error}</div>}
       </div>
 

@@ -17,6 +17,7 @@ import {
 } from "@/lib/curriculum/real-life-materials";
 
 type Message = { role: "student" | "assistant"; content: string };
+type SupportMode = "submit" | "hint";
 
 type NovelSentenceWork = {
   markedTokenIndexes: number[];
@@ -28,6 +29,49 @@ type NovelSentenceWork = {
 };
 
 const novelStructureOptions = ["한 가지 내용", "둘 이상의 내용", "잘 모르겠어요"] as const;
+
+function AiCoach({
+  response,
+  questionLabel = "다음 생각",
+  className = ""
+}: {
+  response: AgentResponse;
+  questionLabel?: string;
+  className?: string;
+}) {
+  return (
+    <article className={`coach-card ${className}`.trim()} aria-live="polite">
+      <div className="coach-label"><span>AI 학습 도우미</span><small>{response.safety.blocked ? "안전 안내" : scaffoldLabel(response.scaffoldLevel)}</small></div>
+      {response.activityComplete ? (
+        <div className="activity-completion-card">
+          <span>활동 완료</span>
+          <strong>이번 과제의 근거와 설명을 모두 확인했어요.</strong>
+        </div>
+      ) : (
+        <>
+          {response.questionResolution === "reveal_and_advance" ? (
+            <div className="activity-resolution-card">
+              <span>이 질문의 정답 확인</span>
+              <strong>{response.resolvedQuestionAnswer}</strong>
+              <p>이 질문은 여기서 마치고 다음 질문으로 이어갈게요.</p>
+            </div>
+          ) : <p>{response.studentMessage}</p>}
+          {response.question && (
+            <div className="coach-question">
+              <span>{response.safety.blocked ? "안전한 학습을 위한 안내" : questionLabel}</span>
+              <strong>{response.question}</strong>
+            </div>
+          )}
+        </>
+      )}
+      {response.focusConcepts.length > 0 && (
+        <div className="concept-tags" aria-label="AI가 살펴본 개념">
+          {response.focusConcepts.map((concept) => <span key={concept}>{concept}</span>)}
+        </div>
+      )}
+    </article>
+  );
+}
 
 type RealLifeChapterProps = {
   lessonNumber: CourseLessonNumber;
@@ -64,6 +108,8 @@ export function RealLifeChapter({
   const [history, setHistory] = useState<Message[]>([]);
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
+  const [questionAttemptCount, setQuestionAttemptCount] = useState(0);
+  const [questionHintCount, setQuestionHintCount] = useState(0);
   const [selectedSentences, setSelectedSentences] = useState<string[]>([]);
   const [novelSentenceIndex, setNovelSentenceIndex] = useState(0);
   const [completedNovelSentenceIndexes, setCompletedNovelSentenceIndexes] = useState<number[]>([]);
@@ -74,6 +120,7 @@ export function RealLifeChapter({
   const [literatureSelectionSubmitted, setLiteratureSelectionSubmitted] = useState(false);
   const [attemptedMaterials, setAttemptedMaterials] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState(false);
+  const [pendingAction, setPendingAction] = useState<SupportMode | null>(null);
   const [error, setError] = useState("");
   const [demo, setDemo] = useState(false);
   const draftRef = useRef<HTMLTextAreaElement>(null);
@@ -109,18 +156,25 @@ export function RealLifeChapter({
     return body.id as string;
   }
 
-  async function sendTurn(submittedDraft: string, selectionTurn = false) {
+  async function sendTurn(submittedDraft: string, selectionTurn = false, supportMode: SupportMode = "submit") {
     const normalizedDraft = submittedDraft.trim();
-    if (pending || (!selectionTurn && !normalizedDraft)) return;
+    if (pending || (!selectionTurn && supportMode === "submit" && !normalizedDraft)) return;
     if (selectionTurn && (
       !isLiterature
       || literatureSelectionSubmitted
       || selectedSentences.length === 0
     )) return;
     setPending(true);
+    setPendingAction(supportMode);
     setError("");
     try {
       const id = await ensureSession();
+      const completionCriterion = isPoem
+        ? "선택한 구절에서 문법 형태를 직접 찾고, 그 형태가 화자의 태도·시간·정서·시의 호흡에 주는 효과를 구절 근거와 함께 설명했다."
+        : isLiterature
+          ? `작품의 ${material.selectableSentences?.length ?? 0}개 문장 모두에서 구조 단서를 표시하고, 각 문장이 담은 내용과 표시한 근거를 짧게 설명했다.`
+          : "자료에서 근거 표현을 직접 찾고, 그 표현이 자료의 목적이나 독자에게 주는 효과를 한 가지 설명했다.";
+      const currentQuestion = response?.question || (isLiterature && !isPoem ? novelGuideQuestion : isLiterature ? literatureTaskTitle : task);
       const studentMessage = [
         `[수업안] ${track.optionLabel} · ${track.title}`,
         `[수업 차시] ${lessonNumber}차시 · ${courseLesson.title}`,
@@ -147,13 +201,19 @@ export function RealLifeChapter({
         isLiterature
           ? `[문학 탐구 단계] ${isPoem && selectionTurn ? `학생이 ${literatureSelectionLabel}을 골라 처음 제출함` : isPoem ? "학생이 선택한 부분을 바탕으로 받은 질문에 답함" : `전체 ${material.selectableSentences?.length ?? 0}문장 중 ${novelSentenceIndex + 1}번째 문장에 직접 표시하고 질문에 답함`}`
           : null,
+        isLiterature && !isPoem
+          ? `[현재까지 답을 확인한 문장] ${completedNovelSentenceIndexes.length}/${material.selectableSentences?.length ?? 0}`
+          : null,
         isLiterature
           ? isPoem
             ? `[튜터 응답 원칙] 고른 구절을 구체적으로 반영해 한 번에 질문 하나만 제시할 것. 문법 요소의 형태를 먼저 찾게 하고, 그 요소가 화자의 태도·시간·정서·호흡에 만드는 효과로 질문을 넓힐 것. 완성 분석은 먼저 제시하지 말 것`
             : `[튜터 응답 원칙] 학생이 문장 안에 직접 밑줄 친 표현, 고른 구조, 짧은 답을 반영해 한두 문장으로 확인해 줄 것. 정답이나 완성 분석을 먼저 제시하지 말고, 다음 문장에서도 같은 방법으로 시도하도록 격려하는 짧은 질문으로 마칠 것`
           : null,
-        `[학생 답]\n${selectionTurn ? `${literatureSelectionLabel} 선택을 제출함` : normalizedDraft}`
+        `[활동 완료 기준] ${completionCriterion}`,
+        `[요청 유형] ${supportMode === "hint" ? "AI 힌트" : "도움 없이 제출"}`,
+        `[학생 답]\n${selectionTurn ? `${literatureSelectionLabel} 선택을 제출함` : normalizedDraft || "아직 답을 쓰지 않았습니다."}`
       ].filter(Boolean).join("\n\n");
+      const requestedScaffoldLevel = supportMode === "hint" ? Math.min(4, scaffoldLevel + 1) : scaffoldLevel;
       const result = await fetch("/api/agent/turn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -161,8 +221,12 @@ export function RealLifeChapter({
           sessionId: id,
           activity: "authentic",
           message: studentMessage,
-          scaffoldLevel,
+          supportMode,
+          scaffoldLevel: requestedScaffoldLevel,
           attemptCount,
+          currentQuestion,
+          questionAttemptCount,
+          questionHintCount,
           history: history.slice(-6)
         })
       });
@@ -173,22 +237,37 @@ export function RealLifeChapter({
       setDemo((current) => current || Boolean(next.demo));
       setScaffoldLevel(next.scaffoldLevel);
       setAttemptCount((count) => count + 1);
+      if (!selectionTurn && next.questionResolution === "continue" && next.question === currentQuestion) {
+        if (supportMode === "hint") setQuestionHintCount((count) => count + 1);
+        if (supportMode === "submit" && (next.answerStatus === "incorrect" || next.answerStatus === "partial")) {
+          setQuestionAttemptCount((count) => count + 1);
+        }
+      } else {
+        setQuestionAttemptCount(0);
+        setQuestionHintCount(0);
+      }
       if (selectionTurn) setLiteratureSelectionSubmitted(true);
       setAttemptedMaterials((current) => new Set(current).add(material.id));
       setHistory((items) => [
         ...items,
         {
           role: "student",
-          content: selectionTurn
-            ? isPoem
-              ? `${literatureSelectionLabel} ${selectedSentences.length}개 선택: ${selectedSentences.join(" / ")}`
-              : `${literatureSelectionLabel}: ${activeNovelSentence} / 밑줄: ${markedNovelTokenIndexes.map((index) => selectedNovelTokens[index]).filter(Boolean).join(" · ")} / 구조: ${novelRelation}`
-            : normalizedDraft
+          content: supportMode === "hint"
+            ? `힌트 요청: ${normalizedDraft || "작성 전"}`
+            : selectionTurn
+              ? isPoem
+                ? `${literatureSelectionLabel} ${selectedSentences.length}개 선택: ${selectedSentences.join(" / ")}`
+                : `${literatureSelectionLabel}: ${activeNovelSentence} / 밑줄: ${markedNovelTokenIndexes.map((index) => selectedNovelTokens[index]).filter(Boolean).join(" · ")} / 구조: ${novelRelation}`
+              : normalizedDraft
         },
-        { role: "assistant", content: `${next.studentMessage} ${next.question}` }
+        { role: "assistant", content: [next.studentMessage, next.resolvedQuestionAnswer, next.question].filter(Boolean).join(" ") }
       ]);
       if (isLiterature) {
-        if (!isPoem && !selectionTurn) {
+        const novelSentenceComplete = !isPoem
+          && !selectionTurn
+          && supportMode === "submit"
+          && (next.activityComplete || next.questionResolution === "advance");
+        if (novelSentenceComplete) {
           setNovelAnswerSubmitted(true);
           setCompletedNovelSentenceIndexes((current) => current.includes(novelSentenceIndex)
             ? current
@@ -205,19 +284,22 @@ export function RealLifeChapter({
             }
           }));
         }
+      }
+      if (!selectionTurn && (next.question !== currentQuestion || next.activityComplete)) {
         setDraft("");
         requestAnimationFrame(() => draftRef.current?.focus());
       }
-      if (!selectionTurn) await onDailyComplete?.(id);
+      if (!selectionTurn && supportMode === "submit" && next.activityComplete) await onDailyComplete?.(id);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "문제가 생겼습니다.");
     } finally {
       setPending(false);
+      setPendingAction(null);
     }
   }
 
-  async function submit() {
-    await sendTurn(draft);
+  async function submit(supportMode: SupportMode) {
+    await sendTurn(draft, false, supportMode);
   }
 
   async function submitLiteratureSelection() {
@@ -233,6 +315,8 @@ export function RealLifeChapter({
     setHistory([]);
     setScaffoldLevel(0);
     setAttemptCount(0);
+    setQuestionAttemptCount(0);
+    setQuestionHintCount(0);
     setSelectedSentences([]);
     setNovelSentenceIndex(0);
     setCompletedNovelSentenceIndexes([]);
@@ -289,6 +373,8 @@ export function RealLifeChapter({
     setDraft(saved?.draft ?? "");
     setResponse(saved?.response ?? null);
     setAttemptCount(0);
+    setQuestionAttemptCount(0);
+    setQuestionHintCount(0);
     setScaffoldLevel(saved?.response?.scaffoldLevel ?? 0);
     setHistory([]);
   }
@@ -304,6 +390,8 @@ export function RealLifeChapter({
     setDraft("");
     setResponse(null);
     setAttemptCount(0);
+    setQuestionAttemptCount(0);
+    setQuestionHintCount(0);
     setScaffoldLevel(0);
     setError("");
   }
@@ -389,23 +477,25 @@ export function RealLifeChapter({
                         <ol>{selectedSentences.map((sentence) => <li key={sentence}>{sentence.replace(/\s*\n\s*/g, " ")}</li>)}</ol>
                       </div>
                       {response && (
-                        <article className="coach-card literature-coach" aria-live="polite">
-                          <div className="coach-label"><span>AI 학습 도우미</span><small>{response.safety.blocked ? "안전 안내" : scaffoldLabel(response.scaffoldLevel)}</small></div>
-                          <p>{response.studentMessage}</p>
-                          <div className="coach-question">
-                            <span>{response.safety.blocked ? "안전한 학습을 위한 안내" : "고른 구절을 바탕으로 한 질문"}</span>
-                            <strong>{response.question}</strong>
-                          </div>
-                        </article>
+                        <AiCoach className="literature-coach" questionLabel="고른 구절을 바탕으로 한 질문" response={response} />
                       )}
-                      <label className="draft-label" htmlFor="literature-followup-draft">질문에 대한 내 답</label>
-                      <textarea id="literature-followup-draft" maxLength={2500} onChange={(event) => setDraft(event.target.value)} placeholder="선택한 구절의 문법 형태와 그 표현 효과를 근거로 답해 보세요." ref={draftRef} value={draft} />
-                      <div className="editor-footer">
-                        <span>{draft.length.toLocaleString()} / 2,500자</span>
-                        <button aria-busy={pending} className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
-                          {pending ? <MondeukLoading compact /> : "답 보내고 다음 질문 받기"}
-                        </button>
-                      </div>
+                      {!response?.activityComplete && (
+                        <>
+                          <label className="draft-label" htmlFor="literature-followup-draft">질문에 대한 내 답</label>
+                          <textarea id="literature-followup-draft" maxLength={2500} onChange={(event) => setDraft(event.target.value)} placeholder="선택한 구절의 문법 형태와 그 표현 효과를 근거로 답해 보세요." ref={draftRef} value={draft} />
+                          <div className="editor-footer">
+                            <span>{draft.length.toLocaleString()} / 2,500자</span>
+                            <div className="editor-actions" aria-label="답 제출과 도움 선택">
+                              <button aria-busy={pendingAction === "hint"} className="secondary-button hint-button" disabled={pending} onClick={() => submit("hint")} type="button">
+                                {pendingAction === "hint" ? <MondeukLoading compact /> : "AI 힌트"}
+                              </button>
+                              <button aria-busy={pendingAction === "submit"} className="primary-button" disabled={pending || !draft.trim()} onClick={() => submit("submit")} type="button">
+                                {pendingAction === "submit" ? <MondeukLoading compact /> : "제출"}
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </section>
                   )}
                 </>
@@ -483,17 +573,13 @@ export function RealLifeChapter({
                       </div>
                       {!response && (
                         <article className="coach-card literature-coach">
-                          <div className="coach-label"><span>문장 표시를 바탕으로 한 질문</span><small>짧게 답해요</small></div>
+                          <div className="coach-label"><span>AI 학습 도우미</span><small>짧게 답해요</small></div>
                           <p>밑줄 친 부분과 ‘{novelRelation}’ 선택을 바탕으로 생각해 보세요.</p>
                           <div className="coach-question"><span>한 문장 질문</span><strong>{novelGuideQuestion}</strong></div>
                         </article>
                       )}
                       {response && (
-                        <article className="coach-card literature-coach" aria-live="polite">
-                          <div className="coach-label"><span>AI 학습 도우미</span><small>{response.safety.blocked ? "안전 안내" : scaffoldLabel(response.scaffoldLevel)}</small></div>
-                          <p>{response.studentMessage}</p>
-                          <div className="coach-question"><span>{response.safety.blocked ? "안전한 학습을 위한 안내" : "이 문장 확인"}</span><strong>{response.question}</strong></div>
-                        </article>
+                        <AiCoach className="literature-coach" questionLabel="이 문장 확인" response={response} />
                       )}
                       {!novelAnswerSubmitted ? (
                         <>
@@ -501,9 +587,14 @@ export function RealLifeChapter({
                           <textarea id="literature-followup-draft" maxLength={600} onChange={(event) => setDraft(event.target.value)} placeholder="한두 문장으로 짧게 답해 보세요." ref={draftRef} value={draft} />
                           <div className="editor-footer">
                             <span>{draft.length.toLocaleString()} / 600자</span>
-                            <button aria-busy={pending} className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
-                              {pending ? <MondeukLoading compact /> : "답 보내고 이 문장 완료"}
-                            </button>
+                            <div className="editor-actions" aria-label="답 제출과 도움 선택">
+                              <button aria-busy={pendingAction === "hint"} className="secondary-button hint-button" disabled={pending} onClick={() => submit("hint")} type="button">
+                                {pendingAction === "hint" ? <MondeukLoading compact /> : "AI 힌트"}
+                              </button>
+                              <button aria-busy={pendingAction === "submit"} className="primary-button" disabled={pending || !draft.trim()} onClick={() => submit("submit")} type="button">
+                                {pendingAction === "submit" ? <MondeukLoading compact /> : "제출"}
+                              </button>
+                            </div>
                           </div>
                         </>
                       ) : (
@@ -566,38 +657,36 @@ export function RealLifeChapter({
               <p>{task}</p>
             </div>
 
-            <label className="draft-label" htmlFor="real-life-draft">내 생각과 고쳐 쓴 문장</label>
-            <textarea
-              id="real-life-draft"
-              maxLength={2500}
-              onChange={(event) => setDraft(event.target.value)}
-              placeholder="자료에서 찾은 근거와 내 판단을 먼저 적어 보세요. 고쳐 쓰기에서는 바꾼 이유도 함께 설명해 보세요."
-              ref={draftRef}
-              value={draft}
-            />
-            <div className="editor-footer">
-              <span>{draft.length.toLocaleString()} / 2,500자</span>
-              <button aria-busy={pending} className="primary-button" disabled={pending || !draft.trim()} onClick={submit} type="button">
-                {pending ? <MondeukLoading compact /> : "질문과 힌트 받기"}
-              </button>
-            </div>
+            {response && (
+              <AiCoach response={response} />
+            )}
+
+            {!response?.activityComplete && (
+              <>
+                <label className="draft-label" htmlFor="real-life-draft">내 생각과 고쳐 쓴 문장</label>
+                <textarea
+                  id="real-life-draft"
+                  maxLength={2500}
+                  onChange={(event) => setDraft(event.target.value)}
+                  placeholder="자료에서 찾은 근거와 내 판단을 먼저 적어 보세요. 고쳐 쓰기에서는 바꾼 이유도 함께 설명해 보세요."
+                  ref={draftRef}
+                  value={draft}
+                />
+                <div className="editor-footer">
+                  <span>{draft.length.toLocaleString()} / 2,500자</span>
+                  <div className="editor-actions" aria-label="답 제출과 도움 선택">
+                    <button aria-busy={pendingAction === "hint"} className="secondary-button hint-button" disabled={pending} onClick={() => submit("hint")} type="button">
+                      {pendingAction === "hint" ? <MondeukLoading compact /> : "AI 힌트"}
+                    </button>
+                    <button aria-busy={pendingAction === "submit"} className="primary-button" disabled={pending || !draft.trim()} onClick={() => submit("submit")} type="button">
+                      {pendingAction === "submit" ? <MondeukLoading compact /> : "제출"}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
 
             {error && <div className="error-panel" role="alert">{error}</div>}
-            {response && (
-            <article className="coach-card" aria-live="polite">
-              <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
-              <p>{response.studentMessage}</p>
-              <div className="coach-question">
-                <span>다음 생각</span>
-                <strong>{response.question}</strong>
-              </div>
-              {response.focusConcepts.length > 0 && (
-                <div className="concept-tags" aria-label="AI가 살펴본 개념">
-                  {response.focusConcepts.map((concept) => <span key={concept}>{concept}</span>)}
-                </div>
-              )}
-            </article>
-            )}
           </section>
         )}
       </section>
