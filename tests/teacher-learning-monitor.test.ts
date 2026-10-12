@@ -159,3 +159,30 @@ test("RESPONSIVE: 교사 학습 현황은 태블릿과 모바일에서 열 수�
   assert.match(styles, /max-height: calc\(var\(--account-row-height\) \* 5/);
   assert.match(styles, /\.teacher-learning-dashboard-header h4 \{ font-size: 23px !important; \}/);
 });
+
+test("TEACHER: 지난 날짜의 보충 유형학습은 제때 완료와 다른 상태로 표시한다", () => {
+  const monitor = buildStudentLearningMonitor({
+    userId: "student-late",
+    name: "박보충",
+    loginId: "late01",
+    now: new Date("2026-10-06T12:00:00+09:00"),
+    sessions: [],
+    concepts: [],
+    events: [{
+      sessionId: "late-session",
+      eventType: "daily_practice_completed",
+      conceptCode: "daily_practice",
+      metadata: { practiceDate: "2026-10-04", practiceType: "literature", title: "문학 작품" },
+      createdAt: "2026-10-06T10:00:00+09:00"
+    }],
+    wrongAnswers: [],
+    challengeProgress: []
+  });
+  const component = read("src/components/student-learning-monitor.tsx");
+  const styles = read("src/app/globals.css");
+
+  assert.equal(monitor.selfStudyActivities.find((activity) => activity.title === "문학 작품")?.state, "completed-late");
+  assert.match(component, /보충 학습 완료/);
+  assert.match(component, /className="completed-late"/);
+  assert.match(styles, /\.teacher-self-study-cells button\.completed-late/);
+});

@@ -21,7 +21,7 @@ import {
   sentenceStructureLessons,
   sentenceStructureSource
 } from "@/lib/curriculum/sentence-structure";
-import { recordWrongAnswer, resolveWrongAnswer } from "@/lib/learning/wrong-answer-client";
+import { recordWrongAnswer } from "@/lib/learning/wrong-answer-client";
 
 type ConceptChapterProps = {
   completed: boolean;
@@ -99,7 +99,6 @@ export function ConceptChapter({ completed, lessonNumber, trackId, onCompletionC
       setFirstAttemptResults((current) => ({ ...current, [currentCheckIndex]: correct }));
     }
     if (correct && !passedCheckIndexes.includes(currentCheckIndex)) {
-      void resolveWrongAnswer("challenge", problemId);
       const nextPassedCheckIndexes = [...passedCheckIndexes, currentCheckIndex];
       setPassedCheckIndexes(nextPassedCheckIndexes);
       const nextChecksComplete = isConceptCheckComplete(checks.length, nextPassedCheckIndexes);

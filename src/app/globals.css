@@ -2486,6 +2486,84 @@ textarea, input {
   .story-step-0 .v3-story-panel.panel-1 p { color: var(--muted); }
 }
 
+/* Wrong-note three-step review and supplemental self-study status */
+.wrong-note-summary-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: end;
+}
+.wrong-note-summary-row dl { width: 100%; }
+.wrong-note-review-button { min-width: 148px; white-space: nowrap; }
+.wrong-note-review {
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid #cbd9ee;
+  border-radius: 16px;
+  background: #f6faff;
+  color: var(--palette-navy);
+}
+.wrong-note-review > header {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  color: inherit;
+}
+.wrong-note-review > header span { color: #4a659b; font-size: 12px; font-weight: 850; }
+.wrong-note-review > header h3 { margin: 7px 0 0; color: #111827; font-size: 19px; line-height: 1.55; }
+.wrong-note-review > header > strong { flex: none; color: #405c95; font-size: 15px; }
+.wrong-note-review-progress { margin: 16px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.wrong-note-review-progress i { height: 5px; border-radius: 99px; background: #dce4f1; }
+.wrong-note-review-progress i.active { background: #7d96c6; }
+.wrong-note-review-progress i.done { background: var(--motion-clay); }
+.wrong-note-review-guide { margin: 0 0 10px; color: #5d6b83; font-size: 12px; }
+.wrong-note-review-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.wrong-note-review-options button {
+  min-height: 58px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #d9e1ee;
+  border-radius: 12px;
+  background: #fff;
+  color: #17213a;
+  text-align: left;
+  cursor: pointer;
+}
+.wrong-note-review-options button:hover { border-color: #7189ba; }
+.wrong-note-review-options button.selected { border-color: #405c95; background: #e7eef9; box-shadow: inset 0 0 0 1px #405c95; }
+.wrong-note-review-options button > i { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: #eef2f8; color: #405c95; font-style: normal; font-weight: 900; }
+.wrong-note-review-options button > span { font-size: 14px; font-weight: 700; line-height: 1.45; }
+.wrong-note-review-feedback { margin-top: 14px; padding: 14px 16px; border-radius: 12px; }
+.wrong-note-review-feedback strong { display: block; font-size: 13px; }
+.wrong-note-review-feedback p { margin: 5px 0 0; font-size: 13px; line-height: 1.55; }
+.wrong-note-review-feedback.retry { background: #fff3dc; color: #784f13; }
+.wrong-note-review-feedback.correct { background: #e8f1fb; color: #254c83; }
+.wrong-note-review-feedback.complete { background: #fde9ee; color: #81384b; }
+.wrong-note-review-feedback.error { background: #f9e5e5; color: #8f2f2f; }
+.wrong-note-card .wrong-note-review > footer { margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.wrong-note-card .wrong-note-review > footer > span { color: #637089; font-size: 12px; }
+.wrong-note-card > .wrong-note-card-footer { margin-top: 18px; display: flex; justify-content: space-between; gap: 18px; color: var(--muted); font-size: 11px; }
+.wrong-note-card > .wrong-note-card-footer a { color: #405c95; font-weight: 800; }
+.teacher-status-intro li i.completed-late { border-color: var(--motion-clay); background: var(--motion-clay); }
+.teacher-self-study-cells button.completed-late { border-color: var(--motion-clay); background: var(--motion-clay); color: #fff; }
+.teacher-activity-detail > header > strong.completed-late { background: #fde6ec; color: #a5415b; }
+
+@media (max-width: 640px) {
+  .wrong-note-summary-row { grid-template-columns: 1fr; }
+  .wrong-note-review-button { width: 100%; }
+  .wrong-note-review { padding: 17px; }
+  .wrong-note-review-options { grid-template-columns: 1fr; }
+  .wrong-note-review > header h3 { font-size: 17px; }
+  .wrong-note-card .wrong-note-review > footer,
+  .wrong-note-card > .wrong-note-card-footer { display: grid; }
+  .wrong-note-card .wrong-note-review > footer .primary-button { width: 100%; }
+}
+
 @media (min-width: 1025px) {
   :where(p, li, dt, dd, label, legend, blockquote, button, a) {
     word-break: keep-all;

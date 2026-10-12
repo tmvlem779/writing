@@ -20,6 +20,8 @@ const errorCorrectionActivity = read("src/components/error-correction-activity.t
 const situationWritingActivity = read("src/components/situation-writing-activity.tsx");
 const realLifeChapter = read("src/components/real-life-chapter.tsx");
 const wrongNotesPage = read("src/app/learn/wrong-notes/page.tsx");
+const wrongNoteReviewList = read("src/components/wrong-note-review-list.tsx");
+const wrongAnswerApi = read("src/app/api/wrong-answers/route.ts");
 const diagnosisApi = read("src/app/api/diagnosis/route.ts");
 const agentTurnApi = read("src/app/api/agent/turn/route.ts");
 const migration = read("supabase/migrations/202609280003_add_wrong_answers.sql");
@@ -403,4 +405,14 @@ test("PRIVACY: 오답은 학생별 RLS로 격리되고 오답노트는 로그인
   assert.match(migration, /user_id = auth\.uid\(\)/);
   assert.match(migration, /private\.is_teacher_of\(user_id\)/);
   assert.match(wrongNotesPage, /\.eq\("user_id", user\.id\)/);
+});
+
+test("P1·P3·PRIVACY: 오답은 그 자리에서 기존 문항과 유사 문항 두 개를 모두 해결해야 완료된다", () => {
+  assert.match(wrongNoteReviewList, /오답 다시 풀기/);
+  assert.match(wrongNoteReviewList, /비슷한 유형 두 문제를 모두 해결/);
+  assert.match(wrongNoteReviewList, /action: "check-review"/);
+  assert.match(wrongAnswerApi, /parsed\.data\.answers\.length === practice\.questions\.length/);
+  assert.match(wrongAnswerApi, /\.eq\("user_id", auth\.user\.id\)/);
+  assert.match(wrongAnswerApi, /resolved_at: new Date\(\)\.toISOString\(\)/);
+  assert.doesNotMatch(wrongNoteReviewList, /correctOptionIds/);
 });

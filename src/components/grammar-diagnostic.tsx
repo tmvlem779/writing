@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { MondeukLoading } from "@/components/mondeuk-loading";
 import { grammarDiagnosticQuestions, scoreDiagnosticAnswers } from "@/lib/diagnosis/grammar-diagnostic";
-import { recordWrongAnswer, resolveWrongAnswer } from "@/lib/learning/wrong-answer-client";
+import { recordWrongAnswer } from "@/lib/learning/wrong-answer-client";
 
 type Feedback = { correct: boolean; message: string } | null;
 
@@ -35,9 +35,7 @@ export function GrammarDiagnostic() {
     setAnswers((current) => ({ ...current, [question.id]: selected }));
     setFeedback({ correct, message: correct ? question.explanation : question.retryHint });
 
-    if (correct) {
-      void resolveWrongAnswer("diagnosis", question.id);
-    } else {
+    if (!correct) {
       void recordWrongAnswer({
         source: "diagnosis",
         sourceLabel: "AI 진단평가",

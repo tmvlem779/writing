@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { buildWrongNotePractice, checkWrongNotePracticeAnswers } from "@/lib/learning/wrong-note-practice";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const sourceSchema = z.enum(["diagnosis", "challenge", "self-study"]);
@@ -14,7 +15,11 @@ const requestSchema = z.discriminatedUnion("action", [
     submittedAnswer: z.string().trim().min(1).max(1000),
     feedbackHint: z.string().trim().min(1).max(500)
   }),
-  z.object({ action: z.literal("resolve"), source: sourceSchema, problemId: z.string().trim().min(1).max(120) })
+  z.object({
+    action: z.literal("check-review"),
+    noteId: z.string().uuid(),
+    answers: z.array(z.array(z.string().trim().min(1).max(80)).min(1).max(8)).min(1).max(3)
+  })
 ]);
 
 export async function POST(request: Request) {
@@ -30,16 +35,48 @@ export async function POST(request: Request) {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
 
-  if (parsed.data.action === "resolve") {
-    const { error } = await supabase
+  if (parsed.data.action === "check-review") {
+    const { data: note, error: noteError } = await supabase
       .from("wrong_answers")
-      .update({ resolved_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .select("id,source,problem_id,problem_title,question,submitted_answer,feedback_hint")
+      .eq("id", parsed.data.noteId)
       .eq("user_id", auth.user.id)
-      .eq("source", parsed.data.source)
-      .eq("problem_id", parsed.data.problemId)
-      .is("resolved_at", null);
-    if (error) return NextResponse.json({ error: "오답 상태를 갱신하지 못했습니다." }, { status: 500 });
-    return NextResponse.json({ resolved: true });
+      .maybeSingle();
+    if (noteError) return NextResponse.json({ error: "오답 정보를 불러오지 못했습니다." }, { status: 500 });
+    if (!note) return NextResponse.json({ error: "본인의 오답만 다시 풀 수 있습니다." }, { status: 404 });
+
+    const practice = buildWrongNotePractice({
+      id: note.id,
+      source: note.source,
+      problemId: note.problem_id,
+      problemTitle: note.problem_title,
+      question: note.question,
+      submittedAnswer: note.submitted_answer,
+      feedbackHint: note.feedback_hint
+    });
+    if (!practice) return NextResponse.json({ error: "이 오답은 원래 학습 영역에서 다시 풀어 주세요." }, { status: 422 });
+
+    const currentIndex = parsed.data.answers.length - 1;
+    const correct = checkWrongNotePracticeAnswers(practice, parsed.data.answers);
+    if (!correct) {
+      return NextResponse.json({ correct: false, resolved: false, hint: practice.questions[currentIndex].hint });
+    }
+
+    const resolved = parsed.data.answers.length === practice.questions.length;
+    if (resolved) {
+      const { error: updateError } = await supabase
+        .from("wrong_answers")
+        .update({ resolved_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq("id", note.id)
+        .eq("user_id", auth.user.id);
+      if (updateError) return NextResponse.json({ error: "오답 해결 상태를 저장하지 못했습니다." }, { status: 500 });
+    }
+    return NextResponse.json({
+      correct: true,
+      resolved,
+      explanation: practice.questions[currentIndex].explanation,
+      nextQuestionIndex: resolved ? null : currentIndex + 1
+    });
   }
 
   const { data: existing } = await supabase

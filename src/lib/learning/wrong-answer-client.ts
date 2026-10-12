@@ -25,7 +25,3 @@ async function postWrongAnswer(body: Record<string, unknown>) {
 export function recordWrongAnswer(input: WrongAnswerInput) {
   return postWrongAnswer({ action: "record", ...input });
 }
-
-export function resolveWrongAnswer(source: WrongAnswerSource, problemId: string) {
-  return postWrongAnswer({ action: "resolve", source, problemId });
-}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { MondeukLoading } from "@/components/mondeuk-loading";
 import { getDiagnosticQuestion, grammarDiagnosticQuestions } from "@/lib/diagnosis/grammar-diagnostic";
-import { recordWrongAnswer, resolveWrongAnswer } from "@/lib/learning/wrong-answer-client";
+import { recordWrongAnswer } from "@/lib/learning/wrong-answer-client";
 
 type ConceptLearningActivityProps = {
   questionId: string;
@@ -56,7 +56,6 @@ export function ConceptLearningActivity({ questionId, onDailyComplete }: Concept
     setPending(true);
     try {
       const sessionId = await createSession();
-      await resolveWrongAnswer("self-study", problemId);
       await onDailyComplete?.(sessionId);
       setFeedback({ correct: true, message: question.explanation });
     } catch (caught) {

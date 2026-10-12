@@ -90,7 +90,7 @@ export type ChallengeActivityStatus = {
 
 export type SelfStudyActivityStatus = {
   sequence: number;
-  state: "completed" | "not-completed";
+  state: "completed" | "completed-late" | "not-completed";
   typeLabel: string;
   title: string;
   completedAt: string | null;
@@ -320,13 +320,20 @@ export function buildStudentLearningMonitor(input: StudentMonitorInput): Student
   for (const event of [...dailyCompletions].sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))) {
     uniqueDailyCompletions.set(metadataString(event.metadata, "practiceDate") ?? event.createdAt, event);
   }
-  const roadmap = buildDailyRoadmap(getKoreanDate(now), uniqueDailyCompletions.keys());
+  const lateCompletionDates = new Set(
+    [...uniqueDailyCompletions.entries()]
+      .filter(([practiceDate, event]) => getKoreanDate(new Date(event.createdAt)) > practiceDate)
+      .map(([practiceDate]) => practiceDate)
+  );
+  const roadmap = buildDailyRoadmap(getKoreanDate(now), uniqueDailyCompletions.keys(), lateCompletionDates);
   const selfStudyActivities: SelfStudyActivityStatus[] = roadmap.map((day, index) => {
     const event = uniqueDailyCompletions.get(day.date);
     const practiceType = event ? metadataString(event.metadata, "practiceType") : null;
     return {
       sequence: index + 1,
-      state: event ? "completed" as const : "not-completed" as const,
+      state: event
+        ? lateCompletionDates.has(day.date) ? "completed-late" as const : "completed" as const
+        : "not-completed" as const,
       typeLabel: practiceType ? practiceTypeLabels[practiceType] ?? practiceType : day.typeLabel,
       title: event ? metadataString(event.metadata, "title") ?? day.title : day.title,
       completedAt: event?.createdAt ?? null
@@ -447,7 +454,7 @@ export function buildClassLearningAnalysis(students: StudentLearningMonitor[]): 
       || student.analysis.hintCount > 0
       || student.wrongNoteSummary.total > 0
       || student.challengeActivities.some((activity) => activity.state !== "not-started")
-      || student.selfStudyActivities.some((activity) => activity.state === "completed");
+      || student.selfStudyActivities.some((activity) => activity.state !== "not-completed");
     if (hasActivity) activeStudentCount += 1;
     hintCount += student.analysis.hintCount;
     unresolvedWrongCount += student.wrongNoteSummary.unresolved;

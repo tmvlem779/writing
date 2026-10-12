@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { MondeukLoading } from "@/components/mondeuk-loading";
 import { getErrorCorrectionItem } from "@/lib/curriculum/error-correction";
-import { recordWrongAnswer, resolveWrongAnswer } from "@/lib/learning/wrong-answer-client";
+import { recordWrongAnswer } from "@/lib/learning/wrong-answer-client";
 
 type ErrorCorrectionActivityProps = {
   itemId: string;
@@ -98,7 +98,6 @@ export function ErrorCorrectionActivity({ itemId, onDailyComplete }: ErrorCorrec
     setPending(true);
     try {
       const sessionId = await createSession();
-      await resolveWrongAnswer("self-study", problemId);
       await onDailyComplete?.(sessionId);
       setCompleted(true);
       setRevisionFeedback({ kind: "success", message: item.explanation });

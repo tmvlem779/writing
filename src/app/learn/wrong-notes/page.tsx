@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { StudentLearningNav } from "@/components/student-learning-nav";
+import { WrongNoteReviewList } from "@/components/wrong-note-review-list";
 import { getStudentSession } from "@/lib/auth/student-session";
+import { buildWrongNotePractice, toPublicWrongNotePractice } from "@/lib/learning/wrong-note-practice";
 
 type WrongAnswerRow = {
   id: string;
@@ -15,12 +17,6 @@ type WrongAnswerRow = {
   resolved_at: string | null;
   updated_at: string;
 };
-
-const sourceLinks = {
-  diagnosis: "/learn/diagnosis",
-  challenge: "/learn/challenge",
-  "self-study": "/learn/self-study"
-} as const;
 
 export default async function WrongNotesPage() {
   const { supabase, user } = await getStudentSession();
@@ -54,26 +50,30 @@ export default async function WrongNotesPage() {
             <Link className="primary-button" href="/learn/challenge">오늘의 챌린지 시작하기</Link>
           </section>
         ) : (
-          <div className="wrong-note-list">
-            {notes.map((note) => (
-              <article className={note.resolved_at ? "wrong-note-card resolved" : "wrong-note-card"} key={note.id}>
-                <div className="wrong-note-meta">
-                  <span>{note.source_label}</span>
-                  <small>{note.problem_title}</small>
-                  <i>{note.resolved_at ? "다시 해결함" : `${note.attempt_count}회 오답`}</i>
-                </div>
-                <h2>{note.question}</h2>
-                <dl>
-                  <div><dt>내가 고른 답</dt><dd>{note.submitted_answer}</dd></div>
-                  <div><dt>다시 볼 단서</dt><dd>{note.feedback_hint}</dd></div>
-                </dl>
-                <footer>
-                  <time dateTime={note.updated_at}>{new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium" }).format(new Date(note.updated_at))}</time>
-                  <Link href={sourceLinks[note.source]}>이 영역 다시 학습하기 →</Link>
-                </footer>
-              </article>
-            ))}
-          </div>
+          <WrongNoteReviewList notes={notes.map((note) => {
+            const practice = buildWrongNotePractice({
+              id: note.id,
+              source: note.source,
+              problemId: note.problem_id,
+              problemTitle: note.problem_title,
+              question: note.question,
+              submittedAnswer: note.submitted_answer,
+              feedbackHint: note.feedback_hint
+            });
+            return {
+              id: note.id,
+              source: note.source,
+              sourceLabel: note.source_label,
+              problemTitle: note.problem_title,
+              question: note.question,
+              submittedAnswer: note.submitted_answer,
+              feedbackHint: note.feedback_hint,
+              attemptCount: note.attempt_count,
+              resolvedAt: note.resolved_at,
+              updatedAt: note.updated_at,
+              practice: practice ? toPublicWrongNotePractice(practice) : null
+            };
+          })} />
         )}
       </main>
     </section>

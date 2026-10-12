@@ -66,7 +66,7 @@ export function StudentLearningMonitor({ classId, students }: StudentLearningMon
         <div className="teacher-status-view" role="tabpanel">
           <div className="teacher-status-intro">
             <div><span>학습 현황</span><h5>학생별 활동을 한눈에 확인하세요</h5><p>번호 칸을 누르면 완료한 활동과 학습 내용을 자세히 볼 수 있습니다.</p></div>
-            <ul aria-label="활동 상태 범례"><li><i className="completed" />완료</li><li><i className="partial" />진행 중</li><li><i />미시작</li></ul>
+            <ul aria-label="활동 상태 범례"><li><i className="completed" />제때 완료</li><li><i className="completed-late" />보충 완료</li><li><i className="partial" />진행 중</li><li><i />미시작</li></ul>
           </div>
           <div className="teacher-activity-table-wrap">
             <table className="teacher-activity-table">
@@ -74,7 +74,7 @@ export function StudentLearningMonitor({ classId, students }: StudentLearningMon
               <tbody>
                 {students.map((item) => {
                   const challengeCompleted = item.challengeActivities.filter((activity) => activity.state === "completed").length;
-                  const selfCompleted = item.selfStudyActivities.filter((activity) => activity.state === "completed").length;
+                  const selfCompleted = item.selfStudyActivities.filter((activity) => activity.state !== "not-completed").length;
                   return (
                     <tr key={item.userId}>
                       <th scope="row"><strong>{item.name}</strong><small>{item.loginId}</small></th>
@@ -87,7 +87,7 @@ export function StudentLearningMonitor({ classId, students }: StudentLearningMon
                       <td>
                         <div className="teacher-activity-cell-heading"><span>{selfCompleted}/30 완료</span><strong>{percent(selfCompleted, 30)}%</strong></div>
                         <div className="teacher-self-study-cells">
-                          {item.selfStudyActivities.map((activity) => <button aria-label={`${item.name} 스스로 유형학습 ${activity.sequence}번 ${activity.state === "completed" ? "완료" : "미완료"} 상세 보기`} className={activity.state} key={activity.sequence} onClick={() => setDetail({ kind: "self-study", studentId: item.userId, sequence: activity.sequence })} type="button">{activity.state === "completed" ? "✓" : activity.sequence}</button>)}
+                          {item.selfStudyActivities.map((activity) => <button aria-label={`${item.name} 스스로 유형학습 ${activity.sequence}번 ${activity.state === "completed" ? "제때 완료" : activity.state === "completed-late" ? "보충 학습 완료" : "미완료"} 상세 보기`} className={activity.state} key={activity.sequence} onClick={() => setDetail({ kind: "self-study", studentId: item.userId, sequence: activity.sequence })} type="button">{activity.state !== "not-completed" ? "✓" : activity.sequence}</button>)}
                         </div>
                       </td>
                       <td>
@@ -114,7 +114,7 @@ export function StudentLearningMonitor({ classId, students }: StudentLearningMon
             })() : detail.kind === "self-study" ? (() => {
               const activity = detailStudent.selfStudyActivities.find((item) => item.sequence === detail.sequence);
               if (!activity) return null;
-              return <><header><div><span>{detailStudent.name} · 스스로 유형학습</span><h5>{activity.sequence}번 활동</h5></div><strong className={activity.state}>{activity.state === "completed" ? "완료" : "미완료"}</strong></header><dl><div><dt>활동 유형</dt><dd>{activity.typeLabel}</dd></div><div><dt>학습 내용</dt><dd>{activity.title}</dd></div><div><dt>완료 기록</dt><dd>{formatMonitorTime(activity.completedAt)}</dd></div></dl></>;
+              return <><header><div><span>{detailStudent.name} · 스스로 유형학습</span><h5>{activity.sequence}번 활동</h5></div><strong className={activity.state}>{activity.state === "completed" ? "제때 완료" : activity.state === "completed-late" ? "보충 완료" : "미완료"}</strong></header><dl><div><dt>활동 유형</dt><dd>{activity.typeLabel}</dd></div><div><dt>학습 내용</dt><dd>{activity.title}</dd></div><div><dt>완료 기록</dt><dd>{formatMonitorTime(activity.completedAt)}</dd></div></dl></>;
             })() : (() => {
               const answers = detailStudent.wrongAnswers.filter((answer) => detail.filter === "all" || (detail.filter === "resolved" ? Boolean(answer.resolvedAt) : !answer.resolvedAt));
               const title = detail.filter === "all" ? "전체 오답" : detail.filter === "resolved" ? "다시 해결한 문제" : "다시 볼 문제";
