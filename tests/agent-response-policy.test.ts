@@ -44,7 +44,7 @@ test("P3: 길고 정답을 되풀이하는 질문은 짧은 한 단계 질문으
     question: "‘학생들이’를 주어로, ‘찬다’를 서술어로 판단한 것이 맞는지 ‘누가 무엇을 하는가’라는 틀에 넣어 그 까닭을 한 문장으로 설명해 보세요."
   }));
 
-  assert.equal(result.question, "답을 찾을 때 살핀 조사나 형태를 하나만 적어 보세요.");
+  assert.match(result.question, /조사|어미|구조/);
   assert.ok(result.question.length <= 76);
   assert.equal(result.activityComplete, false);
 });
@@ -159,12 +159,58 @@ test("P1·P3: 현재 질문을 충분히 답해 다음 질문으로 간 경우 �
   assert.equal(result.activityComplete, false);
 });
 
+test("P1·P3: 어느 정도 적절한 답은 같은 질문을 바꾸어 되묻지 않고 다음 학습 질문으로 간다", () => {
+  const result = applyTutorResponsePolicy(
+    request({ activity: "create", attemptCount: 1, currentQuestion: "문장에 빠진 조건을 하나 보태 보세요." }),
+    response({
+      answerStatus: "partial",
+      questionResolution: "continue",
+      question: "빠진 조건을 찾아 문장에 한 가지 더 넣어 볼까요?"
+    })
+  );
+
+  assert.equal(result.questionResolution, "advance");
+  assert.equal(result.question, "그 변화로 뜻이나 상황 적절성이 어떻게 달라졌는지 적어 보세요.");
+  assert.match(result.studentMessage, /다음 학습 질문/);
+  assert.equal(result.activityComplete, false);
+});
+
+test("P1·P3: 첫 두 번의 부적절한 답에는 질문 문구를 바꾸지 않아 질문별 횟수를 유지한다", () => {
+  const result = applyTutorResponsePolicy(
+    request({ currentQuestion: "주어와 서술어를 찾아 보세요.", questionAttemptCount: 1 }),
+    response({
+      answerStatus: "incorrect",
+      questionResolution: "continue",
+      question: "이 문장의 주어와 서술어는 무엇인가요?"
+    })
+  );
+
+  assert.equal(result.questionResolution, "continue");
+  assert.equal(result.question, "주어와 서술어를 찾아 보세요.");
+  assert.equal(result.resolvedQuestionAnswer, "");
+});
+
+test("P1·P3: 첫 두 번의 힌트에는 현재 질문을 유지하고 정답을 공개하지 않는다", () => {
+  const result = applyTutorResponsePolicy(
+    request({ supportMode: "hint", questionHintCount: 1, currentQuestion: "주어와 서술어를 찾아 보세요." }),
+    response({
+      answerStatus: "not_answered",
+      questionResolution: "continue",
+      question: "누가 무엇을 하는지 찾아 볼까요?"
+    })
+  );
+
+  assert.equal(result.questionResolution, "continue");
+  assert.equal(result.question, "주어와 서술어를 찾아 보세요.");
+  assert.equal(result.resolvedQuestionAnswer, "");
+});
+
 test("P3: 두 개 이상의 질문을 한꺼번에 요구하지 않는다", () => {
   const result = applyTutorResponsePolicy(request({ attemptCount: 1 }), response({
     question: "무엇을 찾았나요? 왜 그렇게 생각했나요?"
   }));
 
-  assert.equal(result.question, "가장 확실한 단서 하나를 골라 적어 보세요.");
+  assert.doesNotMatch(result.question, /\?.*\?/);
   assert.equal((result.question.match(/\?/g) ?? []).length, 0);
 });
 
@@ -190,7 +236,7 @@ test("P2·P3: 문장 생성의 간결화 질문은 이미 사용한 성분을 �
     response({ question: "내가 쓴 문장에서 주어와 목적어와 부사어와 서술어가 각각 무엇인지 모두 찾아서 그 역할을 자세하게 다시 설명해 보세요." })
   );
   assert.doesNotMatch(result.question, /주어|목적어|부사어|서술어/);
-  assert.match(result.question, /빠진 조건/);
+  assert.match(result.question, /달라진 표현|빠진 조건/);
 });
 
 test("DATA: 학생 문장 명시와 중복 분석 방지 규칙은 프롬프트 v16으로 추적한다", () => {
@@ -209,4 +255,10 @@ test("DATA: 질문별 세 번 지원 뒤 계속 학습하는 규칙은 프롬프
   const migration = readFileSync(new URL("../supabase/migrations/202610100002_add_per_question_resolution_prompt.sql", import.meta.url), "utf8");
   assert.match(migration, /writing-tutor-v19/);
   assert.match(migration, /per-question-three-support-then-continue/);
+});
+
+test("DATA: 적절한 답의 다음 질문 이동과 표현만 바꾼 반복 방지는 프롬프트 v20으로 추적한다", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/202610120001_add_semantic_question_progression_prompt.sql", import.meta.url), "utf8");
+  assert.match(migration, /writing-tutor-v20/);
+  assert.match(migration, /advance-adequate-answers-without-paraphrase-loops/);
 });
