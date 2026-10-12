@@ -129,6 +129,7 @@ export function DailyPracticeToday({ requestedDate }: DailyPracticeTodayProps) {
             lessonNumber={6}
             materialGroup={practicePlan.type}
             onDailyComplete={completePractice}
+            practiceDate={practiceDate}
             showOverview={false}
             trackId="grammar"
           />

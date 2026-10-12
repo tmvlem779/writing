@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MondeukLoading } from "@/components/mondeuk-loading";
 import type { AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
@@ -18,6 +18,21 @@ import {
 
 type Message = { role: "student" | "assistant"; content: string };
 type SupportMode = "submit" | "hint";
+
+type SavedRealLifeProgress = {
+  mode: RealLifePracticeMode;
+  completedModes: RealLifePracticeMode[];
+  learningQuestionCount: number;
+  draft: string;
+  response: AgentResponse | null;
+  history: Message[];
+  scaffoldLevel: number;
+  attemptCount: number;
+  questionAttemptCount: number;
+  questionHintCount: number;
+};
+
+const realLifeModeOrder: RealLifePracticeMode[] = ["structure", "effect", "rewrite"];
 
 type NovelSentenceWork = {
   markedTokenIndexes: number[];
@@ -42,20 +57,20 @@ function AiCoach({
   return (
     <article className={`coach-card ${className}`.trim()} aria-live="polite">
       <div className="coach-label"><span>AI 학습 도우미</span><small>{response.safety.blocked ? "안전 안내" : scaffoldLabel(response.scaffoldLevel)}</small></div>
-      {response.activityComplete ? (
+      {response.questionResolution === "reveal_and_advance" ? (
+        <div className="activity-resolution-card">
+          <span>이 질문의 정답 확인</span>
+          <strong>{response.resolvedQuestionAnswer}</strong>
+          <p>{response.activityComplete ? "세 가지 핵심 질문을 모두 살펴봤어요." : "이 질문은 여기서 마치고 다음 질문으로 이어갈게요."}</p>
+        </div>
+      ) : response.activityComplete ? (
         <div className="activity-completion-card">
           <span>활동 완료</span>
           <strong>이번 과제의 근거와 설명을 모두 확인했어요.</strong>
         </div>
       ) : (
         <>
-          {response.questionResolution === "reveal_and_advance" ? (
-            <div className="activity-resolution-card">
-              <span>이 질문의 정답 확인</span>
-              <strong>{response.resolvedQuestionAnswer}</strong>
-              <p>이 질문은 여기서 마치고 다음 질문으로 이어갈게요.</p>
-            </div>
-          ) : <p>{response.studentMessage}</p>}
+          <p>{response.studentMessage}</p>
           {response.question && (
             <div className="coach-question">
               <span>{response.safety.blocked ? "안전한 학습을 위한 안내" : questionLabel}</span>
@@ -79,6 +94,7 @@ type RealLifeChapterProps = {
   showOverview?: boolean;
   materialGroup?: RealLifeMaterialGroup;
   initialMaterialId?: RealLifeMaterialKind;
+  practiceDate?: string;
   dailyMode?: boolean;
   onDailyComplete?: (sessionId: string) => void | Promise<void>;
 };
@@ -89,6 +105,7 @@ export function RealLifeChapter({
   showOverview = true,
   materialGroup = "all",
   initialMaterialId,
+  practiceDate,
   dailyMode = false,
   onDailyComplete
 }: RealLifeChapterProps) {
@@ -102,6 +119,9 @@ export function RealLifeChapter({
   const lessonMaterials = selectedDailyMaterials.length > 0 ? selectedDailyMaterials : availableMaterials;
   const [materialIndex, setMaterialIndex] = useState(0);
   const [mode, setMode] = useState<RealLifePracticeMode>("structure");
+  const [completedModes, setCompletedModes] = useState<RealLifePracticeMode[]>([]);
+  const [learningQuestionCount, setLearningQuestionCount] = useState(0);
+  const [progressHydrated, setProgressHydrated] = useState(!dailyMode || !practiceDate);
   const [draft, setDraft] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [response, setResponse] = useState<AgentResponse | null>(null);
@@ -141,6 +161,57 @@ export function RealLifeChapter({
       : "밑줄 친 말 주변에서 일어나는 일을 하나만 찾아 짧게 써 보세요.";
   const task = buildRealLifeTask(material, mode);
   const selectedMode = realLifePracticeModes.find((item) => item.id === mode) ?? realLifePracticeModes[0];
+  const sequentialDailyPractice = dailyMode && !isLiterature && Boolean(practiceDate);
+
+  useEffect(() => {
+    if (!sequentialDailyPractice || !practiceDate) return;
+    const selectedPracticeDate = practiceDate;
+    let active = true;
+    async function restoreProgress() {
+      try {
+        const query = new URLSearchParams({ practiceDate: selectedPracticeDate, materialId: material.id });
+        const result = await fetch(`/api/daily-practice/state?${query}`, { cache: "no-store" });
+        const body = await result.json() as { state?: SavedRealLifeProgress | null; sessionId?: string; error?: string };
+        if (!result.ok) throw new Error(body.error ?? "학습 진행을 불러오지 못했습니다.");
+        if (!active || !body.state) return;
+        const saved = body.state;
+        setMode(saved.mode);
+        setCompletedModes([...new Set(saved.completedModes)]);
+        setLearningQuestionCount(saved.learningQuestionCount);
+        setDraft(saved.draft);
+        setResponse(saved.response);
+        setHistory(saved.history);
+        setScaffoldLevel(saved.scaffoldLevel);
+        setAttemptCount(saved.attemptCount);
+        setQuestionAttemptCount(saved.questionAttemptCount);
+        setQuestionHintCount(saved.questionHintCount);
+        setSessionId(body.sessionId ?? null);
+      } catch (caught) {
+        if (active) setError(caught instanceof Error ? caught.message : "학습 진행을 불러오지 못했습니다.");
+      } finally {
+        if (active) setProgressHydrated(true);
+      }
+    }
+    void restoreProgress();
+    return () => { active = false; };
+  }, [material.id, practiceDate, sequentialDailyPractice]);
+
+  async function persistProgress(id: string, state: SavedRealLifeProgress) {
+    if (!sequentialDailyPractice || !practiceDate || id.startsWith("demo-")) return;
+    const result = await fetch("/api/daily-practice/state", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId: id, practiceDate, materialId: material.id, state })
+    });
+    const body = await result.json();
+    if (!result.ok) throw new Error(body.error ?? "학습 진행을 저장하지 못했습니다.");
+  }
+
+  function isModeUnlocked(nextMode: RealLifePracticeMode) {
+    if (!sequentialDailyPractice) return true;
+    const index = realLifeModeOrder.indexOf(nextMode);
+    return index === 0 || completedModes.includes(realLifeModeOrder[index - 1]);
+  }
 
   async function ensureSession() {
     if (sessionId) return sessionId;
@@ -173,7 +244,9 @@ export function RealLifeChapter({
         ? "선택한 구절에서 문법 형태를 직접 찾고, 그 형태가 화자의 태도·시간·정서·시의 호흡에 주는 효과를 구절 근거와 함께 설명했다."
         : isLiterature
           ? `작품의 ${material.selectableSentences?.length ?? 0}개 문장 모두에서 구조 단서를 표시하고, 각 문장이 담은 내용과 표시한 근거를 짧게 설명했다.`
-          : "자료에서 근거 표현을 직접 찾고, 그 표현이 자료의 목적이나 독자에게 주는 효과를 한 가지 설명했다.";
+          : sequentialDailyPractice
+            ? `${selectedMode.label}에서 서로 다른 핵심 질문 세 가지에 적절히 답했다. 부족한 답을 돕기 위한 보조 질문은 세 질문에 포함하지 않는다.`
+            : "자료에서 근거 표현을 직접 찾고, 그 표현이 자료의 목적이나 독자에게 주는 효과를 한 가지 설명했다.";
       const currentQuestion = response?.question || (isLiterature && !isPoem ? novelGuideQuestion : isLiterature ? literatureTaskTitle : task);
       const studentMessage = [
         `[수업안] ${track.optionLabel} · ${track.title}`,
@@ -209,6 +282,11 @@ export function RealLifeChapter({
             ? `[튜터 응답 원칙] 고른 구절을 구체적으로 반영해 한 번에 질문 하나만 제시할 것. 문법 요소의 형태를 먼저 찾게 하고, 그 요소가 화자의 태도·시간·정서·호흡에 만드는 효과로 질문을 넓힐 것. 완성 분석은 먼저 제시하지 말 것`
             : `[튜터 응답 원칙] 학생이 문장 안에 직접 밑줄 친 표현, 고른 구조, 짧은 답을 반영해 한두 문장으로 확인해 줄 것. 정답이나 완성 분석을 먼저 제시하지 말고, 다음 문장에서도 같은 방법으로 시도하도록 격려하는 짧은 질문으로 마칠 것`
           : null,
+        sequentialDailyPractice ? `[학습 질문 진행] ${learningQuestionCount}/3` : null,
+        sequentialDailyPractice ? `[일일 활동 마지막 단계] ${mode === "rewrite" ? "예" : "아니요"}` : null,
+        sequentialDailyPractice
+          ? `[튜터 응답 원칙] 현재 핵심 질문에 적절히 답하면 아직 확인하지 않은 다음 질문으로 이동할 것. 답이 부적절하면 핵심 질문 수를 늘리지 말고 더 쉬운 보조 질문과 작은 단서로 같은 학습 목표에 답하도록 도울 것. 보조 질문은 세 가지 핵심 질문에 포함하지 않으며 정답을 먼저 말하지 말 것.`
+          : null,
         `[활동 완료 기준] ${completionCriterion}`,
         `[요청 유형] ${supportMode === "hint" ? "AI 힌트" : "도움 없이 제출"}`,
         `[학생 답]\n${selectionTurn ? `${literatureSelectionLabel} 선택을 제출함` : normalizedDraft || "아직 답을 쓰지 않았습니다."}`
@@ -233,25 +311,33 @@ export function RealLifeChapter({
       const body = await result.json();
       if (!result.ok) throw new Error(body.error ?? "응답을 불러오지 못했습니다.");
       const next = body as AgentResponse & { demo?: boolean };
-      setResponse(next);
-      setDemo((current) => current || Boolean(next.demo));
-      setScaffoldLevel(next.scaffoldLevel);
-      setAttemptCount((count) => count + 1);
-      if (!selectionTurn && next.questionResolution === "continue" && next.question === currentQuestion) {
-        if (supportMode === "hint") setQuestionHintCount((count) => count + 1);
-        if (supportMode === "submit" && (next.answerStatus === "incorrect" || next.answerStatus === "partial")) {
-          setQuestionAttemptCount((count) => count + 1);
-        }
-      } else {
-        setQuestionAttemptCount(0);
-        setQuestionHintCount(0);
-      }
-      if (selectionTurn) setLiteratureSelectionSubmitted(true);
-      setAttemptedMaterials((current) => new Set(current).add(material.id));
-      setHistory((items) => [
-        ...items,
+      const continuesSameQuestion = !selectionTurn
+        && next.questionResolution === "continue"
+        && (sequentialDailyPractice || next.question === currentQuestion);
+      const nextQuestionAttemptCount = continuesSameQuestion && supportMode === "submit" && (next.answerStatus === "incorrect" || next.answerStatus === "partial")
+        ? Math.min(20, questionAttemptCount + 1)
+        : continuesSameQuestion ? questionAttemptCount : 0;
+      const nextQuestionHintCount = continuesSameQuestion && supportMode === "hint"
+        ? Math.min(20, questionHintCount + 1)
+        : continuesSameQuestion ? questionHintCount : 0;
+      const acceptedLearningQuestion = sequentialDailyPractice
+        && !selectionTurn
+        && (
+          next.questionResolution === "reveal_and_advance"
+          || (supportMode === "submit" && (next.questionResolution === "advance" || next.questionResolution === "complete"))
+        );
+      const nextLearningQuestionCount = acceptedLearningQuestion
+        ? Math.min(3, learningQuestionCount + 1)
+        : learningQuestionCount;
+      const modeComplete = sequentialDailyPractice && next.activityComplete && nextLearningQuestionCount >= 3;
+      const nextCompletedModes = modeComplete
+        ? [...new Set([...completedModes, mode])]
+        : completedModes;
+      const nextAttemptCount = Math.min(20, attemptCount + 1);
+      const nextHistory = [
+        ...history,
         {
-          role: "student",
+          role: "student" as const,
           content: supportMode === "hint"
             ? `힌트 요청: ${normalizedDraft || "작성 전"}`
             : selectionTurn
@@ -260,8 +346,20 @@ export function RealLifeChapter({
                 : `${literatureSelectionLabel}: ${activeNovelSentence} / 밑줄: ${markedNovelTokenIndexes.map((index) => selectedNovelTokens[index]).filter(Boolean).join(" · ")} / 구조: ${novelRelation}`
               : normalizedDraft
         },
-        { role: "assistant", content: [next.studentMessage, next.resolvedQuestionAnswer, next.question].filter(Boolean).join(" ") }
-      ]);
+        { role: "assistant" as const, content: [next.studentMessage, next.resolvedQuestionAnswer, next.question].filter(Boolean).join(" ") }
+      ].slice(-6);
+      const clearDraft = !selectionTurn && (next.question !== currentQuestion || next.activityComplete);
+      setResponse(next);
+      setDemo((current) => current || Boolean(next.demo));
+      setScaffoldLevel(next.scaffoldLevel);
+      setAttemptCount(nextAttemptCount);
+      setQuestionAttemptCount(nextQuestionAttemptCount);
+      setQuestionHintCount(nextQuestionHintCount);
+      setLearningQuestionCount(nextLearningQuestionCount);
+      setCompletedModes(nextCompletedModes);
+      if (selectionTurn) setLiteratureSelectionSubmitted(true);
+      setAttemptedMaterials((current) => new Set(current).add(material.id));
+      setHistory(nextHistory);
       if (isLiterature) {
         const novelSentenceComplete = !isPoem
           && !selectionTurn
@@ -285,11 +383,30 @@ export function RealLifeChapter({
           }));
         }
       }
-      if (!selectionTurn && (next.question !== currentQuestion || next.activityComplete)) {
+      if (clearDraft) {
         setDraft("");
         requestAnimationFrame(() => draftRef.current?.focus());
       }
-      if (!selectionTurn && supportMode === "submit" && next.activityComplete) await onDailyComplete?.(id);
+      if (sequentialDailyPractice) {
+        await persistProgress(id, {
+          mode,
+          completedModes: nextCompletedModes,
+          learningQuestionCount: nextLearningQuestionCount,
+          draft: clearDraft ? "" : draft,
+          response: next,
+          history: nextHistory,
+          scaffoldLevel: next.scaffoldLevel,
+          attemptCount: nextAttemptCount,
+          questionAttemptCount: nextQuestionAttemptCount,
+          questionHintCount: nextQuestionHintCount
+        });
+      }
+      const allModesComplete = realLifeModeOrder.every((item) => nextCompletedModes.includes(item));
+      const dailySequenceComplete = sequentialDailyPractice && allModesComplete && next.activityComplete;
+      const regularActivityComplete = !sequentialDailyPractice && supportMode === "submit" && next.activityComplete;
+      if (!selectionTurn && (dailySequenceComplete || regularActivityComplete)) {
+        await onDailyComplete?.(id);
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "문제가 생겼습니다.");
     } finally {
@@ -306,9 +423,32 @@ export function RealLifeChapter({
     await sendTurn("문장 다중 선택", true);
   }
 
+  async function saveCurrentDraft() {
+    if (!sequentialDailyPractice || !progressHydrated) return;
+    try {
+      const id = await ensureSession();
+      await persistProgress(id, {
+        mode,
+        completedModes,
+        learningQuestionCount,
+        draft,
+        response,
+        history: history.slice(-6),
+        scaffoldLevel,
+        attemptCount,
+        questionAttemptCount,
+        questionHintCount
+      });
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "학습 진행을 저장하지 못했습니다.");
+    }
+  }
+
   function changeMaterial(index: number) {
     setMaterialIndex(index);
     setMode("structure");
+    setCompletedModes([]);
+    setLearningQuestionCount(0);
     setDraft("");
     setResponse(null);
     setSessionId(null);
@@ -386,14 +526,31 @@ export function RealLifeChapter({
   }
 
   function changeMode(nextMode: RealLifePracticeMode) {
+    if (!isModeUnlocked(nextMode) || nextMode === mode) return;
     setMode(nextMode);
+    setLearningQuestionCount(0);
     setDraft("");
     setResponse(null);
+    setHistory([]);
     setAttemptCount(0);
     setQuestionAttemptCount(0);
     setQuestionHintCount(0);
     setScaffoldLevel(0);
     setError("");
+    if (sessionId) {
+      void persistProgress(sessionId, {
+        mode: nextMode,
+        completedModes,
+        learningQuestionCount: 0,
+        draft: "",
+        response: null,
+        history: [],
+        scaffoldLevel: 0,
+        attemptCount: 0,
+        questionAttemptCount: 0,
+        questionHintCount: 0
+      }).catch((caught) => setError(caught instanceof Error ? caught.message : "학습 진행을 저장하지 못했습니다."));
+    }
   }
 
   return (
@@ -638,18 +795,24 @@ export function RealLifeChapter({
           <section className="real-life-practice" aria-labelledby="practice-heading">
             <span id="practice-heading">나의 분석과 연습</span>
             <div className="practice-mode-switcher" role="group" aria-label="연습 방식">
-              {realLifePracticeModes.map((item) => (
-                <button
-                  aria-pressed={mode === item.id}
-                  className={mode === item.id ? "practice-mode active" : "practice-mode"}
-                  key={item.id}
-                  onClick={() => changeMode(item.id)}
-                  type="button"
-                >
-                  <strong>{item.label}</strong>
-                  <small>{item.description}</small>
-                </button>
-              ))}
+              {realLifePracticeModes.map((item) => {
+                const unlocked = isModeUnlocked(item.id);
+                const complete = completedModes.includes(item.id);
+                return (
+                  <button
+                    aria-label={`${item.label} ${complete ? "완료" : unlocked ? "학습 가능" : "앞 활동 완료 후 열림"}`}
+                    aria-pressed={mode === item.id}
+                    className={`practice-mode${mode === item.id ? " active" : ""}${complete ? " complete" : ""}${!unlocked ? " locked" : ""}`}
+                    disabled={!progressHydrated || !unlocked}
+                    key={item.id}
+                    onClick={() => changeMode(item.id)}
+                    type="button"
+                  >
+                    <strong>{item.label}{complete ? " ✓" : !unlocked ? " · 잠김" : ""}</strong>
+                    <small>{unlocked ? item.description : "앞 활동을 마치면 열려요."}</small>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="real-life-task">
@@ -661,6 +824,19 @@ export function RealLifeChapter({
               <AiCoach response={response} />
             )}
 
+            {sequentialDailyPractice && !response?.activityComplete && (
+              <p className="real-life-question-progress">핵심 질문 <strong>{Math.min(learningQuestionCount + 1, 3)}</strong>/3 · 보조 질문은 횟수에 포함하지 않아요.</p>
+            )}
+
+            {sequentialDailyPractice && response?.activityComplete && mode !== "rewrite" && (
+              <div className="real-life-mode-complete">
+                <span>{selectedMode.label} 활동을 마쳤어요.</span>
+                <button className="primary-button" onClick={() => changeMode(realLifeModeOrder[realLifeModeOrder.indexOf(mode) + 1])} type="button">
+                  다음: {realLifePracticeModes[realLifeModeOrder.indexOf(mode) + 1]?.label}
+                </button>
+              </div>
+            )}
+
             {!response?.activityComplete && (
               <>
                 <label className="draft-label" htmlFor="real-life-draft">내 생각과 고쳐 쓴 문장</label>
@@ -668,6 +844,7 @@ export function RealLifeChapter({
                   id="real-life-draft"
                   maxLength={2500}
                   onChange={(event) => setDraft(event.target.value)}
+                  onBlur={() => void saveCurrentDraft()}
                   placeholder="자료에서 찾은 근거와 내 판단을 먼저 적어 보세요. 고쳐 쓰기에서는 바꾼 이유도 함께 설명해 보세요."
                   ref={draftRef}
                   value={draft}

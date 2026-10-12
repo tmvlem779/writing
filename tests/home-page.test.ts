@@ -23,6 +23,13 @@ test("첫 화면은 책 모션 없이 로그인 화면으로 바로 이동한다
   assert.doesNotMatch(loginPage, /학교 수업 전용|수업 계정으로|학생 데이터 안내 보기/);
 });
 
+test("로그인 화면은 밝은 하늘색 대신 깊은 파란색 배경을 사용한다", () => {
+  const styles = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /\.auth-intro \{\s*background: #365486;/);
+  assert.match(styles, /\.auth-intro h1 \{ color: #fff;/);
+  assert.doesNotMatch(styles, /\.auth-intro \{\s*background: #e4f6f8;/);
+});
+
 test("공통 화면의 브랜드명을 문득문득으로 통일한다", () => {
   assert.match(layout, /문득문득 \| 문장 구조와 확장/);
   assert.match(brandLogo, /aria-label="문득문득 홈"/);

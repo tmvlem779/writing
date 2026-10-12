@@ -262,3 +262,92 @@ test("DATA: 적절한 답의 다음 질문 이동과 표현만 바꾼 반복 방
   assert.match(migration, /writing-tutor-v20/);
   assert.match(migration, /advance-adequate-answers-without-paraphrase-loops/);
 });
+
+test("P1·P3: 제한형 실생활 활동은 적절한 핵심 답 세 개를 확인한 뒤 완료한다", () => {
+  const first = applyTutorResponsePolicy(
+    request({
+      activity: "authentic",
+      message: "[현재 과제] 구조 찾기\n[학습 질문 진행] 0/3\n[활동 완료 기준] 핵심 질문 세 가지에 답했다.\n[학생 답] 원인과 결과가 연결됩니다."
+    }),
+    response({ answerStatus: "met", activityComplete: true, masteryEvidence: ["원인 관계 확인"] })
+  );
+  const third = applyTutorResponsePolicy(
+    request({
+      activity: "authentic",
+      message: "[현재 과제] 구조 찾기\n[학습 질문 진행] 2/3\n[활동 완료 기준] 핵심 질문 세 가지에 답했다.\n[학생 답] 조건절이 행동의 조건을 분명히 합니다."
+    }),
+    response({ answerStatus: "partial", activityComplete: false })
+  );
+
+  assert.equal(first.activityComplete, false);
+  assert.equal(first.questionResolution, "advance");
+  assert.equal(third.activityComplete, true);
+  assert.equal(third.questionResolution, "complete");
+});
+
+test("P1: 제한형 실생활 활동은 부적절한 답에 쉬운 보조 질문을 주고 세 번째에는 해당 답만 공개한다", () => {
+  const scaffold = applyTutorResponsePolicy(
+    request({
+      activity: "authentic",
+      message: "[현재 과제] 효과 설명\n[학습 질문 진행] 1/3\n[활동 완료 기준] 핵심 질문 세 가지에 답했다.\n[학생 답] 모르겠어요.",
+      questionAttemptCount: 1,
+      currentQuestion: "조건절이 안내의 뜻에 어떤 효과를 주나요?"
+    }),
+    response({
+      answerStatus: "incorrect",
+      questionResolution: "continue",
+      resolvedQuestionAnswer: "조건을 분명하게 합니다.",
+      question: "‘비가 오면’ 뒤에는 어떤 행동이 나오나요?"
+    })
+  );
+  const reveal = applyTutorResponsePolicy(
+    request({
+      activity: "authentic",
+      message: "[현재 과제] 효과 설명\n[학습 질문 진행] 1/3\n[활동 완료 기준] 핵심 질문 세 가지에 답했다.\n[학생 답] 모르겠어요.",
+      questionAttemptCount: 2,
+      currentQuestion: "‘비가 오면’ 뒤에는 어떤 행동이 나오나요?"
+    }),
+    response({
+      answerStatus: "incorrect",
+      questionResolution: "continue",
+      resolvedQuestionAnswer: "조건을 분명하게 합니다.",
+      question: "이 표현이 없을 때와 무엇이 달라지나요?"
+    })
+  );
+
+  assert.equal(scaffold.activityComplete, false);
+  assert.equal(scaffold.questionResolution, "continue");
+  assert.equal(scaffold.resolvedQuestionAnswer, "");
+  assert.equal(scaffold.question, "‘비가 오면’ 뒤에는 어떤 행동이 나오나요?");
+  assert.equal(reveal.activityComplete, false);
+  assert.equal(reveal.questionResolution, "reveal_and_advance");
+  assert.equal(reveal.resolvedQuestionAnswer, "조건을 분명하게 합니다.");
+});
+
+test("P1: 세 번째 핵심 질문에서 세 차례 지원을 마치면 답을 확인하고 해당 단계만 종료한다", () => {
+  const result = applyTutorResponsePolicy(
+    request({
+      activity: "authentic",
+      message: "[현재 과제] 고쳐 쓰기\n[학습 질문 진행] 2/3\n[활동 완료 기준] 핵심 질문 세 가지에 답했다.\n[학생 답] 잘 모르겠어요.",
+      questionHintCount: 2,
+      supportMode: "hint",
+      currentQuestion: "안내 목적에 맞게 어느 부분을 바꾸면 좋을까요?"
+    }),
+    response({
+      answerStatus: "not_answered",
+      resolvedQuestionAnswer: "행동 조건을 앞에 분명히 덧붙일 수 있어요.",
+      question: "조건이 보이도록 첫 부분을 살펴볼까요?"
+    })
+  );
+
+  assert.equal(result.questionResolution, "reveal_and_advance");
+  assert.equal(result.activityComplete, true);
+  assert.equal(result.question, "");
+  assert.equal(result.masteryEvidence.length, 0);
+});
+
+test("DATA: 실생활 자료의 세 질문 완료와 보조 질문 규칙은 프롬프트 v21로 추적한다", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/202610120002_add_bounded_real_life_prompt.sql", import.meta.url), "utf8");
+  assert.match(migration, /writing-tutor-v21/);
+  assert.match(migration, /three-question-sequential-real-life-practice/);
+});

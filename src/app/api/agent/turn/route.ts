@@ -134,7 +134,9 @@ export async function POST(request: Request) {
         target_independent_success: evidence.independentSuccess
       });
       if (recordError) throw recordError;
-      if (result.response.activityComplete) {
+      const boundedIntermediateStep = parsed.data.message.includes("[학습 질문 진행]")
+        && !parsed.data.message.includes("[일일 활동 마지막 단계] 예");
+      if (result.response.activityComplete && !boundedIntermediateStep) {
         const { error: completionError } = await admin
           .from("learning_sessions")
           .update({ status: "completed", ended_at: new Date().toISOString(), updated_at: new Date().toISOString() })

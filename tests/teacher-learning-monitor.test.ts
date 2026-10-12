@@ -114,6 +114,7 @@ test("TEACHER·PRIVACY: 교사 모니터는 담당 학생 데이터와 자동 �
   assert.match(page, /question,submitted_answer,feedback_hint/);
   assert.doesNotMatch(page, /오늘 활동/);
   assert.doesNotMatch(page, /도움 필요/);
+  assert.doesNotMatch(page, /독립 해결, 도움 사용, 수정 근거와 전이 활동을 함께 확인합니다/);
   assert.match(page, /a\.name === "문법학급"/);
   assert.match(classDashboard, /role="tablist"/);
   assert.match(classDashboard, /학급별 학생 진도 현황/);

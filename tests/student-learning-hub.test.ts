@@ -22,6 +22,7 @@ const realLifeChapter = read("src/components/real-life-chapter.tsx");
 const wrongNotesPage = read("src/app/learn/wrong-notes/page.tsx");
 const wrongNoteReviewList = read("src/components/wrong-note-review-list.tsx");
 const wrongAnswerApi = read("src/app/api/wrong-answers/route.ts");
+const dailyPracticeStateApi = read("src/app/api/daily-practice/state/route.ts");
 const diagnosisApi = read("src/app/api/diagnosis/route.ts");
 const agentTurnApi = read("src/app/api/agent/turn/route.ts");
 const migration = read("supabase/migrations/202609280003_add_wrong_answers.sql");
@@ -331,6 +332,23 @@ test("P1·P3: 스스로 유형학습 AI 활동은 과제 아래에서 힌트와 
   assert.match(realLifeChapter, /questionAttemptCount/);
   assert.match(realLifeChapter, /questionHintCount/);
   assert.doesNotMatch(realLifeChapter, /if \(!selectionTurn\) await onDailyComplete/);
+});
+
+test("P1·P3·DATA: 실생활 자료는 세 단계를 순서대로 열고 핵심 질문 세 개와 진행 상태를 복원한다", () => {
+  assert.match(realLifeChapter, /realLifeModeOrder/);
+  assert.match(realLifeChapter, /isModeUnlocked/);
+  assert.match(realLifeChapter, /앞 활동을 마치면 열려요/);
+  assert.match(realLifeChapter, /\[학습 질문 진행\] \$\{learningQuestionCount\}\/3/);
+  assert.match(realLifeChapter, /\[일일 활동 마지막 단계\] \$\{mode === "rewrite" \? "예" : "아니요"\}/);
+  assert.match(agentTurnApi, /boundedIntermediateStep/);
+  assert.match(agentTurnApi, /result\.response\.activityComplete && !boundedIntermediateStep/);
+  assert.match(realLifeChapter, /보조 질문은 횟수에 포함하지 않아요/);
+  assert.match(realLifeChapter, /dailySequenceComplete/);
+  assert.match(realLifeChapter, /\/api\/daily-practice\/state/);
+  assert.match(dailyPracticeToday, /practiceDate=\{practiceDate\}/);
+  assert.match(dailyPracticeStateApi, /\.eq\("user_id", auth\.user\.id\)/);
+  assert.match(dailyPracticeStateApi, /revision_reason/);
+  assert.match(dailyPracticeStateApi, /stateSchema/);
 });
 
 test("학생 홈은 산세리프 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {

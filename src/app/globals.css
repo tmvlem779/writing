@@ -3100,9 +3100,9 @@ body {
   background: #fff;
 }
 .auth-intro {
-  background: #e4f6f8;
+  background: #365486;
 }
-.auth-intro h1 { color: var(--palette-navy); text-shadow: none; }
+.auth-intro h1 { color: #fff; text-shadow: none; }
 .auth-card { border-color: #dbe5ec; border-top: 4px solid var(--motion-clay); background: #fff; box-shadow: 0 22px 60px rgba(17,19,63,.11); }
 .auth-card h2 { color: var(--palette-navy); }
 .auth-card > p { color: var(--muted); }
@@ -3190,6 +3190,14 @@ body {
 .coach-question { background: rgba(255,255,255,.94); }
 .coach-question span, .task-card > span, .real-life-task span { color: #c64060; }
 .practice-mode.active { border-color: var(--palette-navy); background: var(--palette-navy); }
+.practice-mode.complete:not(.active) { border-color: #9bb0d1; background: #eef4fb; color: var(--palette-navy); }
+.practice-mode.locked,
+.practice-mode:disabled { border-color: #e1e5ec; background: #f4f6f8; color: #8b93a3; cursor: not-allowed; }
+.practice-mode.locked small,
+.practice-mode:disabled small { color: #8b93a3; }
+.real-life-question-progress { margin: 14px 0 0; color: #5d6b83; font-size: 13px; }
+.real-life-question-progress strong { color: var(--palette-navy); font-size: 16px; }
+.real-life-mode-complete { margin-top: 14px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 1px solid #cbd9ee; border-radius: 12px; background: #eef4fb; color: var(--palette-navy); font-weight: 800; }
 .check-option.selected { border-color: var(--motion-clay); background: var(--palette-pink-soft); }
 
 /* 스스로 유형학습과 오답노트 */
@@ -3260,7 +3268,7 @@ body {
 
 @media (max-width: 620px) {
   .auth-shell { background: #fff; }
-  .auth-intro { background: #e4f6f8; }
+  .auth-intro { background: #365486; }
   .auth-card { box-shadow: 0 14px 38px rgba(17,19,63,.1); }
   .v3-book-stage > .v3-book-cover { background: linear-gradient(180deg, var(--palette-navy) 0 53%, var(--palette-pale) 53% 100%); }
 }
@@ -3509,10 +3517,11 @@ body {
   word-break: keep-all;
 }
 .auth-slogan strong { font-weight: 900; }
-.auth-slogan .slogan-question { color: #d84f70; }
-.auth-slogan .slogan-discover { color: #365486; }
-.auth-slogan .slogan-sentence { color: #13758c; }
-.auth-slogan .slogan-gain { color: #6b5aa6; }
+.auth-intro .auth-slogan { color: rgba(255,255,255,.9); }
+.auth-slogan .slogan-question { color: #ff9bb2; }
+.auth-slogan .slogan-discover { color: #d8f3f7; }
+.auth-slogan .slogan-sentence { color: #9ed8ff; }
+.auth-slogan .slogan-gain { color: #d1c7ff; }
 
 @media (max-width: 640px) {
   .auth-intro::before { background-size: 92% auto; opacity: .045; }

@@ -144,13 +144,27 @@ function requiredSequenceComplete(request: TurnRequest) {
   return total > 0 && completedBeforeCurrent + 1 >= total;
 }
 
+function boundedQuestionProgress(message: string) {
+  const progress = /\[학습 질문 진행\]\s*(\d+)\s*\/\s*(\d+)/.exec(message);
+  if (!progress) return null;
+  return { completed: Number(progress[1]), total: Number(progress[2]) };
+}
+
 export function applyTutorResponsePolicy(request: TurnRequest, response: AgentResponse): AgentResponse {
   const completionEnabled = request.message.includes("[활동 완료 기준]");
-  const activityComplete = completionEnabled && request.supportMode === "submit" && requiredSequenceComplete(request) && (
-    response.answerStatus === "met"
-    || response.activityComplete
-    || response.masteryEvidence.length > 0
-  );
+  const boundedProgress = boundedQuestionProgress(request.message);
+  const acceptedBoundedAnswer = boundedProgress
+    && (response.answerStatus === "partial" || response.answerStatus === "met" || response.activityComplete);
+  const boundedQuestionsComplete = !boundedProgress
+    || (acceptedBoundedAnswer && boundedProgress.completed + 1 >= boundedProgress.total);
+  const completionEvidence = boundedProgress
+    ? acceptedBoundedAnswer
+    : response.answerStatus === "met" || response.activityComplete || response.masteryEvidence.length > 0;
+  const activityComplete = completionEnabled
+    && request.supportMode === "submit"
+    && requiredSequenceComplete(request)
+    && boundedQuestionsComplete
+    && Boolean(completionEvidence);
   if (activityComplete) {
     const masteryEvidence = response.masteryEvidence.length > 0
       ? response.masteryEvidence
@@ -174,17 +188,21 @@ export function applyTutorResponsePolicy(request: TurnRequest, response: AgentRe
     && (response.answerStatus === "incorrect" || response.answerStatus === "not_answered");
   if (shouldRevealAfterHints || shouldRevealAfterAnswers) {
     const resolvedQuestionAnswer = response.resolvedQuestionAnswer.trim() || response.studentMessage.trim();
-    const nextQuestion = nextLearningQuestion(request, response.question);
+    const completesBoundedActivity = Boolean(boundedProgress && boundedProgress.completed + 1 >= boundedProgress.total);
+    const nextQuestion = completesBoundedActivity ? "" : nextLearningQuestion(request, response.question);
     return {
       ...response,
       mode: "model",
-      studentMessage: "이 질문은 정답을 확인하고 다음 질문으로 넘어갈게요.",
+      studentMessage: completesBoundedActivity
+        ? "이 질문은 정답을 확인하고 이번 활동을 마칠게요."
+        : "이 질문은 정답을 확인하고 다음 질문으로 넘어갈게요.",
       questionResolution: "reveal_and_advance",
       resolvedQuestionAnswer,
-      question: needsSimplifying(nextQuestion)
+      question: nextQuestion && needsSimplifying(nextQuestion)
         ? conciseQuestions[request.activity][Math.min(request.attemptCount, 2)]
         : nextQuestion,
-      activityComplete: false,
+      nextAction: completesBoundedActivity ? "complete" : response.nextAction,
+      activityComplete: completesBoundedActivity,
       masteryEvidence: []
     };
   }
@@ -203,11 +221,11 @@ export function applyTutorResponsePolicy(request: TurnRequest, response: AgentRe
     : response.questionResolution;
   const forcedAdvance = answeredCurrentQuestion && response.questionResolution !== "advance";
   const proposedQuestion = questionResolution === "continue" && request.currentQuestion.trim()
-    ? request.currentQuestion
+    ? boundedProgress && response.question.trim() ? response.question : request.currentQuestion
     : questionResolution === "advance"
     ? nextLearningQuestion(request, forcedAdvance ? "" : response.question)
     : response.question;
-  const question = questionResolution === "continue" && request.currentQuestion.trim()
+  const question = questionResolution === "continue" && request.currentQuestion.trim() && !boundedProgress
     ? request.currentQuestion
     : needsSimplifying(proposedQuestion)
     ? nextLearningQuestion(request, conciseQuestions[request.activity][Math.min(request.attemptCount, 2)])

@@ -156,7 +156,6 @@ export default async function TeacherPage() {
     <section className="teacher-shell">
       <header className="teacher-header">
         <div><span className="eyebrow">교사 화면</span><h1>학생의 답보다<br />학습 과정을 봅니다</h1></div>
-        <p>독립 해결, 도움 사용, 수정 근거와 전이 활동을 함께 확인합니다.</p>
       </header>
 
       {!configured && <div className="notice-card"><strong>개발 환경 안내</strong><p>Supabase 환경 변수를 연결하면 실제 학급과 학생 기록이 표시됩니다.</p></div>}
