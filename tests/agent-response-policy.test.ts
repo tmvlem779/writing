@@ -378,3 +378,9 @@ test("DATA: 정확한 답만 핵심 질문으로 세는 규칙은 프롬프트 v
   assert.match(migration, /writing-tutor-v22/);
   assert.match(migration, /strict-correctness-and-clear-scaffold-questions/);
 });
+
+test("DATA: 원문 유지와 중립적 성찰 질문은 프롬프트 v23으로 추적한다", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/202610130002_add_original_preserving_rewrite_prompt.sql", import.meta.url), "utf8");
+  assert.match(migration, /writing-tutor-v23/);
+  assert.match(migration, /allow-purpose-fit-originals-without-false-comparison/);
+});

@@ -36,6 +36,15 @@ test("P3·P6: 실생활 자료의 세 핵심 질문은 한 번에 한 지점을 
   }
 });
 
+test("P3·P4·P6: 원문이 이미 알맞은 고쳐 쓰기는 원문 유지를 허용하고 허위 비교를 요구하지 않는다", () => {
+  const material = getRealLifeMaterialsForLesson(6, "grammar", "authentic")[0];
+  const questions = buildRealLifeCoreQuestions(material, "rewrite");
+
+  assert.match(questions[1], /원문이 이미 알맞다면 그대로/);
+  assert.match(questions[2], /방금 제출한 문장/);
+  assert.doesNotMatch(questions[2], /고친 문장|원래 문장보다|달라진/);
+});
+
 test("P3·P4·P6: 모든 자료는 구조, 효과, 고쳐 쓰기 과제를 제공한다", () => {
   assert.deepEqual(realLifePracticeModes.map((mode) => mode.id), ["structure", "effect", "rewrite"]);
   for (const material of realLifeMaterials) {
