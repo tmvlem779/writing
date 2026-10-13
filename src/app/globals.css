@@ -510,6 +510,9 @@ body:has(.student-dashboard) > .site-footer, body:has(.student-activity-page) > 
 .situation-condition > strong { line-height: 1.65; }
 .situation-condition > div { display: flex; flex-wrap: wrap; gap: 7px; }
 .situation-condition > div span { padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,.8); color: #76522c; font-size: 11px; }
+.situation-previous-sentence { margin-top: 14px; padding: 18px 20px; border: 1px solid #cad9ed; border-left: 4px solid var(--palette-blue); border-radius: 4px 14px 14px 4px; background: var(--palette-blue-soft); box-shadow: 0 10px 26px rgba(17,19,63,.05); }
+.situation-previous-sentence span { color: var(--palette-blue); font-size: 11px; font-weight: 850; letter-spacing: .04em; }
+.situation-previous-sentence p { margin: 7px 0 0; color: var(--palette-navy); font-size: 16px; font-weight: 750; line-height: 1.7; white-space: pre-wrap; }
 .situation-coach { margin: 18px 0 0; }
 .situation-writing-workspace > textarea { width: 100%; min-height: 180px; resize: vertical; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); font: inherit; font-size: 17px; line-height: 1.75; }
 .situation-writing-workspace > textarea:focus { border-color: var(--green); outline: 3px solid rgba(36,91,67,.1); }

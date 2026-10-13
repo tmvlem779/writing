@@ -8,6 +8,7 @@ import { getSituationScene, sentenceBuildingQuestions, situationScenes, type Sit
 
 type Message = { role: "student" | "assistant"; content: string };
 type SupportMode = "submit" | "hint";
+type PreviousStageSentence = { content: string; source: "student" | "example" };
 
 type SituationWritingActivityProps = {
   initialSceneId?: SituationSceneId;
@@ -30,6 +31,7 @@ export function SituationWritingActivity({
   const [questionAttemptCount, setQuestionAttemptCount] = useState(0);
   const [questionHintCount, setQuestionHintCount] = useState(0);
   const [learningQuestionCount, setLearningQuestionCount] = useState(0);
+  const [previousStageSentence, setPreviousStageSentence] = useState<PreviousStageSentence | null>(null);
   const [pendingAction, setPendingAction] = useState<SupportMode | null>(null);
   const [error, setError] = useState("");
   const scene = getSituationScene(sceneId);
@@ -62,6 +64,9 @@ export function SituationWritingActivity({
         `[활동] ${scene.title}`,
         `[상황] ${scene.setting}`,
         `[문장 조건] ${currentCoreQuestion}`,
+        previousStageSentence
+          ? `[이전 단계에서 ${previousStageSentence.source === "student" ? "제출한 학생 문장" : "확인한 예시 문장"}]\n${previousStageSentence.content}`
+          : null,
         `[학습 초점] ${scene.focusConcepts.join(", ")}`,
         `[학습 질문 진행] ${learningQuestionCount}/${sentenceBuildingQuestions.length}`,
         `[현재 핵심 질문] ${currentCoreQuestion}`,
@@ -70,7 +75,7 @@ export function SituationWritingActivity({
         "[활동 완료 기준] 주어와 서술어가 드러나는 기본 문장을 만든 뒤 부속 성분과 절·연결 표현을 차례로 더하고, 주어·서술어 호응과 상황 적절성을 점검한 최종 문장을 완성했다.",
         `[요청 유형] ${supportMode === "hint" ? "AI 힌트" : "도움 없이 제출"}`,
         `[학생이 만든 문장]\n${submittedDraft || "아직 답을 쓰지 않았습니다."}`
-      ].join("\n\n");
+      ].filter(Boolean).join("\n\n");
       const requestedScaffoldLevel = supportMode === "hint" ? Math.min(4, scaffoldLevel + 1) : scaffoldLevel;
       const result = await fetch("/api/agent/turn", {
         method: "POST",
@@ -110,12 +115,21 @@ export function SituationWritingActivity({
         && nextLearningQuestionCount < sentenceBuildingQuestions.length
         ? { ...rawNext, question: sentenceBuildingQuestions[nextLearningQuestionCount] }
         : rawNext;
+      const acceptedSentence = rawNext.questionResolution === "reveal_and_advance"
+        ? rawNext.resolvedQuestionAnswer.trim()
+        : submittedDraft;
       setResponse(next);
       setScaffoldLevel(next.scaffoldLevel);
       setAttemptCount((count) => count + 1);
       setQuestionAttemptCount(nextQuestionAttemptCount);
       setQuestionHintCount(nextQuestionHintCount);
       setLearningQuestionCount(nextLearningQuestionCount);
+      if (acceptedLearningQuestion && acceptedSentence) {
+        setPreviousStageSentence({
+          content: acceptedSentence,
+          source: rawNext.questionResolution === "reveal_and_advance" ? "example" : "student"
+        });
+      }
       setHistory((items) => [
         ...items,
         { role: "student", content: supportMode === "hint" ? `힌트 요청: ${submittedDraft || "작성 전"}` : submittedDraft },
@@ -141,6 +155,7 @@ export function SituationWritingActivity({
     setQuestionAttemptCount(0);
     setQuestionHintCount(0);
     setLearningQuestionCount(0);
+    setPreviousStageSentence(null);
     setError("");
   }
 
@@ -179,6 +194,13 @@ export function SituationWritingActivity({
           <strong>{scene.firstCondition}</strong>
         </section>
 
+        {learningQuestionCount > 0 && previousStageSentence && (
+          <section className="situation-previous-sentence" aria-label="이전 단계 문장">
+            <span>{previousStageSentence.source === "student" ? "이전 단계에서 제출한 내 문장" : "이전 단계에서 확인한 예시 문장"}</span>
+            <p>{previousStageSentence.content}</p>
+          </section>
+        )}
+
         {response && (
           <article className="coach-card situation-coach" aria-live="polite">
             <div className="coach-label"><span>AI 학습 도우미</span><small>{scaffoldLabel(response.scaffoldLevel)}</small></div>
@@ -209,7 +231,7 @@ export function SituationWritingActivity({
               id="situation-sentence"
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
-              placeholder={response ? "새 질문에 대한 문장이나 설명을 적어 보세요." : "주어진 상황을 바탕으로 먼저 한 문장을 만들어 보세요."}
+              placeholder={previousStageSentence ? "위 문장에 현재 단계의 조건을 더해 다시 써 보세요." : response ? "새 질문에 대한 문장이나 설명을 적어 보세요." : "주어진 상황을 바탕으로 먼저 한 문장을 만들어 보세요."}
               maxLength={1000}
             />
             <div className="editor-footer">

@@ -284,6 +284,16 @@ test("P1·P2·P3: 모든 문장 만들기는 네 단계로 확장하고 보조 �
   assert.match(situationWritingActivity, /setLearningQuestionCount\(nextLearningQuestionCount\)/);
 });
 
+test("P2·P3: 다음 문장 확장 단계에는 직전 단계에서 제출한 문장을 보여 주고 AI에도 전달한다", () => {
+  assert.match(situationWritingActivity, /previousStageSentence/);
+  assert.match(situationWritingActivity, /제출한 학생 문장/);
+  assert.match(situationWritingActivity, /이전 단계에서 제출한 내 문장/);
+  assert.match(situationWritingActivity, /setPreviousStageSentence/);
+  assert.match(situationWritingActivity, /위 문장에 현재 단계의 조건을 더해 다시 써 보세요/);
+  assert.match(situationWritingActivity, /이전 단계에서 확인한 예시 문장/);
+  assert.match(styles, /\.situation-previous-sentence/);
+});
+
 test("DATA: 그림 없는 상황 문장 생성 규칙은 프롬프트 v17로 추적한다", () => {
   const migration = read("supabase/migrations/202610070001_add_text_situation_prompt.sql");
   assert.match(migration, /writing-tutor-v17/);
