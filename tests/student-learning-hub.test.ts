@@ -351,6 +351,12 @@ test("P1·P3·DATA: 실생활 자료는 세 단계를 순서대로 열고 핵심
   assert.match(dailyPracticeStateApi, /stateSchema/);
 });
 
+test("P3·P4: 저장된 고쳐 쓰기의 허위 비교 질문도 중립 질문으로 복원한다", () => {
+  assert.match(realLifeChapter, /legacyRewriteQuestion = "고친 문장이 원래 문장보다 알아보기 쉬운 점을 하나만 쓰세요\."/);
+  assert.match(realLifeChapter, /currentRewriteQuestion = "방금 제출한 문장이 중요한 정보를 잘 보여 주는 이유를 하나만 쓰세요\."/);
+  assert.match(realLifeChapter, /content\.replace\(legacyRewriteQuestion, currentRewriteQuestion\)/);
+});
+
 test("학생 홈은 산세리프 글꼴과 실제 데이터 기반 학습 현황을 제공한다", () => {
   assert.doesNotMatch(layout, /Noto_Serif_KR/);
   assert.match(layout, /Noto_Sans_KR/);

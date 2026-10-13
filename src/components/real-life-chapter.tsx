@@ -179,12 +179,21 @@ export function RealLifeChapter({
         if (!result.ok) throw new Error(body.error ?? "학습 진행을 불러오지 못했습니다.");
         if (!active || !body.state) return;
         const saved = body.state;
+        const legacyRewriteQuestion = "고친 문장이 원래 문장보다 알아보기 쉬운 점을 하나만 쓰세요.";
+        const currentRewriteQuestion = "방금 제출한 문장이 중요한 정보를 잘 보여 주는 이유를 하나만 쓰세요.";
+        const restoredResponse = saved.response?.question === legacyRewriteQuestion
+          ? { ...saved.response, question: currentRewriteQuestion }
+          : saved.response;
+        const restoredHistory = saved.history.map((message) => ({
+          ...message,
+          content: message.content.replace(legacyRewriteQuestion, currentRewriteQuestion)
+        }));
         setMode(saved.mode);
         setCompletedModes([...new Set(saved.completedModes)]);
         setLearningQuestionCount(saved.learningQuestionCount);
         setDraft(saved.draft);
-        setResponse(saved.response);
-        setHistory(saved.history);
+        setResponse(restoredResponse);
+        setHistory(restoredHistory);
         setScaffoldLevel(saved.scaffoldLevel);
         setAttemptCount(saved.attemptCount);
         setQuestionAttemptCount(saved.questionAttemptCount);
