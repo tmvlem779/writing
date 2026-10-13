@@ -276,13 +276,34 @@ test("P1·P3: 제한형 실생활 활동은 적절한 핵심 답 세 개를 확�
       activity: "authentic",
       message: "[현재 과제] 구조 찾기\n[학습 질문 진행] 2/3\n[활동 완료 기준] 핵심 질문 세 가지에 답했다.\n[학생 답] 조건절이 행동의 조건을 분명히 합니다."
     }),
-    response({ answerStatus: "partial", activityComplete: false })
+    response({ answerStatus: "met", activityComplete: false })
   );
 
   assert.equal(first.activityComplete, false);
   assert.equal(first.questionResolution, "advance");
   assert.equal(third.activityComplete, true);
   assert.equal(third.questionResolution, "complete");
+});
+
+test("P1·P3: 제한형 실생활 활동의 부분 답은 핵심 질문 완료로 세지 않고 쉬운 보조 질문을 이어 간다", () => {
+  const result = applyTutorResponsePolicy(
+    request({
+      activity: "authentic",
+      message: "[현재 과제] 구조 찾기\n[학습 질문 진행] 1/3\n[활동 완료 기준] 핵심 질문 세 가지에 답했다.\n[학생 답] 시간이 나옵니다.",
+      questionAttemptCount: 0,
+      currentQuestion: "자료에서 과거 시제가 드러나는 표현 한 곳을 그대로 쓰세요."
+    }),
+    response({
+      answerStatus: "partial",
+      questionResolution: "advance",
+      question: "‘지난달’과 ‘다음 달’ 중 이미 지난 때를 나타내는 말을 고르세요."
+    })
+  );
+
+  assert.equal(result.activityComplete, false);
+  assert.equal(result.answerStatus, "partial");
+  assert.equal(result.questionResolution, "continue");
+  assert.equal(result.question, "‘지난달’과 ‘다음 달’ 중 이미 지난 때를 나타내는 말을 고르세요.");
 });
 
 test("P1: 제한형 실생활 활동은 부적절한 답에 쉬운 보조 질문을 주고 세 번째에는 해당 답만 공개한다", () => {
@@ -350,4 +371,10 @@ test("DATA: 실생활 자료의 세 질문 완료와 보조 질문 규칙은 프
   const migration = readFileSync(new URL("../supabase/migrations/202610120002_add_bounded_real_life_prompt.sql", import.meta.url), "utf8");
   assert.match(migration, /writing-tutor-v21/);
   assert.match(migration, /three-question-sequential-real-life-practice/);
+});
+
+test("DATA: 정확한 답만 핵심 질문으로 세는 규칙은 프롬프트 v22로 추적한다", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/202610130001_add_strict_clear_real_life_prompt.sql", import.meta.url), "utf8");
+  assert.match(migration, /writing-tutor-v22/);
+  assert.match(migration, /strict-correctness-and-clear-scaffold-questions/);
 });

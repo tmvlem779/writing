@@ -6,6 +6,7 @@ import { buildFallbackResponse } from "../src/lib/agent/fallback.ts";
 import { resolveOpenAiModel } from "../src/lib/agent/model.ts";
 import { removeTrustedCurriculumPassages } from "../src/lib/safety/moderation.ts";
 import {
+  buildRealLifeCoreQuestions,
   buildRealLifeTask,
   grammarRealLifeMaterials,
   getRealLifeMaterialGroup,
@@ -21,6 +22,18 @@ test("P6: 챕터 3은 여섯 종류의 실제적 언어 자료를 모두 제공�
     ["article", "notice", "dialogue", "presentation", "interview", "social"]
   );
   assert.ok(realLifeMaterials.every((material) => material.sourceNote === "수업용 재구성 자료"));
+});
+
+test("P3·P6: 실생활 자료의 세 핵심 질문은 한 번에 한 지점을 분명하게 묻는다", () => {
+  const materials = getRealLifeMaterialsForLesson(6, "grammar", "authentic");
+  for (const material of materials) {
+    for (const mode of realLifePracticeModes) {
+      const questions = buildRealLifeCoreQuestions(material, mode.id);
+      assert.equal(questions.length, 3);
+      assert.ok(questions.every((question) => question.length <= 76));
+      assert.ok(questions.every((question) => !/각각|모두|두 가지|세 가지/.test(question)));
+    }
+  }
 });
 
 test("P3·P4·P6: 모든 자료는 구조, 효과, 고쳐 쓰기 과제를 제공한다", () => {

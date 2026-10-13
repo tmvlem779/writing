@@ -154,7 +154,7 @@ export function applyTutorResponsePolicy(request: TurnRequest, response: AgentRe
   const completionEnabled = request.message.includes("[활동 완료 기준]");
   const boundedProgress = boundedQuestionProgress(request.message);
   const acceptedBoundedAnswer = boundedProgress
-    && (response.answerStatus === "partial" || response.answerStatus === "met" || response.activityComplete);
+    && response.answerStatus === "met";
   const boundedQuestionsComplete = !boundedProgress
     || (acceptedBoundedAnswer && boundedProgress.completed + 1 >= boundedProgress.total);
   const completionEvidence = boundedProgress
@@ -185,7 +185,11 @@ export function applyTutorResponsePolicy(request: TurnRequest, response: AgentRe
   const shouldRevealAfterHints = request.supportMode === "hint" && request.questionHintCount >= 2;
   const shouldRevealAfterAnswers = request.supportMode === "submit"
     && request.questionAttemptCount >= 2
-    && (response.answerStatus === "incorrect" || response.answerStatus === "not_answered");
+    && (
+      response.answerStatus === "incorrect"
+      || response.answerStatus === "not_answered"
+      || Boolean(boundedProgress && response.answerStatus === "partial")
+    );
   if (shouldRevealAfterHints || shouldRevealAfterAnswers) {
     const resolvedQuestionAnswer = response.resolvedQuestionAnswer.trim() || response.studentMessage.trim();
     const completesBoundedActivity = Boolean(boundedProgress && boundedProgress.completed + 1 >= boundedProgress.total);
@@ -208,10 +212,14 @@ export function applyTutorResponsePolicy(request: TurnRequest, response: AgentRe
   }
 
   const answeredCurrentQuestion = request.supportMode === "submit"
-    && (response.answerStatus === "partial" || response.answerStatus === "met");
+    && (
+      response.answerStatus === "met"
+      || (!boundedProgress && response.answerStatus === "partial")
+    );
   const mustContinueCurrentQuestion = request.supportMode === "hint"
     || response.answerStatus === "incorrect"
-    || response.answerStatus === "not_answered";
+    || response.answerStatus === "not_answered"
+    || Boolean(boundedProgress && response.answerStatus === "partial");
   const questionResolution = answeredCurrentQuestion
     ? "advance"
     : mustContinueCurrentQuestion
@@ -234,7 +242,9 @@ export function applyTutorResponsePolicy(request: TurnRequest, response: AgentRe
 
   return {
     ...response,
-    answerStatus: response.answerStatus === "met" ? "partial" : response.answerStatus,
+    answerStatus: boundedProgress
+      ? response.answerStatus
+      : response.answerStatus === "met" ? "partial" : response.answerStatus,
     questionResolution,
     resolvedQuestionAnswer: "",
     studentMessage: advancedAfterPartialAnswer

@@ -6,6 +6,7 @@ import type { AgentResponse } from "@/lib/agent/schema";
 import { scaffoldLabel } from "@/lib/agent/state-machine";
 import { getCourseLesson, getCourseTrack, type CourseLessonNumber, type CourseTrackId } from "@/lib/curriculum/five-lesson-course";
 import {
+  buildRealLifeCoreQuestions,
   buildRealLifeTask,
   getRealLifeMaterialGroup,
   getRealLifeLessonGuide,
@@ -159,9 +160,12 @@ export function RealLifeChapter({
     : novelRelation === "둘 이상의 내용"
       ? "밑줄 친 말의 앞과 뒤에서는 각각 어떤 일이 일어나나요? 짧게 써 보세요."
       : "밑줄 친 말 주변에서 일어나는 일을 하나만 찾아 짧게 써 보세요.";
-  const task = buildRealLifeTask(material, mode);
   const selectedMode = realLifePracticeModes.find((item) => item.id === mode) ?? realLifePracticeModes[0];
   const sequentialDailyPractice = dailyMode && !isLiterature && Boolean(practiceDate);
+  const coreQuestionPlan = buildRealLifeCoreQuestions(material, mode);
+  const task = sequentialDailyPractice
+    ? coreQuestionPlan[Math.min(learningQuestionCount, coreQuestionPlan.length - 1)]
+    : buildRealLifeTask(material, mode);
 
   useEffect(() => {
     if (!sequentialDailyPractice || !practiceDate) return;
@@ -283,9 +287,13 @@ export function RealLifeChapter({
             : `[튜터 응답 원칙] 학생이 문장 안에 직접 밑줄 친 표현, 고른 구조, 짧은 답을 반영해 한두 문장으로 확인해 줄 것. 정답이나 완성 분석을 먼저 제시하지 말고, 다음 문장에서도 같은 방법으로 시도하도록 격려하는 짧은 질문으로 마칠 것`
           : null,
         sequentialDailyPractice ? `[학습 질문 진행] ${learningQuestionCount}/3` : null,
+        sequentialDailyPractice ? `[현재 핵심 질문] ${coreQuestionPlan[Math.min(learningQuestionCount, 2)]}` : null,
+        sequentialDailyPractice
+          ? `[세 가지 핵심 질문]\n${coreQuestionPlan.map((question, index) => `${index + 1}. ${question}`).join("\n")}`
+          : null,
         sequentialDailyPractice ? `[일일 활동 마지막 단계] ${mode === "rewrite" ? "예" : "아니요"}` : null,
         sequentialDailyPractice
-          ? `[튜터 응답 원칙] 현재 핵심 질문에 적절히 답하면 아직 확인하지 않은 다음 질문으로 이동할 것. 답이 부적절하면 핵심 질문 수를 늘리지 말고 더 쉬운 보조 질문과 작은 단서로 같은 학습 목표에 답하도록 도울 것. 보조 질문은 세 가지 핵심 질문에 포함하지 않으며 정답을 먼저 말하지 말 것.`
+          ? `[튜터 응답 원칙] 현재 핵심 질문에 정확히 답한 경우에만 아직 확인하지 않은 다음 핵심 질문으로 이동할 것. 일부만 맞거나 틀리거나 질문에 답하지 못했다면 핵심 질문 수를 늘리지 말고, 같은 목표를 한 단계 더 쉽게 묻는 보조 질문 하나를 제시할 것. 보조 질문은 세 가지 핵심 질문에 포함하지 않으며 정답을 먼저 말하지 말 것. 자료와 반대되거나 자료에 없는 답은 통과시키지 말 것.`
           : null,
         `[활동 완료 기준] ${completionCriterion}`,
         `[요청 유형] ${supportMode === "hint" ? "AI 힌트" : "도움 없이 제출"}`,
@@ -310,11 +318,11 @@ export function RealLifeChapter({
       });
       const body = await result.json();
       if (!result.ok) throw new Error(body.error ?? "응답을 불러오지 못했습니다.");
-      const next = body as AgentResponse & { demo?: boolean };
+      const rawNext = body as AgentResponse & { demo?: boolean };
       const continuesSameQuestion = !selectionTurn
-        && next.questionResolution === "continue"
-        && (sequentialDailyPractice || next.question === currentQuestion);
-      const nextQuestionAttemptCount = continuesSameQuestion && supportMode === "submit" && (next.answerStatus === "incorrect" || next.answerStatus === "partial")
+        && rawNext.questionResolution === "continue"
+        && (sequentialDailyPractice || rawNext.question === currentQuestion);
+      const nextQuestionAttemptCount = continuesSameQuestion && supportMode === "submit" && (rawNext.answerStatus === "incorrect" || rawNext.answerStatus === "partial")
         ? Math.min(20, questionAttemptCount + 1)
         : continuesSameQuestion ? questionAttemptCount : 0;
       const nextQuestionHintCount = continuesSameQuestion && supportMode === "hint"
@@ -323,12 +331,17 @@ export function RealLifeChapter({
       const acceptedLearningQuestion = sequentialDailyPractice
         && !selectionTurn
         && (
-          next.questionResolution === "reveal_and_advance"
-          || (supportMode === "submit" && (next.questionResolution === "advance" || next.questionResolution === "complete"))
+          rawNext.questionResolution === "reveal_and_advance"
+          || (supportMode === "submit" && (rawNext.questionResolution === "advance" || rawNext.questionResolution === "complete"))
         );
       const nextLearningQuestionCount = acceptedLearningQuestion
         ? Math.min(3, learningQuestionCount + 1)
         : learningQuestionCount;
+      const next = acceptedLearningQuestion
+        && !rawNext.activityComplete
+        && nextLearningQuestionCount < coreQuestionPlan.length
+        ? { ...rawNext, question: coreQuestionPlan[nextLearningQuestionCount] }
+        : rawNext;
       const modeComplete = sequentialDailyPractice && next.activityComplete && nextLearningQuestionCount >= 3;
       const nextCompletedModes = modeComplete
         ? [...new Set([...completedModes, mode])]

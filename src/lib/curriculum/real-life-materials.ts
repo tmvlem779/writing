@@ -428,3 +428,28 @@ export function buildRealLifeTask(material: RealLifeMaterial, mode: RealLifePrac
   if (mode === "effect") return material.analysisPrompts[1];
   return material.rewritePrompt;
 }
+
+export function buildRealLifeCoreQuestions(
+  material: RealLifeMaterial,
+  mode: RealLifePracticeMode
+): [string, string, string] {
+  if (mode === "structure") {
+    return [
+      `자료에서 ‘${material.focusConcepts[0]}’이 드러나는 표현 한 곳을 그대로 쓰세요.`,
+      "방금 찾은 표현 바로 앞에서 일어난 일을 짧게 쓰세요.",
+      "방금 찾은 표현 바로 뒤에서 일어난 일을 짧게 쓰세요."
+    ];
+  }
+  if (mode === "effect") {
+    return [
+      "이 자료를 읽는 사람이 누구인지 하나만 쓰세요.",
+      "자료에서 독자에게 행동이나 정보를 알려 주는 표현 한 곳을 그대로 쓰세요.",
+      "그 표현 덕분에 독자가 알게 되는 내용을 하나만 쓰세요."
+    ];
+  }
+  return [
+    "독자가 가장 먼저 알아야 할 정보를 하나만 쓰세요.",
+    "그 정보가 앞에 오도록 문장 한 개를 고쳐 쓰세요.",
+    "고친 문장이 원래 문장보다 알아보기 쉬운 점을 하나만 쓰세요."
+  ];
+}
