@@ -245,7 +245,8 @@ test("P1·P3·P5: 개념학습은 첫 답 뒤 오답에만 단서를 주고 정�
 
 test("P2·P3·P4: 그림 없이 글로 제시한 상황에서 학생이 먼저 문장을 만들고 질문을 이어 간다", () => {
   assert.equal(situationScenes.length, 3);
-  assert.ok(situationScenes.every((scene) => scene.setting.length >= 45));
+  assert.ok(situationScenes.every((scene) => scene.setting.length <= 35));
+  assert.ok(situationScenes.every((scene) => !/정리하고|화면을 만들고|위치를 안내|우산을 기울여/.test(scene.setting)));
   assert.ok(situationScenes.every((scene) => scene.firstCondition.length > 20));
   assert.ok(situationScenes.every((scene) => !scene.firstCondition.includes("그림")));
   assert.doesNotMatch(situationWritingActivity, /<svg|SituationIllustration|role="img"|situation-figure|그림 관찰/);
