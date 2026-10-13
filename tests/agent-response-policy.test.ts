@@ -367,6 +367,64 @@ test("P1: 세 번째 핵심 질문에서 세 차례 지원을 마치면 답을 �
   assert.equal(result.masteryEvidence.length, 0);
 });
 
+test("P1·P2: 문장 만들기는 네 번째 핵심 질문을 해결한 뒤에만 완료한다", () => {
+  const third = applyTutorResponsePolicy(
+    request({
+      activity: "create",
+      message: "[현재 과제] 단계별 문장 만들기\n[학습 질문 진행] 2/4\n[활동 완료 기준] 네 단계로 문장을 확장했다.\n[학생 답] 비가 와서 두 학생이 함께 우산을 썼다."
+    }),
+    response({ answerStatus: "met", activityComplete: true, masteryEvidence: ["절과 연결 표현 추가"] })
+  );
+  const fourth = applyTutorResponsePolicy(
+    request({
+      activity: "create",
+      message: "[현재 과제] 단계별 문장 만들기\n[학습 질문 진행] 3/4\n[활동 완료 기준] 네 단계로 문장을 확장했다.\n[학생 답] 아침에 비가 와서 두 학생이 정문에서 함께 우산을 썼다."
+    }),
+    response({ answerStatus: "met", activityComplete: false, masteryEvidence: [] })
+  );
+
+  assert.equal(third.questionResolution, "advance");
+  assert.equal(third.activityComplete, false);
+  assert.equal(fourth.questionResolution, "complete");
+  assert.equal(fourth.activityComplete, true);
+});
+
+test("P1·P2·P3: 문장 만들기의 보조 질문은 핵심 단계로 세지 않고 세 번째 실패에만 답을 공개한다", () => {
+  const feedback = applyTutorResponsePolicy(
+    request({
+      activity: "create",
+      message: "[현재 과제] 단계별 문장 만들기\n[학습 질문 진행] 1/4\n[활동 완료 기준] 네 단계로 문장을 확장했다.\n[학생 답] 학생이 준비했다.",
+      questionAttemptCount: 1,
+      currentQuestion: "앞 문장에 부속 성분 하나를 더해 다시 써 보세요."
+    }),
+    response({
+      answerStatus: "partial",
+      questionResolution: "advance",
+      question: "언제, 어디서 중 하나를 골라 문장에 넣어 보세요."
+    })
+  );
+  const reveal = applyTutorResponsePolicy(
+    request({
+      activity: "create",
+      message: "[현재 과제] 단계별 문장 만들기\n[학습 질문 진행] 1/4\n[활동 완료 기준] 네 단계로 문장을 확장했다.\n[학생 답] 학생이 준비했다.",
+      questionAttemptCount: 2,
+      currentQuestion: "언제, 어디서 중 하나를 골라 문장에 넣어 보세요."
+    }),
+    response({
+      answerStatus: "partial",
+      questionResolution: "continue",
+      resolvedQuestionAnswer: "두 학생이 교실에서 발표를 준비했다.",
+      question: "어디에서 준비했는지 넣어 보세요."
+    })
+  );
+
+  assert.equal(feedback.questionResolution, "continue");
+  assert.equal(feedback.activityComplete, false);
+  assert.equal(reveal.questionResolution, "reveal_and_advance");
+  assert.match(reveal.resolvedQuestionAnswer, /교실에서/);
+  assert.equal(reveal.activityComplete, false);
+});
+
 test("DATA: 실생활 자료의 세 질문 완료와 보조 질문 규칙은 프롬프트 v21로 추적한다", () => {
   const migration = readFileSync(new URL("../supabase/migrations/202610120002_add_bounded_real_life_prompt.sql", import.meta.url), "utf8");
   assert.match(migration, /writing-tutor-v21/);
@@ -389,4 +447,10 @@ test("DATA: 의도적으로 어색한 실생활 고쳐 쓰기 자료는 프롬�
   const migration = readFileSync(new URL("../supabase/migrations/202610130003_add_intentionally_flawed_rewrite_sources_prompt.sql", import.meta.url), "utf8");
   assert.match(migration, /writing-tutor-v24/);
   assert.match(migration, /intentionally-flawed-authentic-rewrite-sources/);
+});
+
+test("DATA: 네 단계 문장 확장과 단계별 세 번 지원 규칙은 프롬프트 v25로 추적한다", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/202610130004_add_four_step_sentence_building_prompt.sql", import.meta.url), "utf8");
+  assert.match(migration, /writing-tutor-v25/);
+  assert.match(migration, /four-step-progressive-sentence-building/);
 });

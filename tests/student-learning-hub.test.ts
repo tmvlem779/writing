@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { grammarDiagnosticQuestions, scoreDiagnosticAnswers } from "../src/lib/diagnosis/grammar-diagnostic.ts";
-import { situationScenes } from "../src/lib/curriculum/situation-writing.ts";
+import { sentenceBuildingQuestions, situationScenes } from "../src/lib/curriculum/situation-writing.ts";
 import { errorCorrectionItems } from "../src/lib/curriculum/error-correction.ts";
 import { getCourseLesson, getCourseLessons } from "../src/lib/curriculum/five-lesson-course.ts";
 
@@ -247,6 +247,7 @@ test("P2·P3·P4: 그림 없이 글로 제시한 상황에서 학생이 먼저 �
   assert.equal(situationScenes.length, 3);
   assert.ok(situationScenes.every((scene) => scene.setting.length <= 35));
   assert.ok(situationScenes.every((scene) => !/정리하고|화면을 만들고|위치를 안내|우산을 기울여/.test(scene.setting)));
+  assert.ok(situationScenes.every((scene) => !("wordHints" in scene)));
   assert.ok(situationScenes.every((scene) => scene.firstCondition.length > 20));
   assert.ok(situationScenes.every((scene) => !scene.firstCondition.includes("그림")));
   assert.doesNotMatch(situationWritingActivity, /<svg|SituationIllustration|role="img"|situation-figure|그림 관찰/);
@@ -262,11 +263,25 @@ test("P2·P3·P4: 그림 없이 글로 제시한 상황에서 학생이 먼저 �
   assert.match(situationWritingActivity, /AI 학습 도우미/);
   assert.match(situationWritingActivity, /\[활동 완료 기준\]/);
   assert.match(situationWritingActivity, /supportMode === "submit" && next\.activityComplete/);
+  assert.doesNotMatch(situationWritingActivity, /활용할 수 있는 말|scene\.wordHints/);
   assert.doesNotMatch(situationWritingActivity, /모범 답안|정답 문장:/);
   assert.ok(situationWritingActivity.indexOf('className="coach-card situation-coach"') < situationWritingActivity.indexOf('htmlFor="situation-sentence"'));
   assert.match(styles, /\.situation-writing-shell/);
   assert.match(styles, /\.situation-prompt/);
   assert.doesNotMatch(styles, /\.situation-illustration|\.situation-figure/);
+});
+
+test("P1·P2·P3: 모든 문장 만들기는 네 단계로 확장하고 보조 질문은 단계 수에 포함하지 않는다", () => {
+  assert.equal(sentenceBuildingQuestions.length, 4);
+  assert.match(sentenceBuildingQuestions[0], /주어와 서술어/);
+  assert.match(sentenceBuildingQuestions[1], /부속 성분/);
+  assert.match(sentenceBuildingQuestions[2], /절.*연결 표현/);
+  assert.match(sentenceBuildingQuestions[3], /호응.*최종 문장/);
+  assert.match(situationWritingActivity, /\[학습 질문 진행\] \$\{learningQuestionCount\}\/\$\{sentenceBuildingQuestions\.length\}/);
+  assert.match(situationWritingActivity, /보조 질문은 네 가지 핵심 질문에 포함하지 않는다/);
+  assert.match(situationWritingActivity, /rawNext\.questionResolution === "continue"/);
+  assert.match(situationWritingActivity, /rawNext\.questionResolution === "reveal_and_advance"/);
+  assert.match(situationWritingActivity, /setLearningQuestionCount\(nextLearningQuestionCount\)/);
 });
 
 test("DATA: 그림 없는 상황 문장 생성 규칙은 프롬프트 v17로 추적한다", () => {
