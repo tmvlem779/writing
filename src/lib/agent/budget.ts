@@ -49,21 +49,6 @@ export async function assertBudgetAvailable(admin: SupabaseClient | null) {
   return { spent, limit };
 }
 
-export async function assertDailyTurnLimit(admin: SupabaseClient | null, userId: string) {
-  if (!admin) return;
-  const start = new Date();
-  start.setUTCHours(0, 0, 0, 0);
-  const limit = Number(process.env.DAILY_TURN_LIMIT_PER_USER ?? 40);
-  const { count, error } = await admin
-    .from("api_usage")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .gte("created_at", start.toISOString())
-    .eq("status", "ok");
-  if (error) throw error;
-  if ((count ?? 0) >= limit) throw new Error("DAILY_TURN_LIMIT_EXCEEDED");
-}
-
 export async function assertSessionTurnLimit(admin: SupabaseClient | null, sessionId: string) {
   if (!admin) return;
   const limit = Number(process.env.MAX_TURNS_PER_SESSION ?? 30);

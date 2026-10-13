@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
-import { assertBudgetAvailable, assertDailyTurnLimit, assertSessionTurnLimit, estimateTurnCostUsd } from "@/lib/agent/budget";
+import { assertBudgetAvailable, assertSessionTurnLimit, estimateTurnCostUsd } from "@/lib/agent/budget";
 import { buildFallbackResponse } from "@/lib/agent/fallback";
 import { deriveLearningEvidence } from "@/lib/agent/learning-evidence";
 import { runOpenAiAgent } from "@/lib/agent/openai-agent";
@@ -57,15 +57,11 @@ export async function POST(request: Request) {
   try {
     await assertBudgetAvailable(admin);
     if (auth.user) {
-      await assertDailyTurnLimit(admin, auth.user.id);
       await assertSessionTurnLimit(admin, parsed.data.sessionId);
     }
   } catch (error) {
     if (error instanceof Error && error.message === "MONTHLY_BUDGET_EXCEEDED") {
       return NextResponse.json({ error: "이번 달 AI 사용 한도에 도달했습니다. 교사에게 알려 주세요." }, { status: 429 });
-    }
-    if (error instanceof Error && error.message === "DAILY_TURN_LIMIT_EXCEEDED") {
-      return NextResponse.json({ error: "오늘 사용할 수 있는 AI 학습 횟수에 도달했습니다." }, { status: 429 });
     }
     if (error instanceof Error && error.message === "SESSION_TURN_LIMIT_EXCEEDED") {
       return NextResponse.json({ error: "이 학습에서 사용할 수 있는 AI 횟수에 도달했습니다. 새 학습을 시작해 주세요." }, { status: 429 });

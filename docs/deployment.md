@@ -50,8 +50,9 @@ GitHub 저장소를 연결한 뒤 Development, Preview, Production 환경을 분
 - 충분히 긴 임의 문자열인 `SAFETY_IDENTIFIER_SALT`
 - `APP_ENV=production`
 - `MAX_TURNS_PER_SESSION=30`
-- `DAILY_TURN_LIMIT_PER_USER=40`
 - `MONTHLY_OPENAI_BUDGET_USD=6`
+
+사용자별 일일 횟수는 제한하지 않는다. 단계형 질문과 힌트가 정상 학습 중 여러 번 이어지기 때문이다. 대신 한 학습 세션의 `MAX_TURNS_PER_SESSION`과 전체 월 예산 `MONTHLY_OPENAI_BUDGET_USD`를 함께 적용한다.
 
 ## 4. 배포 승인
 
