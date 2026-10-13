@@ -179,25 +179,24 @@ export function RealLifeChapter({
         if (!result.ok) throw new Error(body.error ?? "학습 진행을 불러오지 못했습니다.");
         if (!active || !body.state) return;
         const saved = body.state;
-        const legacyRewriteQuestion = "고친 문장이 원래 문장보다 알아보기 쉬운 점을 하나만 쓰세요.";
-        const currentRewriteQuestion = "방금 제출한 문장이 중요한 정보를 잘 보여 주는 이유를 하나만 쓰세요.";
-        const restoredResponse = saved.response?.question === legacyRewriteQuestion
-          ? { ...saved.response, question: currentRewriteQuestion }
-          : saved.response;
-        const restoredHistory = saved.history.map((message) => ({
-          ...message,
-          content: message.content.replace(legacyRewriteQuestion, currentRewriteQuestion)
-        }));
+        const obsoleteRewriteQuestions = [
+          "그 정보가 잘 보이도록 문장 한 개를 쓰세요. 원문이 이미 알맞다면 그대로 써도 됩니다.",
+          "방금 제출한 문장이 중요한 정보를 잘 보여 주는 이유를 하나만 쓰세요.",
+          "고친 문장이 원래 문장보다 알아보기 쉬운 점을 하나만 쓰세요."
+        ];
+        const restartRewrite = saved.mode === "rewrite"
+          && Boolean(saved.response?.question)
+          && obsoleteRewriteQuestions.includes(saved.response?.question ?? "");
         setMode(saved.mode);
         setCompletedModes([...new Set(saved.completedModes)]);
-        setLearningQuestionCount(saved.learningQuestionCount);
-        setDraft(saved.draft);
-        setResponse(restoredResponse);
-        setHistory(restoredHistory);
+        setLearningQuestionCount(restartRewrite ? 0 : saved.learningQuestionCount);
+        setDraft(restartRewrite ? "" : saved.draft);
+        setResponse(restartRewrite ? null : saved.response);
+        setHistory(restartRewrite ? [] : saved.history);
         setScaffoldLevel(saved.scaffoldLevel);
         setAttemptCount(saved.attemptCount);
-        setQuestionAttemptCount(saved.questionAttemptCount);
-        setQuestionHintCount(saved.questionHintCount);
+        setQuestionAttemptCount(restartRewrite ? 0 : saved.questionAttemptCount);
+        setQuestionHintCount(restartRewrite ? 0 : saved.questionHintCount);
         setSessionId(body.sessionId ?? null);
       } catch (caught) {
         if (active) setError(caught instanceof Error ? caught.message : "학습 진행을 불러오지 못했습니다.");
@@ -268,6 +267,9 @@ export function RealLifeChapter({
         `[자료 유형] ${isLiterature ? `문학 작품 · ${material.genre}` : material.label}`,
         `[자료 제목] ${material.title}`,
         `[자료 본문]\n${material.content}`,
+        !isLiterature && mode === "rewrite" && material.rewriteTarget
+          ? `[고쳐 쓸 문장] ${material.rewriteTarget}`
+          : null,
         isPoem ? `[이 작품에서 살필 문법 요소] ${material.focusConcepts.join(", ")}` : null,
         isLiterature
           ? `[첫 과제] ${literatureTaskTitle}`
@@ -302,7 +304,7 @@ export function RealLifeChapter({
           : null,
         sequentialDailyPractice ? `[일일 활동 마지막 단계] ${mode === "rewrite" ? "예" : "아니요"}` : null,
         sequentialDailyPractice
-          ? `[튜터 응답 원칙] 현재 핵심 질문에 정확히 답한 경우에만 아직 확인하지 않은 다음 핵심 질문으로 이동할 것. 일부만 맞거나 틀리거나 질문에 답하지 못했다면 핵심 질문 수를 늘리지 말고, 같은 목표를 한 단계 더 쉽게 묻는 보조 질문 하나를 제시할 것. 보조 질문은 세 가지 핵심 질문에 포함하지 않으며 정답을 먼저 말하지 말 것. 자료와 반대되거나 자료에 없는 답은 통과시키지 말 것.`
+          ? `[튜터 응답 원칙] 현재 핵심 질문에 정확히 답한 경우에만 아직 확인하지 않은 다음 핵심 질문으로 이동할 것. 일부만 맞거나 틀리거나 질문에 답하지 못했다면 핵심 질문 수를 늘리지 말고, 같은 목표를 한 단계 더 쉽게 묻는 보조 질문 하나를 제시할 것. 보조 질문은 세 가지 핵심 질문에 포함하지 않으며 정답을 먼저 말하지 말 것. 자료와 반대되거나 자료에 없는 답은 통과시키지 말 것. [고쳐 쓸 문장]이 있으면 원문을 그대로 제출한 답은 수정 답으로 인정하지 말 것.`
           : null,
         `[활동 완료 기준] ${completionCriterion}`,
         `[요청 유형] ${supportMode === "hint" ? "AI 힌트" : "도움 없이 제출"}`,

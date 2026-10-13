@@ -384,3 +384,9 @@ test("DATA: 원문 유지와 중립적 성찰 질문은 프롬프트 v23으로 �
   assert.match(migration, /writing-tutor-v23/);
   assert.match(migration, /allow-purpose-fit-originals-without-false-comparison/);
 });
+
+test("DATA: 의도적으로 어색한 실생활 고쳐 쓰기 자료는 프롬프트 v24로 추적한다", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/202610130003_add_intentionally_flawed_rewrite_sources_prompt.sql", import.meta.url), "utf8");
+  assert.match(migration, /writing-tutor-v24/);
+  assert.match(migration, /intentionally-flawed-authentic-rewrite-sources/);
+});

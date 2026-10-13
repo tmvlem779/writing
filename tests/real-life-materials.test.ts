@@ -36,13 +36,17 @@ test("P3·P6: 실생활 자료의 세 핵심 질문은 한 번에 한 지점을 
   }
 });
 
-test("P3·P4·P6: 원문이 이미 알맞은 고쳐 쓰기는 원문 유지를 허용하고 허위 비교를 요구하지 않는다", () => {
-  const material = getRealLifeMaterialsForLesson(6, "grammar", "authentic")[0];
-  const questions = buildRealLifeCoreQuestions(material, "rewrite");
-
-  assert.match(questions[1], /원문이 이미 알맞다면 그대로/);
-  assert.match(questions[2], /방금 제출한 문장/);
-  assert.doesNotMatch(questions[2], /고친 문장|원래 문장보다|달라진/);
+test("P3·P4·P5·P6: 모든 실생활 자료는 고쳐 쓸 필요가 분명한 문장을 하나씩 제공한다", () => {
+  const materials = getRealLifeMaterialsForLesson(6, "grammar", "authentic");
+  assert.equal(materials.length, 6);
+  for (const material of materials) {
+    assert.ok(material.rewriteTarget);
+    assert.match(material.content, new RegExp(material.rewriteTarget!.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    const questions = buildRealLifeCoreQuestions(material, "rewrite");
+    assert.match(questions[0], /어색한 부분/);
+    assert.match(questions[1], /고쳐 쓰세요/);
+    assert.match(questions[2], /원문보다 뜻이 분명해진 점/);
+  }
 });
 
 test("P3·P4·P6: 모든 자료는 구조, 효과, 고쳐 쓰기 과제를 제공한다", () => {
