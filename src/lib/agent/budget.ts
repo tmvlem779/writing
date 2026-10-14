@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 type TokenPricing = { input: number; output: number };
 
 const TOKEN_PRICING_USD_PER_MILLION: Record<string, TokenPricing> = {
+  "gpt-5-mini": { input: 0.25, output: 2 },
   "gpt-5.6-luna": { input: 0.2, output: 1.2 },
   "gpt-5-nano": { input: 0.05, output: 0.4 }
 };
@@ -21,7 +22,7 @@ export function getTokenPricingUsdPerMillion(model: string): TokenPricing {
 export function estimateTurnCostUsd(
   inputTokens: number,
   outputTokens: number,
-  model = process.env.OPENAI_MODEL?.trim() || "gpt-5.6-luna"
+  model = process.env.OPENAI_MODEL?.trim() || "gpt-5-mini"
 ): number {
   const pricing = getTokenPricingUsdPerMillion(model);
   return (inputTokens / 1_000_000) * pricing.input + (outputTokens / 1_000_000) * pricing.output;

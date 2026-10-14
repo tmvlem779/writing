@@ -47,7 +47,7 @@ continue일 때는 같은 학습 목표를 더 쉽게 묻는 보조 질문 한 �
     safety_identifier: safetyIdentifier,
     prompt_cache_key: PROMPT_VERSION,
     max_output_tokens: 420,
-    reasoning: { effort: "none" },
+    reasoning: { effort: "minimal" },
     text: {
       verbosity: "low",
       format: {
