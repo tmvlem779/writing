@@ -30,9 +30,9 @@
 
 ## 2. OpenAI
 
-1. 프로젝트 전용 API 키와 월 사용량 알림을 만든다.
-2. 앱 내부 한도 `MONTHLY_OPENAI_BUDGET_USD=6`을 유지한다. 사용량 기록은 `gpt-5-mini` 공식 단가(입력 $0.25/백만 토큰, 출력 $2.00/백만 토큰)로 계산하며 알 수 없는 모델은 보수적인 상한 단가를 적용한다.
-3. 기본 모델은 `gpt-5-mini`, `reasoning.effort: minimal`, `store: false`, 비스트리밍 구조화 출력이다. OpenAI의 deprecated 표시를 인지하고, 교육 평가 품질을 사람이 표본 검토한다.
+1. Upstage와 OpenAI 프로젝트 전용 API 키 및 월 사용량 알림을 만든다. OpenAI 키는 학습 도우미 공급자가 Upstage여도 입력·출력 Moderation에 필요하다.
+2. 앱 내부 한도 `MONTHLY_OPENAI_BUDGET_USD=6`을 공급자 공통 월 예산으로 유지한다. `solar-mini4`는 입력 $0.10/백만 토큰·출력 $0.40/백만 토큰, `gpt-5-mini`는 입력 $0.25/백만 토큰·출력 $2.00/백만 토큰으로 계산하며 알 수 없는 모델은 보수적인 상한 단가를 적용한다.
+3. `AI_PROVIDER=auto`에서는 `UPSTAGE_API_KEY`가 있으면 `solar-mini4`, 없으면 `gpt-5-mini`를 사용한다. 두 모델 모두 `reasoning.effort: minimal`, `store: false`, 비스트리밍 구조화 출력을 사용한다.
 4. 실제 학생 사용 전 대표 P1~P6 사례를 국어 교사가 표본 검토한다.
 
 ## 3. Vercel
@@ -45,6 +45,9 @@ GitHub 저장소를 연결한 뒤 Development, Preview, Production 환경을 분
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_SITE_URL`
 - `SUPABASE_SECRET_KEY`
+- `AI_PROVIDER=auto`
+- `UPSTAGE_API_KEY`
+- `UPSTAGE_MODEL=solar-mini4`
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL=gpt-5-mini`
 - 충분히 긴 임의 문자열인 `SAFETY_IDENTIFIER_SALT`
@@ -53,6 +56,8 @@ GitHub 저장소를 연결한 뒤 Development, Preview, Production 환경을 분
 - `MONTHLY_OPENAI_BUDGET_USD=6`
 
 사용자별 일일 횟수는 제한하지 않는다. 단계형 질문과 힌트가 정상 학습 중 여러 번 이어지기 때문이다. 대신 한 학습 세션의 `MAX_TURNS_PER_SESSION`과 전체 월 예산 `MONTHLY_OPENAI_BUDGET_USD`를 함께 적용한다.
+
+Upstage 키를 추가하거나 교체한 뒤에는 Vercel에서 새 Production 배포를 만들어야 런타임에 반영된다. 키는 `.env.example`, 문서, 로그, Git에 값을 기록하지 않는다.
 
 ## 4. 배포 승인
 

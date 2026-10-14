@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 type TokenPricing = { input: number; output: number };
 
 const TOKEN_PRICING_USD_PER_MILLION: Record<string, TokenPricing> = {
+  "solar-mini4": { input: 0.1, output: 0.4 },
   "gpt-5-mini": { input: 0.25, output: 2 },
   "gpt-5.6-luna": { input: 0.2, output: 1.2 },
   "gpt-5-nano": { input: 0.05, output: 0.4 }

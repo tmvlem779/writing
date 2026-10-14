@@ -4,11 +4,12 @@
 
 ```text
 Browser → Next.js on Vercel → Supabase Auth/RLS/Postgres
-                         └──→ OpenAI Responses + Moderation
+                         ├──→ Upstage/OpenAI Responses
+                         └──→ OpenAI Moderation
 ```
 
 - 브라우저는 Supabase publishable key만 사용한다.
-- OpenAI와 Supabase service role은 Next.js 서버에서만 사용한다.
+- Upstage·OpenAI 키와 Supabase service role은 Next.js 서버에서만 사용한다.
 - 학생과 교사 권한은 Supabase Auth 사용자, `profiles.role`, `class_memberships`로 판정한다.
 - OpenAI 대화 저장은 끄고(`store: false`) 학습 이력은 Supabase에서 관리한다.
 
@@ -23,7 +24,8 @@ Browser → Next.js on Vercel → Supabase Auth/RLS/Postgres
 
 ## 핵심 결정
 
-- 모델 기본값: `gpt-5-mini`, 환경 변수로 교체 가능
+- 학습 도우미: `UPSTAGE_API_KEY`가 있으면 `solar-mini4`, 없으면 `gpt-5-mini`
+- 안전 검사: 공급자와 관계없이 OpenAI Moderation을 서버에서 유지
 - 응답: 비스트리밍 Structured Output
 - 비용: 월 미화 6달러 앱 한도, 세션별 30턴 제한
 - 데이터 보관: 기본 무기한, 관리자 삭제·내보내기 가능

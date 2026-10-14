@@ -9,6 +9,11 @@ import {
 const agentTurnRoute = readFileSync(new URL("../src/app/api/agent/turn/route.ts", import.meta.url), "utf8");
 const environmentExample = readFileSync(new URL("../.env.example", import.meta.url), "utf8");
 
+test("BUDGET: Solar Mini 4의 공식 입력·출력 단가로 비용을 계산한다", () => {
+  assert.deepEqual(getTokenPricingUsdPerMillion("solar-mini4"), { input: 0.1, output: 0.4 });
+  assert.equal(estimateTurnCostUsd(1_000_000, 1_000_000, "solar-mini4"), 0.5);
+});
+
 test("BUDGET: GPT-5 Mini의 공식 입력·출력 단가로 비용을 계산한다", () => {
   assert.deepEqual(getTokenPricingUsdPerMillion("gpt-5-mini"), { input: 0.25, output: 2 });
   assert.equal(estimateTurnCostUsd(1_000_000, 1_000_000, "gpt-5-mini"), 2.25);
@@ -36,4 +41,10 @@ test("BUDGET: 사용자별 일일 한도 없이 월 예산과 세션별 한도�
   assert.match(agentTurnRoute, /assertSessionTurnLimit\(admin, parsed\.data\.sessionId\)/);
   assert.doesNotMatch(agentTurnRoute, /assertDailyTurnLimit|DAILY_TURN_LIMIT_EXCEEDED/);
   assert.doesNotMatch(environmentExample, /DAILY_TURN_LIMIT_PER_USER/);
+});
+
+test("AI: Upstage 키는 서버 전용 환경 변수로만 선언한다", () => {
+  assert.match(environmentExample, /^UPSTAGE_API_KEY=$/m);
+  assert.match(environmentExample, /^UPSTAGE_MODEL=solar-mini4$/m);
+  assert.doesNotMatch(environmentExample, /NEXT_PUBLIC_UPSTAGE/);
 });

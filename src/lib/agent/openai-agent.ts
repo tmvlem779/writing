@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { resolveOpenAiModel } from "./model";
+import type { TutorProvider } from "./provider";
 import { applyTutorResponsePolicy } from "./response-policy";
 import { agentResponseJsonSchema, agentResponseSchema, type AgentResponse, type TurnRequest } from "./schema";
 import { PROMPT_VERSION, SYSTEM_PROMPT } from "./system-prompt";
@@ -7,9 +7,10 @@ import { PROMPT_VERSION, SYSTEM_PROMPT } from "./system-prompt";
 export async function runOpenAiAgent(
   client: OpenAI,
   request: TurnRequest,
-  safetyIdentifier: string
+  safetyIdentifier: string,
+  model: string,
+  provider: TutorProvider
 ): Promise<{ response: AgentResponse; usage: { input: number; output: number }; model: string }> {
-  const model = resolveOpenAiModel();
   const history = request.history.map((item) => `${item.role === "student" ? "학생" : "튜터"}: ${item.content}`).join("\n");
   const thirdHintForQuestion = request.supportMode === "hint" && request.questionHintCount >= 2;
   const boundedQuestionFlow = request.message.includes("[학습 질문 진행]");
@@ -44,7 +45,7 @@ continue일 때는 같은 학습 목표를 더 쉽게 묻는 보조 질문 한 �
     instructions: `${SYSTEM_PROMPT}\n프롬프트 버전: ${PROMPT_VERSION}`,
     input,
     store: false,
-    safety_identifier: safetyIdentifier,
+    ...(provider === "openai" ? { safety_identifier: safetyIdentifier } : {}),
     prompt_cache_key: PROMPT_VERSION,
     max_output_tokens: 420,
     reasoning: { effort: "minimal" },

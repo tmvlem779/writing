@@ -4,6 +4,7 @@ import { assertBudgetAvailable, assertSessionTurnLimit, estimateTurnCostUsd } fr
 import { buildFallbackResponse } from "@/lib/agent/fallback";
 import { deriveLearningEvidence } from "@/lib/agent/learning-evidence";
 import { runOpenAiAgent } from "@/lib/agent/openai-agent";
+import { createTutorClient, resolveTutorProvider } from "@/lib/agent/provider";
 import { turnRequestSchema } from "@/lib/agent/schema";
 import { PROMPT_VERSION } from "@/lib/agent/system-prompt";
 import { grammarRealLifeMaterials, realLifeMaterials } from "@/lib/curriculum/real-life-materials";
@@ -30,9 +31,17 @@ export async function POST(request: Request) {
   }
 
   const userId = auth.user?.id ?? `demo:${parsed.data.sessionId}`;
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
+  const moderationApiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!moderationApiKey) {
     if (isProduction) return NextResponse.json({ error: "AI 서비스 설정이 완료되지 않았습니다." }, { status: 503 });
+    return NextResponse.json({ ...buildFallbackResponse(parsed.data), demo: true });
+  }
+
+  let tutorConfig: ReturnType<typeof resolveTutorProvider>;
+  try {
+    tutorConfig = resolveTutorProvider();
+  } catch {
+    if (isProduction) return NextResponse.json({ error: "AI 학습 도우미 설정이 완료되지 않았습니다." }, { status: 503 });
     return NextResponse.json({ ...buildFallbackResponse(parsed.data), demo: true });
   }
   if (isProduction && !process.env.SAFETY_IDENTIFIER_SALT) {
@@ -69,7 +78,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "사용량을 확인할 수 없습니다." }, { status: 503 });
   }
 
-  const client = new OpenAI({ apiKey });
+  const moderationClient = new OpenAI({ apiKey: moderationApiKey });
+  const tutorClient = createTutorClient(tutorConfig);
   const startedAt = Date.now();
   const safetyIdentifier = createSafetyIdentifier(userId);
 
@@ -77,7 +87,7 @@ export async function POST(request: Request) {
     const moderationInput = parsed.data.activity === "authentic"
       ? removeTrustedCurriculumPassages(parsed.data.message, trustedCurriculumPassages)
       : parsed.data.message;
-    const inputSafety = await moderateText(client, moderationInput || "수업 자료 선택");
+    const inputSafety = await moderateText(moderationClient, moderationInput || "수업 자료 선택");
     if (inputSafety.flagged) {
       await admin?.from("safety_events").insert({
         user_id: auth.user?.id ?? null,
@@ -102,8 +112,17 @@ export async function POST(request: Request) {
       });
     }
 
-    const result = await runOpenAiAgent(client, parsed.data, safetyIdentifier);
-    const outputSafety = await moderateText(client, `${result.response.studentMessage}\n${result.response.question}`);
+    const result = await runOpenAiAgent(
+      tutorClient,
+      parsed.data,
+      safetyIdentifier,
+      tutorConfig.model,
+      tutorConfig.provider
+    );
+    const outputSafety = await moderateText(
+      moderationClient,
+      `${result.response.studentMessage}\n${result.response.question}`
+    );
     if (outputSafety.flagged) {
       return NextResponse.json({ error: "안전 검사를 통과하지 못해 응답을 표시하지 않았습니다." }, { status: 422 });
     }

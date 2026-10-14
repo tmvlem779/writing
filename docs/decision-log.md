@@ -1,5 +1,13 @@
 # 결정 기록
 
+## 2026-10-14 · Upstage 학습 도우미 준비
+
+- `UPSTAGE_API_KEY`를 서버 환경 변수에 입력하면 OpenAI 호환 Responses API의 `solar-mini4`로 자동 전환한다.
+- 키가 비어 있으면 기존 `gpt-5-mini`를 유지해 설정 중 서비스가 중단되지 않도록 한다. 필요하면 `AI_PROVIDER=openai|upstage|auto`로 명시할 수 있다.
+- Solar Mini 4의 구조화 출력과 `reasoning.effort: minimal`을 사용하며, 공식 단가인 입력 $0.10/백만 토큰·출력 $0.40/백만 토큰을 월 예산 계산에 반영한다.
+- 미성년자 안전 검사는 공급자 변경과 분리해 기존 OpenAI Moderation을 유지한다. 따라서 Upstage 사용 중에도 `OPENAI_API_KEY`는 서버 전용 안전 검사 키로 필요하다.
+- 두 공급자 키 모두 브라우저 공개 접두사 없이 Vercel 암호화 환경 변수에만 저장한다.
+
 ## 2026-10-14 · GPT-5 Mini 학습 도우미 전환
 
 - 사용자 요청에 따라 AI 학습 도우미의 기본 모델을 `gpt-5-mini`로 변경한다.
