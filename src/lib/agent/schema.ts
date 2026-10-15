@@ -21,6 +21,7 @@ export const turnRequestSchema = z.object({
   currentQuestion: z.string().max(500).default(""),
   questionAttemptCount: z.number().int().min(0).max(20).default(0),
   questionHintCount: z.number().int().min(0).max(20).default(0),
+  objectiveQuestionKey: z.string().regex(/^[a-z0-9-]+:(structure|effect|rewrite):[0-2]$/).max(120).default(""),
   history: z
     .array(
       z.object({
@@ -52,7 +53,8 @@ export const agentResponseSchema = z.object({
 });
 
 export type Activity = z.infer<typeof activitySchema>;
-export type TurnRequest = z.infer<typeof turnRequestSchema>;
+type ParsedTurnRequest = z.infer<typeof turnRequestSchema>;
+export type TurnRequest = Omit<ParsedTurnRequest, "objectiveQuestionKey"> & { objectiveQuestionKey?: string };
 export type AgentResponse = z.infer<typeof agentResponseSchema>;
 
 export const agentResponseJsonSchema = {

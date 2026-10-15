@@ -52,15 +52,20 @@ test("P5: 연속 학습은 오늘 또는 어제부터 끊기지 않은 날짜만
 
 test("DATA·PRIVACY: 완료 API는 로그인 사용자와 소유 세션을 확인하고 기존 RLS 이벤트에 기록한다", () => {
   const route = read("src/app/api/daily-practice/route.ts");
+  const todayPage = read("src/app/learn/self-study/today/page.tsx");
   const rls = read("supabase/migrations/202609230001_initial_schema.sql");
   assert.match(route, /supabase\.auth\.getUser\(\)/);
   assert.match(route, /\.eq\("user_id", auth\.user\.id\)/);
   assert.match(route, /본인의 학습 세션만 완료 처리할 수 있습니다/);
   assert.match(route, /event_type: "daily_practice_completed"/);
+  assert.match(route, /status: "completed"/);
+  assert.match(route, /ended_at: completedAt/);
   assert.match(route, /practiceDate < today/);
   assert.match(route, /calculateDailyStreak\(onTimeCompletionDates, today\)/);
   assert.match(route, /\.select\("metadata, created_at"\)/);
   assert.doesNotMatch(route, /service_role|createAdmin/);
   assert.match(rls, /events_read_owner_or_teacher/);
   assert.match(rls, /events_insert_owner/);
+  assert.match(todayPage, /date !== getSelectablePracticeDate\(date, getKoreanDate\(\)\)/);
+  assert.match(todayPage, /redirect\("\/learn\/self-study"\)/);
 });

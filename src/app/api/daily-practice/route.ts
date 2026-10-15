@@ -96,15 +96,15 @@ export async function POST(request: Request) {
   try {
     const existing = await readCompletionProgress(supabase, auth.user.id);
     const alreadyCompleted = existing.completionDates.includes(practiceDate);
-    if (!alreadyCompleted) {
-      const { data: session } = await supabase
-        .from("learning_sessions")
-        .select("id")
-        .eq("id", parsed.data.sessionId)
-        .eq("user_id", auth.user.id)
-        .maybeSingle();
-      if (!session) return NextResponse.json({ error: "본인의 학습 세션만 완료 처리할 수 있습니다." }, { status: 403 });
+    const { data: session } = await supabase
+      .from("learning_sessions")
+      .select("id")
+      .eq("id", parsed.data.sessionId)
+      .eq("user_id", auth.user.id)
+      .maybeSingle();
+    if (!session) return NextResponse.json({ error: "본인의 학습 세션만 완료 처리할 수 있습니다." }, { status: 403 });
 
+    if (!alreadyCompleted) {
       const { error } = await supabase.from("learning_events").insert({
         session_id: session.id,
         user_id: auth.user.id,
@@ -119,6 +119,14 @@ export async function POST(request: Request) {
       });
       if (error) return NextResponse.json({ error: "학습 완료 기록을 저장하지 못했습니다." }, { status: 500 });
     }
+
+    const completedAt = new Date().toISOString();
+    const { error: sessionError } = await supabase
+      .from("learning_sessions")
+      .update({ status: "completed", ended_at: completedAt, updated_at: completedAt })
+      .eq("id", session.id)
+      .eq("user_id", auth.user.id);
+    if (sessionError) return NextResponse.json({ error: "학습 세션 완료 상태를 저장하지 못했습니다." }, { status: 500 });
 
     const completionDates = [...new Set([...existing.completionDates, practiceDate])].sort();
     const lateCompletionDates = [...new Set([

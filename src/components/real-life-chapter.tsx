@@ -324,12 +324,28 @@ export function RealLifeChapter({
           currentQuestion,
           questionAttemptCount,
           questionHintCount,
+          objectiveQuestionKey: sequentialDailyPractice
+            ? `${material.id}:${mode}:${Math.min(learningQuestionCount, 2)}`
+            : "",
           history: history.slice(-6)
         })
       });
       const body = await result.json();
       if (!result.ok) throw new Error(body.error ?? "응답을 불러오지 못했습니다.");
-      const rawNext = body as AgentResponse & { demo?: boolean };
+      const received = body as AgentResponse & { demo?: boolean };
+      const rawNext = selectionTurn && isPoem
+        ? {
+            ...received,
+            answerStatus: "not_answered" as const,
+            questionResolution: "continue" as const,
+            resolvedQuestionAnswer: "",
+            studentMessage: "고른 구절을 바탕으로 문법 형태부터 살펴볼게요.",
+            question: received.question || "고른 구절에서 반복되거나 같은 모양으로 끝나는 표현을 하나 찾아 쓰세요.",
+            nextAction: "explain" as const,
+            activityComplete: false,
+            masteryEvidence: []
+          }
+        : received;
       const continuesSameQuestion = !selectionTurn
         && rawNext.questionResolution === "continue"
         && (sequentialDailyPractice || rawNext.question === currentQuestion);
@@ -384,16 +400,19 @@ export function RealLifeChapter({
       if (selectionTurn) setLiteratureSelectionSubmitted(true);
       setAttemptedMaterials((current) => new Set(current).add(material.id));
       setHistory(nextHistory);
+      let literatureSequenceComplete = false;
       if (isLiterature) {
         const novelSentenceComplete = !isPoem
           && !selectionTurn
           && supportMode === "submit"
           && (next.activityComplete || next.questionResolution === "advance");
         if (novelSentenceComplete) {
+          const nextCompletedSentenceIndexes = completedNovelSentenceIndexes.includes(novelSentenceIndex)
+            ? completedNovelSentenceIndexes
+            : [...completedNovelSentenceIndexes, novelSentenceIndex];
+          literatureSequenceComplete = nextCompletedSentenceIndexes.length >= (material.selectableSentences?.length ?? 0);
           setNovelAnswerSubmitted(true);
-          setCompletedNovelSentenceIndexes((current) => current.includes(novelSentenceIndex)
-            ? current
-            : [...current, novelSentenceIndex]);
+          setCompletedNovelSentenceIndexes(nextCompletedSentenceIndexes);
           setNovelSentenceWork((current) => ({
             ...current,
             [novelSentenceIndex]: {
@@ -428,7 +447,7 @@ export function RealLifeChapter({
       const allModesComplete = realLifeModeOrder.every((item) => nextCompletedModes.includes(item));
       const dailySequenceComplete = sequentialDailyPractice && allModesComplete && next.activityComplete;
       const regularActivityComplete = !sequentialDailyPractice && supportMode === "submit" && next.activityComplete;
-      if (!selectionTurn && (dailySequenceComplete || regularActivityComplete)) {
+      if (!selectionTurn && (dailySequenceComplete || regularActivityComplete || literatureSequenceComplete)) {
         await onDailyComplete?.(id);
       }
     } catch (caught) {

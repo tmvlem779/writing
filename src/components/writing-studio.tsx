@@ -15,12 +15,14 @@ import type { ChallengeProgressInput, ChallengeProgressRecord } from "@/lib/lear
 
 type Chapter = "concept" | "practice" | "real-life";
 type ProgressByLesson = Partial<Record<CourseLessonNumber, ChallengeProgressRecord>>;
+type PrimaryAnswersByLesson = Partial<Record<CourseLessonNumber, Record<string, string>>>;
 
 export function WritingStudio() {
   const trackId: CourseTrackId = "grammar";
   const [lessonNumber, setLessonNumber] = useState<CourseLessonNumber>(1);
   const [chapter, setChapter] = useState<Chapter>("concept");
   const [progressByLesson, setProgressByLesson] = useState<ProgressByLesson>({});
+  const [primaryAnswersByLesson, setPrimaryAnswersByLesson] = useState<PrimaryAnswersByLesson>({});
   const progressRef = useRef<ProgressByLesson>({});
   const progressSaveQueue = useRef<Promise<void>>(Promise.resolve());
   const [progressHydrated, setProgressHydrated] = useState(false);
@@ -35,9 +37,13 @@ export function WritingStudio() {
     let cancelled = false;
     async function restoreProgress() {
       try {
-        const result = await fetch("/api/challenge-progress", { cache: "no-store" });
-        const body = await result.json();
-        if (!result.ok) throw new Error(body.error ?? "학습 진행 상황을 불러오지 못했습니다.");
+        const [progressResult, answersResult] = await Promise.all([
+          fetch("/api/challenge-progress", { cache: "no-store" }),
+          fetch("/api/challenge-answers", { cache: "no-store" })
+        ]);
+        const [body, answersBody] = await Promise.all([progressResult.json(), answersResult.json()]);
+        if (!progressResult.ok) throw new Error(body.error ?? "학습 진행 상황을 불러오지 못했습니다.");
+        if (!answersResult.ok) throw new Error(answersBody.error ?? "앞 활동의 문장을 불러오지 못했습니다.");
         if (cancelled) return;
         const records = (body.progress ?? []) as ChallengeProgressRecord[];
         const nextProgress: ProgressByLesson = {};
@@ -48,6 +54,13 @@ export function WritingStudio() {
         }
         progressRef.current = nextProgress;
         setProgressByLesson(nextProgress);
+        const nextPrimaryAnswers: PrimaryAnswersByLesson = {};
+        for (const record of answersBody.answers ?? []) {
+          if (record.trackId === trackId && record.lessonNumber >= 1 && record.lessonNumber <= 6) {
+            nextPrimaryAnswers[record.lessonNumber as CourseLessonNumber] = record.answers;
+          }
+        }
+        setPrimaryAnswersByLesson(nextPrimaryAnswers);
         const latest = records.find((record) => record.trackId === trackId);
         if (latest && latest.lessonNumber >= 1 && latest.lessonNumber <= 6) {
           const restoredLesson = latest.lessonNumber as CourseLessonNumber;
@@ -135,6 +148,10 @@ export function WritingStudio() {
       lastActivityId,
       lastChapter: "practice"
     });
+  }
+
+  function updatePrimaryAnswers(answers: Record<string, string>) {
+    setPrimaryAnswersByLesson((current) => ({ ...current, [lessonNumber]: answers }));
   }
 
   if (!progressHydrated) {
@@ -233,8 +250,10 @@ export function WritingStudio() {
         <PracticeChapter
           initialActivityId={currentProgress?.lastActivityId}
           initialCompletedActivityIds={currentProgress?.completedActivityIds ?? []}
+          initialPrimaryActivityAnswers={primaryAnswersByLesson[lessonNumber] ?? {}}
           key={`practice-${trackId}-${lessonNumber}`}
           lessonNumber={lessonNumber}
+          onPrimaryAnswersChange={updatePrimaryAnswers}
           onProgressChange={updatePracticeProgress}
           trackId={trackId}
         />

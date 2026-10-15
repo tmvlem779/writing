@@ -20,7 +20,9 @@ type SupportMode = "submit" | "hint";
 type PracticeChapterProps = {
   initialActivityId?: string | null;
   initialCompletedActivityIds?: string[];
+  initialPrimaryActivityAnswers?: Record<string, string>;
   lessonNumber: CourseLessonNumber;
+  onPrimaryAnswersChange?: (answers: Record<string, string>) => void;
   onProgressChange?: (completedActivityIds: string[], activeActivityId: string) => void;
   trackId: CourseTrackId;
 };
@@ -47,7 +49,9 @@ function previewAnswer(answer: string) {
 export function PracticeChapter({
   initialActivityId,
   initialCompletedActivityIds = [],
+  initialPrimaryActivityAnswers = {},
   lessonNumber,
+  onPrimaryAnswersChange,
   onProgressChange,
   trackId
 }: PracticeChapterProps) {
@@ -61,7 +65,7 @@ export function PracticeChapter({
   const [draft, setDraft] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [response, setResponse] = useState<AgentResponse | null>(null);
-  const [primaryActivityAnswers, setPrimaryActivityAnswers] = useState<Record<string, string>>({});
+  const [primaryActivityAnswers, setPrimaryActivityAnswers] = useState<Record<string, string>>(initialPrimaryActivityAnswers);
   const [history, setHistory] = useState<Message[]>([]);
   const [scaffoldLevel, setScaffoldLevel] = useState(0);
   const [questionAttemptCount, setQuestionAttemptCount] = useState(0);
@@ -91,6 +95,18 @@ export function PracticeChapter({
     setSessionId(body.id);
     setDemo(Boolean(body.demo));
     return body.id as string;
+  }
+
+  async function persistPrimaryAnswers(id: string, answers: Record<string, string>) {
+    onPrimaryAnswersChange?.(answers);
+    const result = await fetch("/api/challenge-answers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId: id, trackId, lessonNumber, answers }),
+      keepalive: true
+    });
+    const body = await result.json();
+    if (!result.ok) throw new Error(body.error ?? "앞 활동의 문장을 저장하지 못했습니다.");
   }
 
   async function sendTurn(supportMode: SupportMode) {
@@ -134,7 +150,11 @@ export function PracticeChapter({
       if (!result.ok) throw new Error(body.error ?? "응답을 불러오지 못했습니다.");
       const next = body as AgentResponse & { demo?: boolean };
       if (supportMode === "submit" && submittedDraft) {
-        setPrimaryActivityAnswers((answers) => rememberPrimaryActivityAnswer(answers, selected.id, submittedDraft));
+        const nextAnswers = rememberPrimaryActivityAnswer(primaryActivityAnswers, selected.id, submittedDraft);
+        if (nextAnswers !== primaryActivityAnswers) {
+          setPrimaryActivityAnswers(nextAnswers);
+          await persistPrimaryAnswers(id, nextAnswers);
+        }
       }
       setResponse(next);
       setDemo((current) => current || Boolean(next.demo));

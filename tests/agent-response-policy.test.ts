@@ -454,3 +454,9 @@ test("DATA: 네 단계 문장 확장과 단계별 세 번 지원 규칙은 프�
   assert.match(migration, /writing-tutor-v25/);
   assert.match(migration, /four-step-progressive-sentence-building/);
 });
+
+test("DATA: 객관적 근거 확인과 명확한 질문 규칙은 프롬프트 v26으로 추적한다", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/202610150001_add_objective_evidence_prompt.sql", import.meta.url), "utf8");
+  assert.match(migration, /writing-tutor-v26/);
+  assert.match(migration, /objective-evidence-clear-questions-and-durable-learning-state/);
+});

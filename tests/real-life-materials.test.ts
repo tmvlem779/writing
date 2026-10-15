@@ -32,6 +32,7 @@ test("P3·P6: 실생활 자료의 세 핵심 질문은 한 번에 한 지점을 
       assert.equal(questions.length, 3);
       assert.ok(questions.every((question) => question.length <= 76));
       assert.ok(questions.every((question) => !/각각|모두|두 가지|세 가지/.test(question)));
+      assert.ok(questions.every((question) => !/바로 앞|바로 뒤/.test(question)));
     }
   }
 });
@@ -43,9 +44,9 @@ test("P3·P4·P5·P6: 모든 실생활 자료는 고쳐 쓸 필요가 분명한 
     assert.ok(material.rewriteTarget);
     assert.match(material.content, new RegExp(material.rewriteTarget!.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     const questions = buildRealLifeCoreQuestions(material, "rewrite");
-    assert.match(questions[0], /어색한 부분/);
+    assert.match(questions[0], /어색한.*부분|부분.*어색/);
     assert.match(questions[1], /고쳐 쓰세요/);
-    assert.match(questions[2], /원문보다 뜻이 분명해진 점/);
+    assert.match(questions[2], /분명해진|누구에게|누가 무엇을|누구의 행동|미래 계획|주체와 대상/);
   }
 });
 

@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type { TutorProvider } from "./provider";
+import { applyObjectiveAnswerEvidence } from "./objective-answer-evaluator";
 import { applyTutorResponsePolicy } from "./response-policy";
 import { agentResponseJsonSchema, agentResponseSchema, type AgentResponse, type TurnRequest } from "./schema";
 import { PROMPT_VERSION, SYSTEM_PROMPT } from "./system-prompt";
@@ -61,8 +62,9 @@ continue일 때는 같은 학습 목표를 더 쉽게 묻는 보조 질문 한 �
   });
 
   const parsed = agentResponseSchema.parse(JSON.parse(result.output_text));
+  const evidenceChecked = applyObjectiveAnswerEvidence(request, parsed);
   return {
-    response: applyTutorResponsePolicy(request, parsed),
+    response: applyTutorResponsePolicy(request, evidenceChecked),
     usage: {
       input: result.usage?.input_tokens ?? 0,
       output: result.usage?.output_tokens ?? 0

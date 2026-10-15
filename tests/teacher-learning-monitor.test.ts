@@ -108,6 +108,8 @@ test("TEACHER·PRIVACY: 교사 모니터는 담당 학생 데이터와 자동 �
   const dailyConcept = read("src/components/concept-learning-activity.tsx");
 
   assert.match(page, /StudentLearningMonitor/);
+  assert.match(page, /profile\?\.role !== "teacher" && profile\?\.role !== "admin"/);
+  assert.match(page, /redirect\("\/learn"\)/);
   assert.match(page, /\.in\("user_id", studentIds\)/);
   assert.match(page, /getUserById\(userId\)/);
   assert.match(page, /challenge_progress/);

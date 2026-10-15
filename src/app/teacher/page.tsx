@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { TeacherClassDashboard, type TeacherClassView } from "@/components/teacher-class-dashboard";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -32,8 +33,14 @@ export default async function TeacherPage() {
 
   if (supabase) {
     const { data: auth } = await supabase.auth.getUser();
-    signedIn = Boolean(auth.user);
     if (auth.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("user_id", auth.user.id)
+        .maybeSingle();
+      if (profile?.role !== "teacher" && profile?.role !== "admin") redirect("/learn");
+      signedIn = true;
       const { data: classMemberships } = await supabase.from("class_memberships").select("classes(id,name)")
         .eq("user_id", auth.user.id).eq("role", "teacher").eq("status", "active");
       const visibleClasses: ClassRow[] = (classMemberships ?? []).flatMap((row: { classes: unknown }) => {

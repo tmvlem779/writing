@@ -28,6 +28,21 @@ test("DATA·PRIVACY: 진행 상황 API는 로그인 사용자를 다시 확인�
   assert.doesNotMatch(api, /userId: input\.data|user_id: input\.data/);
 });
 
+test("DATA·PRIVACY: 앞 활동의 학생 문장은 본인 세션과 본인 초안으로만 저장하고 다시 불러온다", () => {
+  const api = read("src/app/api/challenge-answers/route.ts");
+  const studio = read("src/components/writing-studio.tsx");
+  const practice = read("src/components/practice-chapter.tsx");
+  assert.match(api, /primaryActivityAnswersSchema/);
+  assert.match(api, /supabase\.auth\.getUser\(\)/);
+  assert.match(api, /\.eq\("user_id", auth\.user\.id\)/);
+  assert.match(api, /\.eq\("id", parsed\.data\.sessionId\)/);
+  assert.doesNotMatch(api, /userId: parsed\.data|user_id: parsed\.data/);
+  assert.match(studio, /fetch\("\/api\/challenge-answers"/);
+  assert.match(studio, /initialPrimaryActivityAnswers/);
+  assert.match(practice, /persistPrimaryAnswers/);
+  assert.match(practice, /onPrimaryAnswersChange/);
+});
+
 test("RLS: 다른 학생의 챌린지 진행을 읽거나 쓰지 못한다", () => {
   const migration = read("supabase/migrations/202610060002_add_challenge_progress.sql");
   const rls = read("supabase/tests/rls.sql");
